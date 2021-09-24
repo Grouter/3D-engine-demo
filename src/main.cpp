@@ -1,39 +1,43 @@
 #ifndef UNICODE
 #define UNICODE
-#endif 
+#endif
 
 #include <windows.h>
 #include <gl/gl.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "platform.h"
 
-HDC window_dc;
-HGLRC opengl_rc;
+global HDC   window_dc;
+global HGLRC opengl_rc;
 
-internal void init_openGL(HWND window) {
+#include "math/vector.cpp"
+#include "math/matrix.cpp"
+#include "game.cpp"
+
+internal void init_opengl(HWND window) {
     window_dc = GetDC(window);
-        
-    PIXELFORMATDESCRIPTOR pfd;
 
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.dwLayerMask = PFD_MAIN_PLANE;
-    pfd.iPixelType = PFD_TYPE_COLORINDEX;
-    pfd.cColorBits = 8;
-    pfd.cDepthBits = 16;
-    pfd.cAccumBits = 0;
-    pfd.cStencilBits = 0;
+    PIXELFORMATDESCRIPTOR desiredPixelFormat;
+    desiredPixelFormat.nSize    = sizeof(PIXELFORMATDESCRIPTOR);
+    desiredPixelFormat.nVersion = 1;
 
-    int pixelformat;
-    
-    if ((pixelformat = ChoosePixelFormat(window_dc, &pfd)) == 0) {
-        printf("Choose pixelformat failed!");
-    }
+    desiredPixelFormat.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    desiredPixelFormat.dwLayerMask  = PFD_MAIN_PLANE;
+    desiredPixelFormat.iPixelType   = PFD_TYPE_COLORINDEX;
+    desiredPixelFormat.cColorBits   = 32;
+    desiredPixelFormat.cAlphaBits   = 8;
+    desiredPixelFormat.cDepthBits   = 16;
 
-    if (SetPixelFormat(window_dc, pixelformat, &pfd) == 0) {
-        printf("Set pixelformat failed!");
+    // Find and set pixelformat
+    {
+        int suggestedPixelformatIndex = ChoosePixelFormat(window_dc, &desiredPixelFormat);
+
+        PIXELFORMATDESCRIPTOR suggestedPixelFormat;
+        DescribePixelFormat(window_dc, suggestedPixelformatIndex, sizeof(suggestedPixelFormat), &suggestedPixelFormat);
+
+        SetPixelFormat(window_dc, suggestedPixelformatIndex, &suggestedPixelFormat);
     }
 
     opengl_rc = wglCreateContext(window_dc);
@@ -43,11 +47,10 @@ internal void init_openGL(HWND window) {
 
 LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {
     LRESULT result = 1;
-    PAINTSTRUCT ps;
 
     switch (message) {
         case WM_CREATE : {
-            init_openGL(window);
+            init_opengl(window);
         } break;
 
         case WM_CLOSE: {
@@ -77,16 +80,14 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
     return result;
 }
 
-const wchar_t CLASS_NAME[]  = L"Sample Window Class";
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_line, int show_code) {
+    const wchar_t CLASS_NAME[]  = L"GameWindowClass";
 
     WNDCLASS window_class = {};
 
     window_class.lpfnWndProc   = window_callback;
     window_class.hInstance     = instance;
     window_class.lpszClassName = CLASS_NAME;
-
-    //window_class.style;   // @Todo: figure this out
     //window_class.hIcon    // @Todo: add icon later
 
     RegisterClass(&window_class);
@@ -94,7 +95,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
     HWND window = CreateWindowEx(
         0,
         CLASS_NAME,
-        L"ASD",
+        L"Game",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         NULL,
@@ -111,7 +112,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
     UpdateWindow(window);
 
     MSG message = {};
-    
+
     while (1) {
         while (PeekMessage(&message, NULL, 0, 0, PM_NOREMOVE)) {
             if (GetMessage(&message, NULL, 0, 0)) {
@@ -123,8 +124,12 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
             }
         }
 
+        tick();
+
         glClearColor(1.0, 0.0, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        render();
 
         glFlush();
 
