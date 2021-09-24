@@ -2,10 +2,10 @@
 
 inline Matrix4x4 identity() {
     Matrix4x4 result = {
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
     };
 
     return result;
@@ -16,7 +16,7 @@ inline Matrix4x4 scale(f32 x, f32 y, f32 z) {
         x, 0, 0, 0,
         0, y, 0, 0,
         0, 0, z, 0,
-        0, 0, 0, 0
+        0, 0, 0, 1
     };
 
     return result;
@@ -24,10 +24,10 @@ inline Matrix4x4 scale(f32 x, f32 y, f32 z) {
 
 inline Matrix4x4 translation(f32 x, f32 y, f32 z) {
     Matrix4x4 result = {
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        x, y, z, 0
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        x, y, z, 1
     };
 
     return result;
@@ -38,10 +38,10 @@ inline Matrix4x4 rotation_x(f32 x) {
     f32 s_x = sinf(x);
 
     Matrix4x4 result = {
-        1.0,  0.0, 0.0, 0.0,
-        0.0,  c_x, s_x, 0.0,
-        0.0, -s_x, c_x, 0.0,
-        0.0,  0.0, 0.0, 1.0
+        1,    0,   0, 0,
+        0,  c_x, s_x, 0,
+        0, -s_x, c_x, 0,
+        0,    0,   0, 1
     };
 
     return result;
@@ -52,10 +52,10 @@ inline Matrix4x4 rotation_y(f32 y) {
     f32 s_y = sinf(y);
 
     Matrix4x4 result = {
-        c_y,  0.0, -s_y, 0.0,
-        0.0,  1.0,  0.0, 0.0,
-        s_y,  0.0,  c_y, 0.0,
-        0.0,  0.0,  0.0, 1.0
+        c_y,  0, -s_y, 0,
+          0,  1,    0, 0,
+        s_y,  0,  c_y, 0,
+          0,  0,    0, 1
     };
 
     return result;
@@ -66,10 +66,10 @@ inline Matrix4x4 rotation_z(f32 z) {
     f32 s_z = sinf(z);
 
     Matrix4x4 result = {
-        c_z, -s_z, 0.0, 0.0,
-        s_z,  c_z, 0.0, 0.0,
-        0.0,  0.0, 1.0, 0.0,
-        0.0,  0.0, 0.0, 1.0
+        c_z, -s_z, 0, 0,
+        s_z,  c_z, 0, 0,
+          0,    0, 1, 0,
+          0,    0, 0, 1
     };
 
     return result;
