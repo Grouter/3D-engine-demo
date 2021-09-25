@@ -97,8 +97,8 @@ internal void translate(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
 
 internal void rotate(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
     Matrix4x4 x_rotation = rotation_x(x);
-    Matrix4x4 y_rotation = rotation_x(y);
-    Matrix4x4 z_rotation = rotation_x(z);
+    Matrix4x4 y_rotation = rotation_y(y);
+    Matrix4x4 z_rotation = rotation_z(z);
 
     matrix = multiply(matrix, x_rotation);
     matrix = multiply(matrix, y_rotation);

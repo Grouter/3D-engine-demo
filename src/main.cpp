@@ -12,8 +12,11 @@
 global HDC   window_dc;
 global HGLRC opengl_rc;
 
+#include "math/vector.h"
 #include "math/vector.cpp"
+#include "math/matrix.h"
 #include "math/matrix.cpp"
+#include "game.h"
 #include "game.cpp"
 
 internal void init_opengl(HWND window) {
