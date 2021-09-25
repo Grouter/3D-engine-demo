@@ -1,11 +1,18 @@
 @echo off
 
-set BuildCompilerFlags=-Zi
-set BuildLinkerFlags=user32.lib gdi32.lib opengl32.lib
+:: Look here for compiler flags documentation https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=msvc-160
+set BuildCompilerFlags=-MT -nologo -Gm- -GR- -EHa- -Oi -W4 -wd4201 -wd4100 -Zi
+:: Link libraries here
+set BuildLinkerFlags=-opt:ref user32.lib gdi32.lib opengl32.lib
 
-if not exist w:\build mkdir w:\build
-pushd w:\build
+pushd %~dp0%
+cd ..
+if not exist build mkdir build
+cd build
 
-cl %BuildCompilerFlags% w:\src\main.cpp %BuildLinkerFlags%
+:: 32 bit build
+:: cl %BuildCompilerFlags% ..\src\main.cpp /link -subsystem:windows,5.01 %BuildLinkerFlags%
+
+cl %BuildCompilerFlags% ..\src\main.cpp /link %BuildLinkerFlags%
 
 popd
