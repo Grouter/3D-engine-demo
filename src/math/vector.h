@@ -1,4 +1,4 @@
-#ifndef VECTOR_H
+#if !defined(VECTOR_H)
 #define VECTOR_H
 
 #include "platform.h"

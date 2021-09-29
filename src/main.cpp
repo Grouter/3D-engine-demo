@@ -3,8 +3,10 @@
 #endif
 
 #include <windows.h>
+#include <glew.h>
 #include <gl/gl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 #include "platform.h"
@@ -16,6 +18,14 @@ global HGLRC opengl_rc;
 #include "math/vector.cpp"
 #include "math/matrix.h"
 #include "math/matrix.cpp"
+#include "graphics.h"
+#include "graphics.cpp"
+#include "resources.h"
+#include "resources.cpp"
+
+global Resources resources;
+
+#include "entity.h"
 #include "game.h"
 #include "game.cpp"
 
@@ -114,6 +124,14 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
     ShowWindow(window, show_code);
     UpdateWindow(window);
 
+    GLenum glew_state = glewInit();
+    if (glew_state != GLEW_OK) {
+        //printf("Error while initializing GL extensions!\n");
+        //exit(1);
+    }
+
+    init();
+
     MSG message = {};
 
     while (1) {
@@ -138,7 +156,6 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
         SwapBuffers(window_dc);
     }
-
 
     return 0;
 }

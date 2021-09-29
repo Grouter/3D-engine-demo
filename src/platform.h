@@ -1,4 +1,4 @@
-#ifndef PLATFORM_H
+#if !defined(PLATFORM_H)
 #define PLATFORM_H
 
 #include <stdint.h>

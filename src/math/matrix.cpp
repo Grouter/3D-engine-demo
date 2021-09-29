@@ -89,7 +89,7 @@ internal Matrix4x4 multiply(const Matrix4x4 &a, const Matrix4x4 &b) {
     return result;
 }
 
-internal void translate(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
+inline void translate(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
     matrix.data[3][0] += x;
     matrix.data[3][1] += y;
     matrix.data[3][2] += z;

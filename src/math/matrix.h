@@ -1,4 +1,4 @@
-#ifndef MATRIX_H
+#if !defined(MATRIX_H)
 #define MATRIX_H
 
 #include "platform.h"
