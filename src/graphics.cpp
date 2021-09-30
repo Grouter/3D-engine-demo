@@ -15,7 +15,7 @@ internal Program load_program(const char *name) {
         shader_file_bytes = ftell(shader_file);
         rewind(shader_file);
 
-        shader_source = new char[shader_file_bytes];
+        shader_source = (char *)malloc(shader_file_bytes);
     }
 
     fread(shader_source, sizeof(char), shader_file_bytes, shader_file);
@@ -62,7 +62,7 @@ internal Program load_program(const char *name) {
     glAttachShader(program.handle, fragment_handle);
     glLinkProgram(program.handle);
 
-    delete[] shader_source;
+    free(shader_source);
 
     return program;
 }

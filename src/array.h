@@ -9,9 +9,12 @@ struct Array {
     u64 capacity;
     T *data;
 
+    void reserve(u32 amount);
     void add(T item);
     void remove(u32 index);
-    // @Todo: performant remove (to prevent memmoves)
+
+    // This will reorder the array!
+    void fast_remove(u32 index);
 };
 
 #endif
