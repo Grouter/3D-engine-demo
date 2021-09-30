@@ -2,18 +2,24 @@
 #define UNICODE
 #endif
 
+// Uncomment for release mode
+//#define NDEBUG
+
 #include <windows.h>
 #include <glew.h>
 #include <gl/gl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 
 #include "platform.h"
 
 global HDC   window_dc;
 global HGLRC opengl_rc;
 
+#include "array.h"
+#include "array.cpp"
 #include "math/vector.h"
 #include "math/vector.cpp"
 #include "math/matrix.h"
