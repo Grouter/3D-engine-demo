@@ -75,24 +75,85 @@ inline Matrix4x4 rotation_z(f32 z) {
     return result;
 }
 
+inline Matrix4x4 perspective(f32 fov, f32 clip_near, f32 clip_far, f32 display_w, f32 display_h) {
+    f32 aspect = display_w / display_h;
+    f32 fov_radians = TO_RADIANS(fov);
+    f32 cotan_half_fov = 1.0f / (f32)tan(fov_radians / 2.0f);
+
+    Matrix4x4 perspective = {};
+
+    perspective.table[0][0] = cotan_half_fov / aspect;
+    perspective.table[0][1] = 0.0f;
+    perspective.table[0][2] = 0.0f;
+    perspective.table[0][3] = 0.0f;
+
+    perspective.table[1][0] = 0.0f;
+    perspective.table[1][1] = cotan_half_fov;
+    perspective.table[1][2] = 0.0f;
+    perspective.table[1][3] = 0.0f;
+
+    perspective.table[2][0] = 0.0f;
+    perspective.table[2][1] = 0.0f;
+    perspective.table[2][2] = (clip_far + clip_near) / (clip_near - clip_far);
+    perspective.table[2][3] = -1.0f;
+
+    perspective.table[3][0] =  0.0f;
+    perspective.table[3][1] =  0.0f;
+    perspective.table[3][2] = (2.0f * clip_far * clip_near) / (clip_near - clip_far);
+    perspective.table[3][3] =  0.0f;
+
+    return perspective;
+}
+
+inline Matrix4x4 ortho(f32 clip_near, f32 clip_far, f32 display_w, f32 display_h) {
+    f32 left   = 0.0f;
+    f32 right  = display_w;
+    f32 top    = display_h;
+    f32 bottom = 0.0f;
+
+    Matrix4x4 orto = {};
+
+    orto.table[0][0] = 2.0f / (right - left);
+    orto.table[0][1] = 0.0f;
+    orto.table[0][2] = 0.0f;
+    orto.table[0][3] = 0.0f;
+
+    orto.table[1][0] = 0.0f;
+    orto.table[1][1] = 2.0f / (top - bottom);
+    orto.table[1][2] = 0.0f;
+    orto.table[1][3] = 0.0f;
+
+    orto.table[2][0] = 0.0f;
+    orto.table[2][1] = 0.0f;
+    orto.table[2][2] = 2.0f / (clip_far - clip_near);
+    orto.table[2][3] = 0.0f;
+
+    orto.table[3][0] = -(right + left) / (right - left);
+    orto.table[3][1] = -(top + bottom) / (top - bottom);
+    orto.table[3][2] = -(clip_far + clip_near) / (clip_far - clip_near);
+    orto.table[3][3] = 1.0f;
+
+    return orto;
+}
+
 // Multiplies matricies (in column major order), that means it will swap them and will do "bXa"
 internal Matrix4x4 multiply(const Matrix4x4 &a, const Matrix4x4 &b) {
     Matrix4x4 result = identity();
 
     for (int i = 0; i < 4; i++) {
-        result.data[i][0] = a.data[0][0] * b.data[i][0] + a.data[1][0] * b.data[i][1] + a.data[2][0] * b.data[i][2] + a.data[3][0] * b.data[i][3];
-        result.data[i][1] = a.data[0][1] * b.data[i][0] + a.data[1][1] * b.data[i][1] + a.data[2][1] * b.data[i][2] + a.data[3][1] * b.data[i][3];
-        result.data[i][2] = a.data[0][2] * b.data[i][0] + a.data[1][2] * b.data[i][1] + a.data[2][2] * b.data[i][2] + a.data[3][2] * b.data[i][3];
-        result.data[i][3] = a.data[0][3] * b.data[i][0] + a.data[1][3] * b.data[i][1] + a.data[2][3] * b.data[i][2] + a.data[3][3] * b.data[i][3];
+        result.table[i][0] = a.table[0][0] * b.table[i][0] + a.table[1][0] * b.table[i][1] + a.table[2][0] * b.table[i][2] + a.table[3][0] * b.table[i][3];
+        result.table[i][1] = a.table[0][1] * b.table[i][0] + a.table[1][1] * b.table[i][1] + a.table[2][1] * b.table[i][2] + a.table[3][1] * b.table[i][3];
+        result.table[i][2] = a.table[0][2] * b.table[i][0] + a.table[1][2] * b.table[i][1] + a.table[2][2] * b.table[i][2] + a.table[3][2] * b.table[i][3];
+        result.table[i][3] = a.table[0][3] * b.table[i][0] + a.table[1][3] * b.table[i][1] + a.table[2][3] * b.table[i][2] + a.table[3][3] * b.table[i][3];
     }
 
     return result;
 }
 
 inline void translate(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
-    matrix.data[3][0] += x;
-    matrix.data[3][1] += y;
-    matrix.data[3][2] += z;
+    matrix.table[3][0] += x;
+    matrix.table[3][1] += y;
+    matrix.table[3][2] += z;
 }
 
 internal void rotate(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {

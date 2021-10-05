@@ -5,6 +5,11 @@
 // Uncomment for release mode
 //#define NDEBUG
 
+#define PI 3.14159f
+#define TO_RADIANS(v) ((v) / PI * 180.0f)
+
+// @Todo: check if RVO is happening
+
 #include <windows.h>
 #include <glew.h>
 #include <gl/gl.h>
@@ -24,13 +29,23 @@ global HGLRC opengl_rc;
 #include "math/vector.cpp"
 #include "math/matrix.h"
 #include "math/matrix.cpp"
+#include "camera.h"
+#include "camera.cpp"
 #include "graphics.h"
 #include "graphics.cpp"
 #include "resources.h"
 #include "resources.cpp"
 
-global Resources resources;
+struct GameState {
+    u32 window_width;
+    u32 window_height;
+    Resources resources;
+    Camera camera;
+};
 
+global GameState game_state;
+
+#include "input.cpp"
 #include "entity.h"
 #include "game.h"
 #include "game.cpp"
@@ -70,10 +85,23 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
     switch (message) {
         case WM_CREATE : {
             init_opengl(window);
+
+            RECT window_rect;
+            if (GetWindowRect(window, &window_rect)) {
+                game_state.window_width  = window_rect.right - window_rect.left;
+                game_state.window_height = window_rect.bottom - window_rect.top;
+            }
         } break;
 
         case WM_CLOSE: {
             DestroyWindow(window);
+        } break;
+
+        case WM_SIZE: {
+            game_state.window_width  = LOWORD(l_param);
+            game_state.window_height = HIWORD(l_param);
+
+            update_perspective(game_state.camera, game_state.window_width, game_state.window_height);
         } break;
 
         case WM_DESTROY: {
@@ -89,6 +117,31 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
             window_dc = 0;
 
             PostQuitMessage(0);
+        } break;
+
+        case WM_KEYUP:
+        case WM_KEYDOWN: {
+            u16 virtual_code = LOWORD(w_param);
+
+            u8 scan_code     = LOBYTE(HIWORD(l_param));
+            bool alt_down    = (HIWORD(l_param) & KF_ALTDOWN) == KF_ALTDOWN;
+            bool up_flag     = (HIWORD(l_param) & KF_UP) == KF_UP;
+            bool repeat_flag = (HIWORD(l_param) & KF_REPEAT) == KF_REPEAT;
+
+            if (repeat_flag) break; // We will handle repeat our way...
+
+            if (up_flag) {
+                handle_key_up(scan_code, virtual_code, alt_down);
+            }
+            else {
+                handle_key_down(scan_code, virtual_code, alt_down);
+            }
+        } break;
+
+        case WM_CHAR: {
+            wchar_t pressed_char = (wchar_t)w_param;
+
+            handle_char(pressed_char);
         } break;
 
         default: {
@@ -132,8 +185,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
     GLenum glew_state = glewInit();
     if (glew_state != GLEW_OK) {
-        //printf("Error while initializing GL extensions!\n");
-        //exit(1);
+        printf("Error while initializing GL extensions!\n");
+        exit(1);
     }
 
     init();

@@ -3,8 +3,9 @@
 
 #include "platform.h"
 
-struct Matrix4x4 {
-    f32 data[4][4];
+union Matrix4x4 {
+    f32 table[4][4];
+    f32 raw[16];
 };
 
 #endif

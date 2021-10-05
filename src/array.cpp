@@ -1,6 +1,3 @@
-#include "platform.h"
-#include "array.h"
-
 template <typename T>
 internal Array<T> allocate_array(u64 size) {
     Array<T> array;
