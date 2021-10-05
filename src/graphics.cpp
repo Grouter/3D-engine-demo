@@ -60,7 +60,11 @@ internal Program load_program(const char *name) {
     program.handle = glCreateProgram();
     glAttachShader(program.handle, vertex_handle);
     glAttachShader(program.handle, fragment_handle);
+
     glLinkProgram(program.handle);
+
+    glDetachShader(program.handle, vertex_handle);
+    glDetachShader(program.handle, fragment_handle);
 
     free(shader_source);
 

@@ -1,7 +1,7 @@
 @echo off
 
 :: Look here for compiler flags documentation https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=msvc-160
-set BuildCompilerFlags=-DGLEW_STATIC -MT -nologo -Gm- -GR- -EHa- -Oi -W4 -wd4201 -wd4100 -Zi -I ../libs/
+set BuildCompilerFlags=-DGLEW_STATIC -MT -nologo -Gm- -GR- -EHa- -Oi -W4 -wd4201 -wd4100 -wd4505 -Zi -I ../libs/
 :: Link libraries here
 set BuildLinkerFlags=-opt:ref user32.lib gdi32.lib ../libs/glew32s.lib opengl32.lib
 
