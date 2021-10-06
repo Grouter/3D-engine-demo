@@ -36,18 +36,22 @@ global HGLRC opengl_rc;
 #include "graphics.cpp"
 #include "resources.h"
 #include "resources.cpp"
+#include "entity.h"
 
 struct GameState {
     u32 window_width;
     u32 window_height;
     Resources resources;
     Camera camera;
+
+    // @Temporary: this will be replaced by a bucket array to have
+    // much more efficient allocations and safe pointer references
+    Array<Entity> entities;
 };
 
 global GameState game_state;
 
 #include "input.cpp"
-#include "entity.h"
 #include "game.h"
 #include "game.cpp"
 

@@ -5,8 +5,10 @@
 
 struct Entity {
     Vector3 position;
-    Vector3 rotation;
+    Vector3 rotation;   // Radians
     Vector3 scale;
+
+    Mesh *mesh;
 };
 
 #endif

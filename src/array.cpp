@@ -1,7 +1,5 @@
 template <typename T>
-internal Array<T> allocate_array(u64 size) {
-    Array<T> array;
-
+internal void allocate_array(Array<T> &array, u64 size) {
     array.length = 0;
     array.capacity = size;
 
@@ -11,8 +9,6 @@ internal Array<T> allocate_array(u64 size) {
     else {
         array.data = (T*)malloc(sizeof(T) * size);
     }
-
-    return array;
 }
 
 template <typename T>
@@ -56,6 +52,13 @@ void Array<T>::remove(u32 index) {
         memmove(this->data + index, this->data + index + 1, sizeof(T) * right_part);
         this->length -= 1;
     }
+}
+
+template <typename T>
+T* Array<T>::get(u32 index) {
+    assert(index < this->length);
+
+    return (this->data + index);
 }
 
 template <typename T>
