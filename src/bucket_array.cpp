@@ -35,21 +35,25 @@ void BucketArray<T>::add(T item) {
 
     assert(target->stored < target->capacity);
 
-    bool store_success = false;
+    // Find and occupy empty slot
+    {
+        bool store_success = false;
 
-    for (u64 i = 0; i < target->capacity; i++) {
-        if (target->occupied[i]) continue;
+        // @Speed: maybe we can cache this
+        for (u64 i = 0; i < target->capacity; i++) {
+            if (target->occupied[i]) continue;
 
-        target->data[i]     = item;
-        target->occupied[i] = true;
-        target->stored += 1;
+            target->data[i]     = item;
+            target->occupied[i] = true;
+            target->stored += 1;
 
-        store_success = true;
+            store_success = true;
 
-        break;
+            break;
+        }
+
+        assert(store_success);
     }
-
-    assert(store_success);
 
     if (target->stored >= target->capacity) {
         this->unfull_buckets.fast_remove(0);
@@ -66,6 +70,8 @@ void BucketArray<T>::remove(BucketLocation location) {
     assert(location.slot_index < this->bucket_size);
 
     Bucket<T> *target = this->buckets.get(location.bucket_index);
+
+    assert(target->occupied[location.slot_index] == true);
 
     target->occupied[location.slot_index] = false;
     target->stored -= 1;
