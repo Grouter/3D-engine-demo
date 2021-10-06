@@ -1,7 +1,3 @@
-#ifndef UNICODE
-#define UNICODE
-#endif
-
 // Uncomment for release mode
 //#define NDEBUG
 
@@ -173,21 +169,19 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
 }
 
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_line, int show_code) {
-    const wchar_t CLASS_NAME[]  = L"GameWindowClass";
-
     WNDCLASS window_class = {};
 
     window_class.lpfnWndProc   = window_callback;
     window_class.hInstance     = instance;
-    window_class.lpszClassName = CLASS_NAME;
+    window_class.lpszClassName = TEXT("CastleDemoWindowClass");
     //window_class.hIcon    // @Todo: add icon later
 
     RegisterClass(&window_class);
 
     HWND window = CreateWindowEx(
         0,
-        CLASS_NAME,
-        L"Game",
+        window_class.lpszClassName,
+        TEXT("Castle Demo"),
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         NULL,

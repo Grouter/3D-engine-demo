@@ -1,8 +1,11 @@
 internal Program load_program(const char *name) {
     Program program;
 
-    FILE *shader_file = fopen(name, "r");
-    if (!shader_file) {
+    FILE *shader_file;
+
+    errno_t open_err = fopen_s(&shader_file, name, "r");
+
+    if(open_err) {
         printf("Error opening a shader file: %s\n", name);
         exit(1);
     }
