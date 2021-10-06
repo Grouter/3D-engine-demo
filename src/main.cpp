@@ -15,6 +15,7 @@
 #include <math.h>
 #include <cmath>
 #include <assert.h>
+#include <algorithm>
 
 #include "platform.h"
 
@@ -23,6 +24,8 @@ global HGLRC opengl_rc;
 
 #include "array.h"
 #include "array.cpp"
+#include "bucket_array.h"
+#include "bucket_array.cpp"
 #include "math/math.h"
 #include "math/vector.h"
 #include "math/vector.cpp"
@@ -44,9 +47,7 @@ struct GameState {
     Resources resources;
     Camera camera;
 
-    // @Temporary: this will be replaced by a bucket array to have
-    // much more efficient allocations and safe pointer references
-    Array<Entity> entities;
+    BucketArray<Entity> entities;
 };
 
 global GameState game_state;

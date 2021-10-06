@@ -5,7 +5,7 @@ internal void init() {
     game_state.resources.programs[0] = load_program("shaders/default.glsl");
     game_state.resources.meshes[0]   = create_cube(50.0f);
 
-    allocate_array<Entity>(game_state.entities, 1);
+    allocate_bucket_array<Entity>(game_state.entities, 10); // @Temporary count
     game_state.entities.add(Entity {});
 
     // @Temporary
@@ -15,7 +15,7 @@ internal void init() {
 }
 
 internal void tick() {
-    game_state.entities.data[0].rotation.y += 0.01f;
+    game_state.entities.get(BucketLocation { 0, 0 })->rotation.y += 0.01f;
 }
 
 internal void render() {
@@ -30,7 +30,7 @@ internal void render() {
     }
 
     {   // Render the test model
-        Entity *e = game_state.entities.get(0);
+        Entity *e = game_state.entities.get(BucketLocation { 0, 0 });
 
         Matrix4x4 model = identity();
         translate(model, e->position.x, e->position.y, e->position.z);

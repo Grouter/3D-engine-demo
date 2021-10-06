@@ -40,7 +40,7 @@ void Array<T>::add(T item) {
 }
 
 template <typename T>
-void Array<T>::remove(u32 index) {
+void Array<T>::remove(u64 index) {
     assert(index < this->length);
 
     // When removing the last element
@@ -55,14 +55,14 @@ void Array<T>::remove(u32 index) {
 }
 
 template <typename T>
-T* Array<T>::get(u32 index) {
+T* Array<T>::get(u64 index) {
     assert(index < this->length);
 
     return (this->data + index);
 }
 
 template <typename T>
-void Array<T>::fast_remove(u32 index) {
+void Array<T>::fast_remove(u64 index) {
     assert(index < this->length);
 
     if (this->length == 1) {
