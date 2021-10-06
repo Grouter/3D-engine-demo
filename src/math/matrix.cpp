@@ -34,8 +34,8 @@ inline Matrix4x4 translation(f32 x, f32 y, f32 z) {
 }
 
 inline Matrix4x4 rotation_x(f32 x) {
-    f32 c_x = cosf(x);
-    f32 s_x = sinf(x);
+    f32 c_x = cos(x);
+    f32 s_x = sin(x);
 
     Matrix4x4 result = {
         1,    0,   0, 0,
@@ -48,8 +48,8 @@ inline Matrix4x4 rotation_x(f32 x) {
 }
 
 inline Matrix4x4 rotation_y(f32 y) {
-    f32 c_y = cosf(y);
-    f32 s_y = sinf(y);
+    f32 c_y = cos(y);
+    f32 s_y = sin(y);
 
     Matrix4x4 result = {
         c_y,  0, -s_y, 0,
@@ -62,8 +62,8 @@ inline Matrix4x4 rotation_y(f32 y) {
 }
 
 inline Matrix4x4 rotation_z(f32 z) {
-    f32 c_z = cosf(z);
-    f32 s_z = sinf(z);
+    f32 c_z = cos(z);
+    f32 s_z = sin(z);
 
     Matrix4x4 result = {
         c_z, -s_z, 0, 0,
@@ -78,7 +78,7 @@ inline Matrix4x4 rotation_z(f32 z) {
 inline Matrix4x4 perspective(f32 fov, f32 clip_near, f32 clip_far, f32 display_w, f32 display_h) {
     f32 aspect = display_w / display_h;
     f32 fov_radians = TO_RADIANS(fov);
-    f32 cotan_half_fov = 1.0f / (f32)tan(fov_radians / 2.0f);
+    f32 cotan_half_fov = 1.0f / tan(fov_radians / 2.0f);
 
     Matrix4x4 perspective = {};
 

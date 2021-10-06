@@ -5,9 +5,6 @@
 // Uncomment for release mode
 //#define NDEBUG
 
-#define PI 3.14159f
-#define TO_RADIANS(v) ((v) / PI * 180.0f)
-
 // @Todo: check if RVO is happening
 
 #include <windows.h>
@@ -16,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <cmath>
 #include <assert.h>
 
 #include "platform.h"
@@ -25,10 +23,13 @@ global HGLRC opengl_rc;
 
 #include "array.h"
 #include "array.cpp"
+#include "math/math.h"
 #include "math/vector.h"
 #include "math/vector.cpp"
 #include "math/matrix.h"
 #include "math/matrix.cpp"
+#include "math/quaternion.h"
+#include "math/quaternion.cpp"
 #include "camera.h"
 #include "camera.cpp"
 #include "graphics.h"
@@ -77,6 +78,20 @@ internal void init_opengl(HWND window) {
     opengl_rc = wglCreateContext(window_dc);
 
     wglMakeCurrent(window_dc, opengl_rc);
+
+    OutputDebugStringA("OpenGL initialized:\n");
+
+    OutputDebugStringA("    Vendor: ");
+    OutputDebugStringA((char*)glGetString(GL_VENDOR));
+    OutputDebugStringA("\n");
+
+    OutputDebugStringA("    Renderer: ");
+    OutputDebugStringA((char*)glGetString(GL_RENDERER));
+    OutputDebugStringA("\n");
+
+    OutputDebugStringA("    Version: ");
+    OutputDebugStringA((char*)glGetString(GL_VERSION));
+    OutputDebugStringA("\n");
 }
 
 LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {
