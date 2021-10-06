@@ -24,9 +24,10 @@ struct BucketArray {
     Array<u64>       unfull_buckets;
 
     void add_bucket();
-    void add(T item);
+    BucketLocation add(T item);
     void remove(BucketLocation location);
     T *get(BucketLocation location);
+    void for_each(void(*f)(T &e));
 };
 
 #endif

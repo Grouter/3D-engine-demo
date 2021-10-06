@@ -36,6 +36,7 @@ global HGLRC opengl_rc;
 #include "resources.h"
 #include "resources.cpp"
 #include "entity.h"
+#include "entity.cpp"
 
 struct GameState {
     u32 window_width;
@@ -43,11 +44,12 @@ struct GameState {
     Resources resources;
     Camera camera;
 
-    BucketArray<Entity> entities;
+    EntityStorage entities;
 };
 
 global GameState game_state;
 
+#include "render.cpp"
 #include "input.cpp"
 #include "game.h"
 #include "game.cpp"

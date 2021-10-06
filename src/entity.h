@@ -8,7 +8,12 @@ struct Entity {
     Vector3 rotation;   // Radians
     Vector3 scale;
 
+    Program *program;
     Mesh *mesh;
+};
+
+struct EntityStorage {
+    BucketArray<Entity> base_entities;
 };
 
 #endif

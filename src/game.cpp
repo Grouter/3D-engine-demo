@@ -5,8 +5,22 @@ internal void init() {
     game_state.resources.programs[0] = load_program("shaders/default.glsl");
     game_state.resources.meshes[0]   = create_cube(50.0f);
 
-    allocate_bucket_array<Entity>(game_state.entities, 10); // @Temporary count
-    game_state.entities.add(Entity {});
+    allocate_entity_storage(game_state.entities);
+
+    {
+        Entity *e = create_base_entity(game_state.entities);
+        e->mesh = &game_state.resources.meshes[0];
+        e->program = &game_state.resources.programs[0];
+    }
+
+    {
+        Entity *e = create_base_entity(game_state.entities);
+        e->mesh = &game_state.resources.meshes[0];
+        e->program = &game_state.resources.programs[0];
+
+        e->position.x = 50.0f;
+        e->position.z = -50.0f;
+    }
 
     // @Temporary
     glUseProgram(game_state.resources.programs[0].handle);
@@ -14,8 +28,13 @@ internal void init() {
     glUniformMatrix4fv(p, 1, false, game_state.camera.perspective.raw);
 }
 
+// @Temporary: testing
+internal void rotate_entity(Entity &entity) {
+    entity.rotation.y += 0.01f;
+}
+
 internal void tick() {
-    game_state.entities.get(BucketLocation { 0, 0 })->rotation.y += 0.01f;
+    game_state.entities.base_entities.for_each(rotate_entity);
 }
 
 internal void render() {
@@ -29,17 +48,5 @@ internal void render() {
         glUniformMatrix4fv(view_handle, 1, GL_FALSE, view.raw);
     }
 
-    {   // Render the test model
-        Entity *e = game_state.entities.get(BucketLocation { 0, 0 });
-
-        Matrix4x4 model = identity();
-        translate(model, e->position.x, e->position.y, e->position.z);
-        rotate(model, e->rotation.x, e->rotation.y, e->rotation.z);
-
-        i32 model_handle = glGetUniformLocation(game_state.resources.programs[0].handle, "model");
-        glUniformMatrix4fv(model_handle, 1, GL_FALSE, model.raw);
-
-        glBindVertexArray(game_state.resources.meshes[0].vao);
-        glDrawElements(GL_TRIANGLES, game_state.resources.meshes[0].index_count, GL_UNSIGNED_INT, NULL);
-    }
+    game_state.entities.base_entities.for_each(render_entity);
 }

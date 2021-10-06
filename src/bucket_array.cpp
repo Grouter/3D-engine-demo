@@ -22,7 +22,7 @@ void BucketArray<T>::add_bucket() {
 }
 
 template <typename T>
-void BucketArray<T>::add(T item) {
+BucketLocation BucketArray<T>::add(T item) {
     if (this->unfull_buckets.length == 0) {
         this->add_bucket();
     }
@@ -35,6 +35,9 @@ void BucketArray<T>::add(T item) {
 
     assert(target->stored < target->capacity);
 
+    BucketLocation result = {};
+    result.bucket_index = unfull_bucket_index;
+
     // Find and occupy empty slot
     {
         bool store_success = false;
@@ -46,6 +49,8 @@ void BucketArray<T>::add(T item) {
             target->data[i]     = item;
             target->occupied[i] = true;
             target->stored += 1;
+
+            result.slot_index = i;
 
             store_success = true;
 
@@ -62,6 +67,8 @@ void BucketArray<T>::add(T item) {
             std::sort(this->unfull_buckets.data, this->unfull_buckets.data + this->unfull_buckets.length);
         }
     }
+
+    return result;
 }
 
 template <typename T>
@@ -107,4 +114,16 @@ T* BucketArray<T>::get(BucketLocation location) {
     T *result = (target->data + location.slot_index);
 
     return result;
+}
+
+template <typename T>
+void BucketArray<T>::for_each(void (*f)(T &e)) {
+    for (u64 bucket = 0; bucket < this->buckets.length; bucket++) {
+        for (u64 slot = 0; slot < this->bucket_size; slot++) {
+            if (this->buckets.data[bucket].occupied[slot] == false)
+                continue;
+
+            (*f)(this->buckets.data[bucket].data[slot]);
+        }
+    }
 }
