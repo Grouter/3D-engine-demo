@@ -4,6 +4,7 @@
 // @Todo: check if RVO is happening
 
 #include <windows.h>
+#include <Windowsx.h>
 #include <glew.h>
 #include <gl/gl.h>
 #include <stdio.h>
@@ -162,9 +163,20 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
             handle_char(pressed_char);
         } break;
 
+        case WM_MOUSEMOVE: {
+            
+            i32 x_pos = GET_X_LPARAM(l_param); 
+            i32 y_pos = GET_Y_LPARAM(l_param);
+
+            printf("x: %d, y: %d\n", x_pos, y_pos);
+
+        } break;
+
         default: {
             result = DefWindowProc(window, message, w_param, l_param);
         }
+
+        
     }
 
     return result;
