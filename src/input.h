@@ -1,6 +1,7 @@
 #if !defined(INPUT_H)
 #define INPUT_H
 
+
 struct InputState {
     i32 mouse_x;
     i32 mouse_y;

@@ -8,10 +8,10 @@ internal void handle_key_down(u8 scan_code, u16 virtual_code, bool alt_down) {
         game_state.camera.position.x -= CAMERA_SPEED;
     }
     else if (virtual_code == VK_UP) {
-        game_state.camera.position.y -= CAMERA_SPEED;
+        game_state.camera.position.y += CAMERA_SPEED;
     }
     else if (virtual_code == VK_DOWN) {
-        game_state.camera.position.y += CAMERA_SPEED;
+        game_state.camera.position.y -= CAMERA_SPEED;
     }
     else if (virtual_code == VK_HOME) {
         game_state.camera.position.z += CAMERA_SPEED;
@@ -34,9 +34,6 @@ internal void handle_mouse_input() {
     input_state.mouse_dx = input_state.mouse_x - input_state.mouse_old_x;
     input_state.mouse_dy = input_state.mouse_y - input_state.mouse_old_y;
 
-    printf("dx:%d dy:%d\n", input_state.mouse_x, input_state.mouse_y);
-
     input_state.mouse_old_x = input_state.mouse_x;
     input_state.mouse_old_y = input_state.mouse_y;
-
 }

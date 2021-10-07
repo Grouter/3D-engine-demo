@@ -35,17 +35,15 @@ internal void rotate_entity(Entity &entity) {
 
 internal void tick() {
     game_state.entities.base_entities.for_each(rotate_entity);
+    camera_update(game_state.camera, input_state);
 }
 
 internal void render() {
     glUseProgram(game_state.resources.programs[0].handle);
 
     {   // Update view uniform
-        Matrix4x4 view = identity();
-        translate(view, game_state.camera.position.x, game_state.camera.position.y, game_state.camera.position.z);
-
         i32 view_handle = glGetUniformLocation(game_state.resources.programs[0].handle, "view");
-        glUniformMatrix4fv(view_handle, 1, GL_FALSE, view.raw);
+        glUniformMatrix4fv(view_handle, 1, GL_FALSE, game_state.camera.transform.raw);
     }
 
     game_state.entities.base_entities.for_each(render_entity);

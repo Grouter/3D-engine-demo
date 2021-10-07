@@ -32,8 +32,6 @@ global HGLRC opengl_rc;
 #include "math/matrix.cpp"
 #include "math/quaternion.h"
 #include "math/quaternion.cpp"
-#include "camera.h"
-#include "camera.cpp"
 #include "graphics.h"
 #include "graphics.cpp"
 #include "resources.h"
@@ -41,6 +39,8 @@ global HGLRC opengl_rc;
 #include "entity.h"
 #include "entity.cpp"
 #include "input.h"
+#include "camera.h"
+#include "camera.cpp"
 
 struct GameState {
     u32 window_width;
