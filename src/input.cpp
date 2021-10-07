@@ -28,3 +28,15 @@ internal void handle_key_up(u8 scan_code, u16 virtual_code, bool alt_down) {
 internal void handle_char(wchar_t c) {
 
 }
+
+internal void handle_mouse_input() {
+
+    input_state.mouse_dx = input_state.mouse_x - input_state.mouse_old_x;
+    input_state.mouse_dy = input_state.mouse_y - input_state.mouse_old_y;
+
+    printf("dx:%d dy:%d\n", input_state.mouse_x, input_state.mouse_y);
+
+    input_state.mouse_old_x = input_state.mouse_x;
+    input_state.mouse_old_y = input_state.mouse_y;
+
+}

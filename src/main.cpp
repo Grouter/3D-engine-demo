@@ -40,17 +40,19 @@ global HGLRC opengl_rc;
 #include "resources.cpp"
 #include "entity.h"
 #include "entity.cpp"
+#include "input.h"
 
 struct GameState {
     u32 window_width;
     u32 window_height;
     Resources resources;
     Camera camera;
-
     EntityStorage entities;
 };
 
+
 global GameState game_state;
+global InputState input_state;
 
 #include "render.cpp"
 #include "input.cpp"
@@ -166,19 +168,14 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
         } break;
 
         case WM_MOUSEMOVE: {
-            
-            i32 x_pos = GET_X_LPARAM(l_param); 
-            i32 y_pos = GET_Y_LPARAM(l_param);
-
-            printf("x: %d, y: %d\n", x_pos, y_pos);
+            input_state.mouse_x = GET_X_LPARAM(l_param); 
+            input_state.mouse_y = GET_Y_LPARAM(l_param);
 
         } break;
 
         default: {
             result = DefWindowProc(window, message, w_param, l_param);
         }
-
-        
     }
 
     return result;
@@ -245,6 +242,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
                 return 1;
             }
         }
+
+        handle_mouse_input();
 
         tick();
 
