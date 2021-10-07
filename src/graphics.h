@@ -27,7 +27,6 @@ struct Mesh {
     u32 vertex_count;
     u32 index_count;
 
-    // @Todo: allocate only one buffer for these:
     VertexP *verticies;
     u32     *indicies;
 };

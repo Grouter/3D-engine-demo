@@ -9,6 +9,9 @@ internal Program load_program(const char *name) {
         printf("Error opening a shader file: %s\n", name);
         exit(1);
     }
+    else {
+        printf("Loaded shader: %s\n", name);
+    }
 
     char *shader_source;
     u64   shader_file_bytes;
@@ -74,7 +77,7 @@ internal Program load_program(const char *name) {
     return program;
 }
 
-internal void bind_mesh(Mesh &mesh) {
+internal void bind_mesh_buffer_objects(Mesh &mesh) {
     glGenVertexArrays(1, &mesh.vao);
     glBindVertexArray(mesh.vao);
 
@@ -120,7 +123,7 @@ internal Mesh create_rectangle(u32 w, u32 h) {
     mesh.vertex_count = 4;
     mesh.index_count = 6;
 
-    bind_mesh(mesh);
+    bind_mesh_buffer_objects(mesh);
 
     return mesh;
 }
@@ -171,7 +174,73 @@ internal Mesh create_cube(f32 size) {
     mesh.vertex_count = 8;
     mesh.index_count  = 36;
 
-    bind_mesh(mesh);
+    bind_mesh_buffer_objects(mesh);
+
+    return mesh;
+}
+
+internal Mesh load_model(const char *name) {
+    printf("Loading %s 3D model\n", name);
+
+    tinyobj::ObjReader reader;
+
+    bool result = reader.ParseFromFile(name);
+    if (!result) {
+        printf("Error loading %s 3D model file\n", name);
+    }
+
+    tinyobj::attrib_t              data   = reader.GetAttrib();
+    std::vector<tinyobj::shape_t>  shapes = reader.GetShapes();
+
+    tinyobj::mesh_t *sub_mesh;
+
+    Mesh mesh = {};
+    mesh.vertex_count = (u32)data.vertices.size() / 3;
+
+    // This just counts all the indicies of all sub meshes
+    for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
+        sub_mesh = &shapes[shape_index].mesh;
+
+        for (u64 f = 0; f < sub_mesh->num_face_vertices.size(); f++) {
+            u64 face_verticies = (u64)sub_mesh->num_face_vertices[f];
+
+            mesh.index_count += (u32)face_verticies;
+        }
+    }
+
+    printf("Mesh verticies: %lu\n", mesh.vertex_count);
+    printf("Mesh indicies: %lu\n", mesh.index_count);
+
+    mesh.verticies = (VertexP*)malloc(mesh.vertex_count * sizeof(VertexP));
+    mesh.indicies  = (u32*)malloc(mesh.index_count * sizeof(u32));
+
+    printf("Mesh buffer initialized: %u %u\n", mesh.vertex_count, mesh.index_count);
+
+    // Copy loaded data to our mesh data
+    // @Speed: this iterates over all indicies...
+    {
+        memcpy(mesh.verticies, data.vertices.data(), data.vertices.size() * sizeof(f32));
+
+        u32 stored_indicies = 0;
+
+        for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
+            u64 index_offset = 0;
+            sub_mesh = &shapes[shape_index].mesh;
+
+            for (u64 f = 0; f < sub_mesh->num_face_vertices.size(); f++) {
+                u64 fv = (u64)sub_mesh->num_face_vertices[f];
+
+                for (u64 v = 0; v < fv; v++) {
+                    mesh.indicies[stored_indicies] = sub_mesh->indices[index_offset + v].vertex_index;
+                    stored_indicies += 1;
+                }
+
+                index_offset += fv;
+            }
+        }
+    }
+
+    bind_mesh_buffer_objects(mesh);
 
     return mesh;
 }

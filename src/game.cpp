@@ -1,9 +1,9 @@
 internal void init() {
     game_state.camera = create_camera(game_state.window_width, game_state.window_height, 80.0);
-    game_state.camera.position.z = -60.0f;
+    game_state.camera.position.z = -20.0f;
 
     game_state.resources.programs[0] = load_program("shaders/default.glsl");
-    game_state.resources.meshes[0]   = create_cube(50.0f);
+    game_state.resources.meshes[0]   = load_model("test.obj");
 
     allocate_entity_storage(game_state.entities);
 

@@ -3,22 +3,30 @@
 
 #define DEBUG_CONSOLE
 
+#define STB_IMAGE_IMPLEMENTATION
+#define TINYOBJLOADER_IMPLEMENTATION
+
 // @Todo: check if RVO is happening
 
 #include <windows.h>
 #include <glew.h>
+#include <wglew.h>
 #include <gl/gl.h>
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <math.h>
 #include <cmath>
 #include <assert.h>
 #include <algorithm>    // @Todo: implement own sort?
+#include <tiny_obj_loader.h>
 
 #include "platform.h"
+#include "opengl.cpp"
 
-global HDC   window_dc;
-global HGLRC opengl_rc;
+global HDC   window_context;
+global HGLRC opengl_context;
 
 #include "array.h"
 #include "array.cpp"
@@ -56,56 +64,11 @@ global GameState game_state;
 #include "game.h"
 #include "game.cpp"
 
-internal void init_opengl(HWND window) {
-    window_dc = GetDC(window);
-
-    PIXELFORMATDESCRIPTOR desiredPixelFormat;
-    desiredPixelFormat.nSize    = sizeof(PIXELFORMATDESCRIPTOR);
-    desiredPixelFormat.nVersion = 1;
-
-    desiredPixelFormat.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    desiredPixelFormat.dwLayerMask  = PFD_MAIN_PLANE;
-    desiredPixelFormat.iPixelType   = PFD_TYPE_COLORINDEX;
-    desiredPixelFormat.cColorBits   = 32;
-    desiredPixelFormat.cAlphaBits   = 8;
-    desiredPixelFormat.cDepthBits   = 16;
-
-    // Find and set pixelformat
-    {
-        int suggestedPixelformatIndex = ChoosePixelFormat(window_dc, &desiredPixelFormat);
-
-        PIXELFORMATDESCRIPTOR suggestedPixelFormat;
-        DescribePixelFormat(window_dc, suggestedPixelformatIndex, sizeof(suggestedPixelFormat), &suggestedPixelFormat);
-
-        SetPixelFormat(window_dc, suggestedPixelformatIndex, &suggestedPixelFormat);
-    }
-
-    opengl_rc = wglCreateContext(window_dc);
-
-    wglMakeCurrent(window_dc, opengl_rc);
-
-    OutputDebugStringA("OpenGL initialized:\n");
-
-    OutputDebugStringA("    Vendor: ");
-    OutputDebugStringA((char*)glGetString(GL_VENDOR));
-    OutputDebugStringA("\n");
-
-    OutputDebugStringA("    Renderer: ");
-    OutputDebugStringA((char*)glGetString(GL_RENDERER));
-    OutputDebugStringA("\n");
-
-    OutputDebugStringA("    Version: ");
-    OutputDebugStringA((char*)glGetString(GL_VERSION));
-    OutputDebugStringA("\n");
-}
-
 LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {
     LRESULT result = 1;
 
     switch (message) {
         case WM_CREATE : {
-            init_opengl(window);
-
             RECT window_rect;
             if (GetWindowRect(window, &window_rect)) {
                 game_state.window_width  = window_rect.right - window_rect.left;
@@ -125,16 +88,16 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
         } break;
 
         case WM_DESTROY: {
-            if (opengl_rc) {
-                wglDeleteContext(opengl_rc);
+            if (opengl_context) {
+                wglDeleteContext(opengl_context);
             }
 
-            if (window_dc) {
-                ReleaseDC(window, window_dc);
+            if (window_context) {
+                ReleaseDC(window, window_context);
             }
 
-            opengl_rc = 0;
-            window_dc = 0;
+            opengl_context = 0;
+            window_context = 0;
 
             PostQuitMessage(0);
         } break;
@@ -198,14 +161,13 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
         return 0;
     }
 
+    init_gl_extensions();
+
+    window_context = GetDC(window);
+    opengl_context = create_gl_context(window_context);
+
     ShowWindow(window, show_code);
     UpdateWindow(window);
-
-    GLenum glew_state = glewInit();
-    if (glew_state != GLEW_OK) {
-        printf("Error while initializing GL extensions!\n");
-        exit(1);
-    }
 
 #if defined(DEBUG_CONSOLE)
     {
@@ -243,7 +205,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
         glFlush();
 
-        SwapBuffers(window_dc);
+        SwapBuffers(window_context);
     }
 
     return 0;
