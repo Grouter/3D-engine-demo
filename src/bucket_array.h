@@ -11,6 +11,8 @@ struct Bucket {
     u64 capacity;
     u64 stored;
 
+    // @Todo: these two could be in one buffer
+    // which would require only one allocation
     T    *data;
     bool *occupied;
 };

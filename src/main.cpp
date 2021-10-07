@@ -1,6 +1,8 @@
 // Uncomment for release mode
 //#define NDEBUG
 
+#define DEBUG_CONSOLE
+
 // @Todo: check if RVO is happening
 
 #include <windows.h>
@@ -216,6 +218,18 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
         printf("Error while initializing GL extensions!\n");
         exit(1);
     }
+
+#if defined(DEBUG_CONSOLE)
+    {
+        bool console = AllocConsole();
+        if (console) {
+            freopen("CONOUT$", "w", stdout);
+        }
+        else {
+            OutputDebugStringA("Failed to open a debug console\n");
+        }
+    }
+#endif
 
     init();
 
