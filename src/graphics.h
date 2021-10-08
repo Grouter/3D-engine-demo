@@ -26,6 +26,8 @@ struct Mesh {
     u32 nbo;
     u32 ebo;
 
+    Array<SubMeshInfo> sub_meshes;
+
     // Loaded data
     Array<Vector3> verticies;
     Array<Vector3> normals;

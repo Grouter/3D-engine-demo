@@ -199,6 +199,8 @@ internal Mesh load_model(const char *name) {
 
     Mesh mesh = {};
 
+    allocate_array(mesh.sub_meshes, shapes.size());
+
     // Allocate same amount of verticies and normals
     allocate_array(mesh.verticies, (u64)data.vertices.size() / 3);
     allocate_array(mesh.normals,   (u64)data.vertices.size() / 3);
@@ -219,6 +221,13 @@ internal Mesh load_model(const char *name) {
     for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
         u64 index_offset = 0;
         sub_mesh = &shapes[shape_index].mesh;
+
+        SubMeshInfo sub_mesh_info = {};
+
+        sub_mesh_info.fist_index = (u32)mesh.indicies.length;
+        sub_mesh_info.index_count = (u32)sub_mesh->indices.size();
+
+        mesh.sub_meshes.add(sub_mesh_info);
 
         for (u64 f = 0; f < sub_mesh->num_face_vertices.size(); f++) {
             u64 fv = (u64)sub_mesh->num_face_vertices[f];
@@ -244,6 +253,7 @@ internal Mesh load_model(const char *name) {
         }
     }
 
+    printf("Mesh sub meshes: %llu\n", mesh.sub_meshes.length);
     printf("Mesh verticies: %llu\n", mesh.verticies.length);
     printf("Mesh normals: %llu\n", mesh.normals.length);
     printf("Mesh indicies: %llu\n", mesh.indicies.length);
