@@ -116,6 +116,13 @@ internal HGLRC create_gl_context(HDC window_context) {
         exit(1);
     }
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     OutputDebugStringA("OpenGL initialized:\n");
 
     OutputDebugStringA("    Vendor: ");

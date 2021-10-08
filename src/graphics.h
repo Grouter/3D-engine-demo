@@ -14,21 +14,22 @@ struct Program {
     u32 handle;
 };
 
-struct VertexP {
-    Vector3 position;
+struct SubMeshInfo {
+    // @Todo: submesh material index
+    u32 fist_index;
+    u32 index_count;
 };
 
 struct Mesh {
     u32 vao;
     u32 vbo;
+    u32 nbo;
     u32 ebo;
 
-    // @Robustness: this can only hold one triangle list
-    u32 vertex_count;
-    u32 index_count;
-
-    VertexP *verticies;
-    u32     *indicies;
+    // Loaded data
+    Array<Vector3> verticies;
+    Array<Vector3> normals;
+    Array<u32>     indicies;
 };
 
 #endif

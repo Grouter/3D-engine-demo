@@ -8,5 +8,5 @@ internal void render_entity(Entity &entity) {
     glUniformMatrix4fv(model_handle, 1, GL_FALSE, model.raw);
 
     glBindVertexArray(entity.mesh->vao);
-    glDrawElements(GL_TRIANGLES, entity.mesh->index_count, GL_UNSIGNED_INT, NULL);
+    glDrawElements(GL_TRIANGLES, (i32)entity.mesh->indicies.length, GL_UNSIGNED_INT, NULL);
 }

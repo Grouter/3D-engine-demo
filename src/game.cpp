@@ -48,5 +48,5 @@ internal void render() {
         glUniformMatrix4fv(view_handle, 1, GL_FALSE, view.raw);
     }
 
-    game_state.entities.base_entities.for_each(render_entity);
+   game_state.entities.base_entities.for_each(render_entity);
 }

@@ -84,48 +84,31 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
     {   // Vertex data
         glGenBuffers(1, &mesh.vbo);
         glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
-        glBufferData(GL_ARRAY_BUFFER, mesh.vertex_count * sizeof(VertexP), mesh.verticies, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, mesh.verticies.length * sizeof(Vector3), mesh.verticies.data, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), nullptr);
+        glEnableVertexAttribArray(0);
+    }
+
+    {   // Normal data
+        glGenBuffers(1, &mesh.nbo);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.nbo);
+        glBufferData(GL_ARRAY_BUFFER, mesh.normals.length * sizeof(Vector3), mesh.normals.data, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), nullptr);
+        glEnableVertexAttribArray(1);
     }
 
     {   // Index data
         glGenBuffers(1, &mesh.ebo);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.index_count * sizeof(u32), mesh.indicies, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indicies.length * sizeof(u32), mesh.indicies.data, GL_STATIC_DRAW);
     }
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), nullptr);
-    glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
-}
-
-internal Mesh create_rectangle(u32 w, u32 h) {
-    Mesh mesh;
-
-    f32 w_half = (f32)w / 2.0f;
-    f32 h_half = (f32)h / 2.0f;
-
-    mesh.verticies = new VertexP[] {
-        VertexP { make_vector3(-w_half,  h_half, 0.0f) },
-        VertexP { make_vector3( w_half,  h_half, 0.0f) },
-        VertexP { make_vector3( w_half, -h_half, 0.0f) },
-        VertexP { make_vector3(-w_half, -h_half, 0.0f) },
-    };
-
-    mesh.indicies = new u32[] {
-        1, 0, 3,
-        3, 2, 1
-    };
-
-    mesh.vertex_count = 4;
-    mesh.index_count = 6;
-
-    bind_mesh_buffer_objects(mesh);
-
-    return mesh;
 }
 
 internal Mesh create_cube(f32 size) {
@@ -133,19 +116,19 @@ internal Mesh create_cube(f32 size) {
 
     Mesh mesh = {};
 
-    mesh.verticies = new VertexP[] {
-        VertexP { make_vector3(-half_size,  half_size, half_size) },
-        VertexP { make_vector3( half_size,  half_size, half_size) },
-        VertexP { make_vector3( half_size, -half_size, half_size) },
-        VertexP { make_vector3(-half_size, -half_size, half_size) },
+    allocate_array(mesh.verticies, 8);
 
-        VertexP { make_vector3(-half_size,  half_size, -half_size) },
-        VertexP { make_vector3( half_size,  half_size, -half_size) },
-        VertexP { make_vector3( half_size, -half_size, -half_size) },
-        VertexP { make_vector3(-half_size, -half_size, -half_size) },
-    };
+    mesh.verticies.add(make_vector3(-half_size,  half_size, half_size));
+    mesh.verticies.add(make_vector3( half_size,  half_size, half_size));
+    mesh.verticies.add(make_vector3( half_size, -half_size, half_size));
+    mesh.verticies.add(make_vector3(-half_size, -half_size, half_size));
+    mesh.verticies.add(make_vector3(-half_size,  half_size, -half_size));
+    mesh.verticies.add(make_vector3( half_size,  half_size, -half_size));
+    mesh.verticies.add(make_vector3( half_size, -half_size, -half_size));
+    mesh.verticies.add(make_vector3(-half_size, -half_size, -half_size));
 
-    mesh.indicies = new u32[] {
+    // This is hardcoded array initialization... we can do better
+    mesh.indicies.data = new u32[] {
          // Front
         1, 0, 3,
         3, 2, 1,
@@ -170,9 +153,8 @@ internal Mesh create_cube(f32 size) {
         2, 3, 7,
         7, 6, 2,
     };
-
-    mesh.vertex_count = 8;
-    mesh.index_count  = 36;
+    mesh.indicies.length = 36;
+    mesh.indicies.capacity = 36;
 
     bind_mesh_buffer_objects(mesh);
 
@@ -187,6 +169,13 @@ internal Mesh load_model(const char *name) {
     bool result = reader.ParseFromFile(name);
     if (!result) {
         printf("Error loading %s 3D model file\n", name);
+        if (!reader.Error().empty()) {
+            printf(reader.Error().c_str());
+        }
+    }
+
+    if (!reader.Warning().empty()) {
+        printf(reader.Warning().c_str());
     }
 
     tinyobj::attrib_t              data   = reader.GetAttrib();
@@ -194,51 +183,70 @@ internal Mesh load_model(const char *name) {
 
     tinyobj::mesh_t *sub_mesh;
 
-    Mesh mesh = {};
-    mesh.vertex_count = (u32)data.vertices.size() / 3;
+    u32 index_count = 0;
 
-    // This just counts all the indicies of all sub meshes
+    // This just counts all the indicies of all sub meshes so we can
+    // allocate space for them. Using a dynamic array would be very slow...
     for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
         sub_mesh = &shapes[shape_index].mesh;
 
         for (u64 f = 0; f < sub_mesh->num_face_vertices.size(); f++) {
             u64 face_verticies = (u64)sub_mesh->num_face_vertices[f];
 
-            mesh.index_count += (u32)face_verticies;
+            index_count += (u32)face_verticies;
         }
     }
 
-    printf("Mesh verticies: %lu\n", mesh.vertex_count);
-    printf("Mesh indicies: %lu\n", mesh.index_count);
+    Mesh mesh = {};
 
-    mesh.verticies = (VertexP*)malloc(mesh.vertex_count * sizeof(VertexP));
-    mesh.indicies  = (u32*)malloc(mesh.index_count * sizeof(u32));
+    // Allocate same amount of verticies and normals
+    allocate_array(mesh.verticies, (u64)data.vertices.size() / 3);
+    allocate_array(mesh.normals,   (u64)data.vertices.size() / 3);
 
-    printf("Mesh buffer initialized: %u %u\n", mesh.vertex_count, mesh.index_count);
+    allocate_array(mesh.indicies, index_count);
 
-    // Copy loaded data to our mesh data
-    // @Speed: this iterates over all indicies...
+    // Verticies
     {
-        memcpy(mesh.verticies, data.vertices.data(), data.vertices.size() * sizeof(f32));
+        mesh.verticies.length = mesh.verticies.capacity;
+        memcpy(mesh.verticies.data, data.vertices.data(), data.vertices.size() * sizeof(f32));
+    }
 
-        u32 stored_indicies = 0;
+    {
+        mesh.normals.length = mesh.normals.capacity;
+    }
 
-        for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
-            u64 index_offset = 0;
-            sub_mesh = &shapes[shape_index].mesh;
+    // Indicies and normals
+    for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
+        u64 index_offset = 0;
+        sub_mesh = &shapes[shape_index].mesh;
 
-            for (u64 f = 0; f < sub_mesh->num_face_vertices.size(); f++) {
-                u64 fv = (u64)sub_mesh->num_face_vertices[f];
+        for (u64 f = 0; f < sub_mesh->num_face_vertices.size(); f++) {
+            u64 fv = (u64)sub_mesh->num_face_vertices[f];
 
-                for (u64 v = 0; v < fv; v++) {
-                    mesh.indicies[stored_indicies] = sub_mesh->indices[index_offset + v].vertex_index;
-                    stored_indicies += 1;
+            for (u64 v = 0; v < fv; v++) {
+                tinyobj::index_t idx = sub_mesh->indices[index_offset + v];
+
+                // Indicies
+                mesh.indicies.add(idx.vertex_index);
+
+                // Normals
+                if (idx.normal_index >= 0) {
+                    Vector3 normal = {};
+                    normal.x = data.normals[3 * (u64)idx.normal_index + 0];
+                    normal.y = data.normals[3 * (u64)idx.normal_index + 1];
+                    normal.z = data.normals[3 * (u64)idx.normal_index + 2];
+
+                    mesh.normals.data[idx.vertex_index] = normal;
                 }
-
-                index_offset += fv;
             }
+
+            index_offset += fv;
         }
     }
+
+    printf("Mesh verticies: %llu\n", mesh.verticies.length);
+    printf("Mesh normals: %llu\n", mesh.normals.length);
+    printf("Mesh indicies: %llu\n", mesh.indicies.length);
 
     bind_mesh_buffer_objects(mesh);
 
