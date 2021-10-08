@@ -116,10 +116,15 @@ internal HGLRC create_gl_context(HDC window_context) {
         exit(1);
     }
 
+    // V-Sync
+    wglSwapIntervalEXT(1);
+
+    // Culling
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
+    // Depth tests
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
