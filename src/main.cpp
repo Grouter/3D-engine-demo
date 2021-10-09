@@ -28,6 +28,15 @@
 global HDC   window_context;
 global HGLRC opengl_context;
 
+const u32 INITIAL_WINDOW_W = 1920;
+const u32 INITIAL_WINDOW_H = 1080;
+
+const u32 VIRTUAL_WINDOW_W = 1920;
+const u32 VIRTUAL_WINDOW_H = 1080;
+
+const u32 TARGET_ASPECT_W = 16;
+const u32 TARGET_ASPECT_H = 9;
+
 #include "array.h"
 #include "array.cpp"
 #include "bucket_array.h"
@@ -48,9 +57,21 @@ global HGLRC opengl_context;
 #include "entity.h"
 #include "entity.cpp"
 
+struct Viewport {
+    i32 left, bottom;
+    i32 width, height;
+};
+
 struct GameState {
+    // Window and rendering
     u32 window_width;
     u32 window_height;
+
+    Viewport viewport;
+
+    f32 unit_to_pixels;
+
+    // Gameplay
     Resources resources;
     Camera camera;
 
@@ -84,7 +105,32 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
             game_state.window_width  = LOWORD(l_param);
             game_state.window_height = HIWORD(l_param);
 
-            update_perspective(game_state.camera, game_state.window_width, game_state.window_height);
+            // Recalculate viewport to keep the aspect ratio
+            {
+                u32 w = game_state.window_width;
+                u32 h = game_state.window_height;
+
+                if (game_state.window_width * TARGET_ASPECT_H > game_state.window_height * TARGET_ASPECT_H) {
+                    w = game_state.window_height * TARGET_ASPECT_W / TARGET_ASPECT_H;
+                }
+                else if (game_state.window_width * TARGET_ASPECT_H < game_state.window_height * TARGET_ASPECT_W) {
+                    h = game_state.window_width * TARGET_ASPECT_H / TARGET_ASPECT_W;
+                }
+
+                game_state.viewport.left   = (game_state.window_width / 2) - w / 2;
+                game_state.viewport.bottom = (game_state.window_height / 2) - h / 2;
+                game_state.viewport.width  = w;
+                game_state.viewport.height = h;
+
+                glViewport(
+                    game_state.viewport.left,
+                    game_state.viewport.bottom,
+                    game_state.viewport.width,
+                    game_state.viewport.height
+                );
+            }
+
+            game_state.unit_to_pixels = (f32)game_state.viewport.width / (f32)TARGET_ASPECT_W;
         } break;
 
         case WM_DESTROY: {
@@ -150,9 +196,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
         window_class.lpszClassName,
         TEXT("Castle Demo"),
         WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-        NULL,
-        NULL,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H,
+        NULL, NULL,
         instance,
         NULL
     );
