@@ -45,3 +45,11 @@ inline Vector3 cross(Vector3 a, Vector3 b) {
 
     return cross;
 }
+
+inline Vector3 multiply(Vector3 v, f32 x) {
+    return { v.x * x, v.y * x, v.z * x };
+}
+
+inline Vector3 add(Vector3 a, Vector3 b) {
+    return { a.x + b.x, a.y + b.y, a.z + b.z };
+}
