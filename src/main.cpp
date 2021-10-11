@@ -20,7 +20,7 @@
 #include <math.h>
 #include <cmath>
 #include <assert.h>
-#include <algorithm>    // @Todo: implement own sort?
+#include <algorithm>    // @Todo: implement own sort
 #include <tiny_obj_loader.h>
 
 #include "platform.h"
@@ -79,12 +79,11 @@ struct GameState {
     EntityStorage entities;
 };
 
-
 global GameState game_state;
 global InputState input_state;
 
-#include "render.cpp"
 #include "input.cpp"
+#include "render.cpp"
 #include "game.h"
 #include "game.cpp"
 
@@ -177,9 +176,24 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
         } break;
 
         case WM_MOUSEMOVE: {
-            input_state.mouse_x = GET_X_LPARAM(l_param); 
+            input_state.mouse_x = GET_X_LPARAM(l_param);
             input_state.mouse_y = GET_Y_LPARAM(l_param);
 
+            if (input_state.mouse_locked) {
+                // Set cursor is in the screen coords not window coords!!
+                // We need to convert.
+                {
+                    POINT pt;
+                    pt.x = game_state.window_width  / 2;
+                    pt.y = game_state.window_height / 2;
+                    ClientToScreen(window, &pt);
+
+                    SetCursorPos(pt.x, pt.y);
+                }
+
+                input_state.mouse_old_x = game_state.window_width  / 2;
+                input_state.mouse_old_y = game_state.window_height / 2;
+            }
         } break;
 
         default: {

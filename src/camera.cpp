@@ -3,8 +3,6 @@
 
 inline void update_perspective(Camera &camera, u32 window_w, u32 window_h) {
     camera.perspective = perspective(camera.fov, camera.clip_near, camera.clip_far, (f32)window_w, (f32)window_h);
-
-    //camera.perspective = orto(-1.0, 1.0, (f32)window_w, (f32)window_h);
 }
 
 internal Camera create_camera(u32 window_w, u32 window_h, f32 fov) {
@@ -20,41 +18,30 @@ internal Camera create_camera(u32 window_w, u32 window_h, f32 fov) {
 }
 
 internal void camera_update(Camera &camera, InputState &input_state) {
-    
-    camera.yaw += (f32)input_state.mouse_dx * SENS;
-    camera.pitch += (f32)input_state.mouse_dy * SENS;
-
-    if (camera.pitch > 89.0f)
-        camera.pitch = 89.0f;
-    
-    if (camera.pitch < -89.0f)
-        camera.pitch = -89.f;
+    if (camera.rotation.pitch > 89.0f)
+        camera.rotation.pitch = 89.0f;
+    else if (camera.rotation.pitch < -89.0f)
+        camera.rotation.pitch = -89.0f;
 
     Vector3 direction;
+    direction.x = cos(TO_RADIANS(camera.rotation.yaw)) * cos(TO_RADIANS(camera.rotation.pitch));
+    direction.y = sin(TO_RADIANS(camera.rotation.pitch));
+    direction.z = sin(TO_RADIANS(camera.rotation.yaw)) * cos(TO_RADIANS(camera.rotation.pitch));
 
-    direction.x = cos(TO_RADIANS(camera.yaw)) * cos(TO_RADIANS(camera.pitch));
-    direction.y = sin(TO_RADIANS(camera.pitch));
-    direction.z = sin(TO_RADIANS(camera.yaw)) * cos(TO_RADIANS(camera.pitch));
+    Vector3 forward = normalized(direction);
+    Vector3 side    = normalized(cross(V3_UP, forward));
+    Vector3 up      = cross(forward, side);
 
-    Vector3 global_up = make_vector3(0.0f, 1.0f, 0.0f);
-
-    Vector3 forward = normalized(direction);;
-
-    Vector3 side = cross(global_up, forward); 
-    Vector3 n_side = normalized(side);
-
-    Vector3 up = cross(forward, n_side);
-
-    Vector3 position = {
-        -camera.position.x * n_side.x    - camera.position.y * n_side.y   - camera.position.z * n_side.z,
-        -camera.position.x * up.x        - camera.position.y * up.y       - camera.position.z * up.z,
-        -camera.position.x * forward.x   - camera.position.y * forward.y  - camera.position.z * forward.z
-    };
+    Vector3 position = make_vector3(
+        -camera.position.x * side.x    - camera.position.y * side.y    - camera.position.z * side.z,
+        -camera.position.x * up.x      - camera.position.y * up.y      - camera.position.z * up.z,
+        -camera.position.x * forward.x - camera.position.y * forward.y - camera.position.z * forward.z
+    );
 
     camera.transform = {
-        n_side.x, up.x, forward.x, 0.0f,
-        n_side.y, up.y, forward.y, 0.0f,
-        n_side.z, up.z, forward.z, 0.0f,
+        side.x, up.x, forward.x, 0.0f,
+        side.y, up.y, forward.y, 0.0f,
+        side.z, up.z, forward.z, 0.0f,
         position.x, position.y, position.z, 1.0f,
     };
 }
