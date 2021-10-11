@@ -9,6 +9,7 @@
 // @Todo: check if RVO is happening
 
 #include <windows.h>
+#include <Windowsx.h>
 #include <glew.h>
 #include <wglew.h>
 #include <gl/gl.h>
@@ -48,14 +49,15 @@ const u32 TARGET_ASPECT_H = 9;
 #include "math/matrix.cpp"
 #include "math/quaternion.h"
 #include "math/quaternion.cpp"
-#include "camera.h"
-#include "camera.cpp"
 #include "graphics.h"
 #include "graphics.cpp"
 #include "resources.h"
 #include "resources.cpp"
 #include "entity.h"
 #include "entity.cpp"
+#include "input.h"
+#include "camera.h"
+#include "camera.cpp"
 
 struct Viewport {
     i32 left, bottom;
@@ -74,11 +76,12 @@ struct GameState {
     // Gameplay
     Resources resources;
     Camera camera;
-
     EntityStorage entities;
 };
 
+
 global GameState game_state;
+global InputState input_state;
 
 #include "render.cpp"
 #include "input.cpp"
@@ -173,6 +176,12 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
             handle_char(pressed_char);
         } break;
 
+        case WM_MOUSEMOVE: {
+            input_state.mouse_x = GET_X_LPARAM(l_param); 
+            input_state.mouse_y = GET_Y_LPARAM(l_param);
+
+        } break;
+
         default: {
             result = DefWindowProc(window, message, w_param, l_param);
         }
@@ -241,6 +250,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
                 return 1;
             }
         }
+
+        handle_mouse_input();
 
         tick();
 
