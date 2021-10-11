@@ -46,6 +46,19 @@ internal void camera_update(Camera &camera, InputState &input_state) {
     };
 }
 
+inline Vector3 get_forward_vector(Camera &camera) {
+    return { camera.transform.raw[2], camera.transform.raw[6], camera.transform.raw[10] };
+}
+
+inline Vector3 get_up_vector(Camera &camera) {
+    return { camera.transform.raw[1], camera.transform.raw[5], camera.transform.raw[9] };
+}
+
+inline Vector3 get_side_vector(Camera &camera) {
+    return { camera.transform.raw[0], camera.transform.raw[4], camera.transform.raw[8] };
+}
+
+// @Speed: creating new vectors everytime
 internal void camera_handle_input(Camera &camera, const KeyInput &input) {
     const f32 CAMERA_SPEED = 10.0f;
 
@@ -62,12 +75,6 @@ internal void camera_handle_input(Camera &camera, const KeyInput &input) {
     }
     else if (input.virtual_code == VK_DOWN) {
         camera.position = add(camera.position, multiply(get_forward_vector(camera), CAMERA_SPEED));
-    }
-    else if (input.virtual_code == VK_HOME) {
-        camera.position.z += CAMERA_SPEED;
-    }
-    else if (input.virtual_code == VK_END) {
-        camera.position.z -= CAMERA_SPEED;
     }
 }
 
@@ -88,16 +95,4 @@ internal void camera_handle_mouse(Camera &camera, i32 dx, i32 dy) {
     else if (camera.rotation.pitch <= -360.0f) {
         camera.rotation.pitch += 360.0f;
     }
-}
-
-inline Vector3 get_forward_vector(Camera &camera) {
-    return { camera.transform.raw[2], camera.transform.raw[6], camera.transform.raw[10] };
-}
-
-inline Vector3 get_up_vector(Camera &camera) {
-    return { camera.transform.raw[1], camera.transform.raw[5], camera.transform.raw[9] };
-}
-
-inline Vector3 get_side_vector(Camera &camera) {
-    return { camera.transform.raw[0], camera.transform.raw[4], camera.transform.raw[8] };
 }
