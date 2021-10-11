@@ -186,7 +186,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
     window_class.lpfnWndProc   = window_callback;
     window_class.hInstance     = instance;
-    window_class.lpszClassName = TEXT("CastleDemoWindowClass");
+    window_class.lpszClassName = TEXT("WindowClass");
     //window_class.hIcon    // @Todo: add icon later
 
     RegisterClass(&window_class);
@@ -194,7 +194,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
     HWND window = CreateWindowEx(
         0,
         window_class.lpszClassName,
-        TEXT("Castle Demo"),
+        TEXT("Window"),
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
         VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H,

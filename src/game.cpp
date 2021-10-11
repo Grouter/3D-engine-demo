@@ -5,6 +5,14 @@ internal void init() {
     game_state.resources.programs[0] = load_program("shaders/default.glsl");
     game_state.resources.meshes[0]   = load_model("test.obj");
 
+    // Send camera perspective to the shader uniform
+    {
+        glUseProgram(game_state.resources.programs[0].handle);
+        i32 p = glGetUniformLocation(game_state.resources.programs[0].handle, "projection");
+        glUniformMatrix4fv(p, 1, false, game_state.camera.perspective.raw);
+        glUseProgram(0);
+    }
+
     allocate_entity_storage(game_state.entities);
 
     {
@@ -21,11 +29,6 @@ internal void init() {
         e->position.x = 50.0f;
         e->position.z = -50.0f;
     }
-
-    // @Temporary
-    glUseProgram(game_state.resources.programs[0].handle);
-    i32 p = glGetUniformLocation(game_state.resources.programs[0].handle, "projection");
-    glUniformMatrix4fv(p, 1, false, game_state.camera.perspective.raw);
 }
 
 // @Temporary: testing
