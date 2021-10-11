@@ -45,3 +45,45 @@ internal void camera_update(Camera &camera, InputState &input_state) {
         position.x, position.y, position.z, 1.0f,
     };
 }
+
+internal void camera_handle_input(Camera &camera, const KeyInput &input) {
+    const f32 CAMERA_SPEED = 10.0f;
+
+    if (input.virtual_code == VK_LEFT) {
+        camera.position.x += CAMERA_SPEED;
+    }
+    else if (input.virtual_code == VK_RIGHT) {
+        camera.position.x -= CAMERA_SPEED;
+    }
+    else if (input.virtual_code == VK_UP) {
+        camera.position.y += CAMERA_SPEED;
+    }
+    else if (input.virtual_code == VK_DOWN) {
+        camera.position.y -= CAMERA_SPEED;
+    }
+    else if (input.virtual_code == VK_HOME) {
+        camera.position.z += CAMERA_SPEED;
+    }
+    else if (input.virtual_code == VK_END) {
+        camera.position.z -= CAMERA_SPEED;
+    }
+}
+
+internal void camera_handle_mouse(Camera &camera, i32 dx, i32 dy) {
+    camera.rotation.yaw   += (f32)dx * CAMERA_SENS;
+    camera.rotation.pitch += (f32)dy * CAMERA_SENS;
+
+    if (camera.rotation.yaw >= 360.0f) {
+        camera.rotation.yaw -= 360.0f;
+    }
+    else if (camera.rotation.yaw <= -360.0f) {
+        camera.rotation.yaw += 360.0f;
+    }
+
+    if (camera.rotation.pitch >= 360.0f) {
+        camera.rotation.pitch -= 360.0f;
+    }
+    else if (camera.rotation.pitch <= -360.0f) {
+        camera.rotation.pitch += 360.0f;
+    }
+}

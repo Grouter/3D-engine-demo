@@ -184,15 +184,15 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
                 // We need to convert.
                 {
                     POINT pt;
-                    pt.x = game_state.window_width  / 2;
-                    pt.y = game_state.window_height / 2;
+                    pt.x = (i32)game_state.window_width  / 2;
+                    pt.y = (i32)game_state.window_height / 2;
                     ClientToScreen(window, &pt);
 
                     SetCursorPos(pt.x, pt.y);
                 }
 
-                input_state.mouse_old_x = game_state.window_width  / 2;
-                input_state.mouse_old_y = game_state.window_height / 2;
+                input_state.mouse_old_x = (i32)game_state.window_width  / 2;
+                input_state.mouse_old_y = (i32)game_state.window_height / 2;
             }
         } break;
 
