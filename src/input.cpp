@@ -1,9 +1,3 @@
-internal void toggle_cursor_state() {
-    input_state.mouse_locked = !input_state.mouse_locked;
-
-    ShowCursor(!input_state.mouse_locked);
-}
-
 internal void handle_key_down(u8 scan_code, u16 virtual_code, bool alt_down) {
     KeyInput key = {};
     key.scan_code    = scan_code;
@@ -14,7 +8,8 @@ internal void handle_key_down(u8 scan_code, u16 virtual_code, bool alt_down) {
     camera_handle_input(game_state.camera, key);
 
     if (virtual_code == VK_ESCAPE) {
-        toggle_cursor_state();
+        input_state.mouse_locked = !input_state.mouse_locked;
+        ShowCursor(!input_state.mouse_locked);
     }
 }
 
