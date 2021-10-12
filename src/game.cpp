@@ -1,9 +1,12 @@
 internal void init() {
     game_state.camera = create_camera(VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H, 80.0);
-    //game_state.camera.position.z = -20.0f;
+    game_state.camera.rotation.yaw = 90.0f;
+    game_state.camera.position.z = 10.0f;
 
     game_state.resources.programs[0] = load_program("shaders/default.glsl");
-    game_state.resources.meshes[0]   = load_model("test.obj");
+
+    game_state.resources.meshes[0]   = load_model("monkey.obj");
+    game_state.resources.meshes[1]   = load_model("cube.obj");
 
     // Send camera perspective to the shader uniform
     {
@@ -23,11 +26,10 @@ internal void init() {
 
     {
         Entity *e = create_base_entity(game_state.entities);
-        e->mesh = &game_state.resources.meshes[0];
+        e->mesh = &game_state.resources.meshes[1];
         e->program = &game_state.resources.programs[0];
 
-        e->position.x = 50.0f;
-        e->position.z = -50.0f;
+        e->position.x = 10.0f;
     }
 }
 
