@@ -161,6 +161,9 @@ internal Mesh create_cube(f32 size) {
     return mesh;
 }
 
+// @Todo: This mesh loading is wasting a lot of memory!
+// We allocate the same amount of verticies and normals as we have indicies.
+// I think some of the data is always duplicate (which wastes memory)...
 internal Mesh load_model(const char *name) {
     printf("Loading %s 3D model\n", name);
 
@@ -183,39 +186,24 @@ internal Mesh load_model(const char *name) {
 
     tinyobj::mesh_t *sub_mesh;
 
-    u32 index_count = 0;
+    u64 index_count = 0;
 
     // This just counts all the indicies of all sub meshes so we can
     // allocate space for them. Using a dynamic array would be very slow...
     for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
         sub_mesh = &shapes[shape_index].mesh;
 
-        for (u64 f = 0; f < sub_mesh->num_face_vertices.size(); f++) {
-            u64 face_verticies = (u64)sub_mesh->num_face_vertices[f];
-
-            index_count += (u32)face_verticies;
-        }
+        // We export .obj with triangulate faces option, so every face has exactly 3 verticies.
+        u64 sub_mesh_indicies = sub_mesh->num_face_vertices.size() * 3;
+        index_count += sub_mesh_indicies;
     }
 
     Mesh mesh = {};
 
     allocate_array(mesh.sub_meshes, shapes.size());
-
-    // Allocate same amount of verticies and normals
-    allocate_array(mesh.verticies, (u64)data.vertices.size() / 3);
-    allocate_array(mesh.normals,   (u64)data.vertices.size() / 3);
-
-    allocate_array(mesh.indicies, index_count);
-
-    // Verticies
-    {
-        mesh.verticies.length = mesh.verticies.capacity;
-        memcpy(mesh.verticies.data, data.vertices.data(), data.vertices.size() * sizeof(f32));
-    }
-
-    {
-        mesh.normals.length = mesh.normals.capacity;
-    }
+    allocate_array(mesh.verticies,  index_count);
+    allocate_array(mesh.normals,    index_count);
+    allocate_array(mesh.indicies,   index_count);
 
     // Indicies and normals
     for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
@@ -236,16 +224,28 @@ internal Mesh load_model(const char *name) {
                 tinyobj::index_t idx = sub_mesh->indices[index_offset + v];
 
                 // Indicies
-                mesh.indicies.add(idx.vertex_index);
+                mesh.indicies.add((u32)(index_offset + v));
+
+                // Position
+                {
+                    Vector3 position = {};
+
+                    position.x = data.vertices[3 * (u64)idx.vertex_index + 0];
+                    position.y = data.vertices[3 * (u64)idx.vertex_index + 1];
+                    position.z = data.vertices[3 * (u64)idx.vertex_index + 2];
+
+                    mesh.verticies.add(position);
+                }
 
                 // Normals
                 if (idx.normal_index >= 0) {
                     Vector3 normal = {};
+
                     normal.x = data.normals[3 * (u64)idx.normal_index + 0];
                     normal.y = data.normals[3 * (u64)idx.normal_index + 1];
                     normal.z = data.normals[3 * (u64)idx.normal_index + 2];
 
-                    mesh.normals.data[idx.vertex_index] = normal;
+                    mesh.normals.add(normal);
                 }
             }
 
@@ -254,9 +254,9 @@ internal Mesh load_model(const char *name) {
     }
 
     printf("Mesh sub meshes: %llu\n", mesh.sub_meshes.length);
-    printf("Mesh verticies: %llu\n", mesh.verticies.length);
-    printf("Mesh normals: %llu\n", mesh.normals.length);
-    printf("Mesh indicies: %llu\n", mesh.indicies.length);
+    printf("Mesh verticies:  %llu\n", mesh.verticies.length);
+    printf("Mesh normals:    %llu\n", mesh.normals.length);
+    printf("Mesh indicies:   %llu\n", mesh.indicies.length);
 
     bind_mesh_buffer_objects(mesh);
 

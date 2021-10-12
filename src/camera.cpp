@@ -68,7 +68,7 @@ internal void camera_handle_input(Camera &camera, const KeyInput &input) {
     }
     else if (input.virtual_code == VK_RIGHT) {
         camera.position.x += get_forward_vector(camera).z * CAMERA_SPEED;
-        camera.position.z -= get_forward_vector(camera).x * CAMERA_SPEED;       
+        camera.position.z -= get_forward_vector(camera).x * CAMERA_SPEED;
     }
     else if (input.virtual_code == VK_UP) {
         camera.position = add(camera.position, multiply(get_forward_vector(camera), -CAMERA_SPEED));

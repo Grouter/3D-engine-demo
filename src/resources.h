@@ -6,7 +6,7 @@ enum ProgramResource {
 };
 
 struct Resources {
-    Mesh meshes[1];
+    Mesh meshes[2];
     Program programs[1];
 };
 

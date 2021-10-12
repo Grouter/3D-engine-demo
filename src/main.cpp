@@ -220,7 +220,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
         TEXT("Window"),
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT,
-        VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H,
+        INITIAL_WINDOW_W, INITIAL_WINDOW_H,
         NULL, NULL,
         instance,
         NULL
