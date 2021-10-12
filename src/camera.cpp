@@ -62,19 +62,20 @@ inline Vector3 get_side_vector(Camera &camera) {
 internal void camera_handle_input(Camera &camera, const KeyInput &input) {
     const f32 CAMERA_SPEED = 10.0f;
 
+    Vector3 forward = get_forward_vector(camera);
+    Vector3 side = get_side_vector(camera);
+
     if (input.virtual_code == VK_LEFT) {
-        camera.position.x -= get_forward_vector(camera).z * CAMERA_SPEED;
-        camera.position.z += get_forward_vector(camera).x * CAMERA_SPEED;
+        camera.position = add(camera.position, multiply(side, -CAMERA_SPEED));
     }
     else if (input.virtual_code == VK_RIGHT) {
-        camera.position.x += get_forward_vector(camera).z * CAMERA_SPEED;
-        camera.position.z -= get_forward_vector(camera).x * CAMERA_SPEED;       
+        camera.position = add(camera.position, multiply(side, CAMERA_SPEED));
     }
     else if (input.virtual_code == VK_UP) {
-        camera.position = add(camera.position, multiply(get_forward_vector(camera), -CAMERA_SPEED));
+        camera.position = add(camera.position, multiply(forward, -CAMERA_SPEED));
     }
     else if (input.virtual_code == VK_DOWN) {
-        camera.position = add(camera.position, multiply(get_forward_vector(camera), CAMERA_SPEED));
+        camera.position = add(camera.position, multiply(forward, CAMERA_SPEED));
     }
 }
 
