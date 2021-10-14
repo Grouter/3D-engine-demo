@@ -55,9 +55,12 @@ internal void render() {
         glUniformMatrix4fv(view_handle, 1, GL_FALSE, game_state.camera.transform.raw);
     }
 
-    set_material_color(game_state.resources.programs[0], make_vector3(0.0f, 1.0f, 0.0f));
+    set_material_color(game_state.resources.programs[0], make_vector3(1.0f, 1.0f, 1.0f));
 
-    glUniform1i(glGetUniformLocation(game_state.resources.programs[0].handle, "diffuse_texture"), 0);
+    {
+        i32 texture_loc = glGetUniformLocation(game_state.resources.programs[0].handle, "diffuse_texture");
+        glUniform1i(texture_loc, 0);
+    }
 
     game_state.entities.base_entities.for_each(render_entity);
 }
