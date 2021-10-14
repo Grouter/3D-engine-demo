@@ -20,14 +20,13 @@ void main() {
 
 #ifdef FRAGMENT
 
-const vec3 LIGHT_DIR = vec3(0.0, 0.0, 0.5);
-const vec3 LIGHT_COLOR = vec3(1.0, 1.0, 1.0);
-
+const vec3  LIGHT_DIR        = vec3(0.0, 0.0, 0.5);
+const vec3  LIGHT_COLOR      = vec3(1.0, 1.0, 1.0);
 const float AMBIENT_STRENGTH = 0.2;
 
-const vec3 OBJ_COLOR = vec3(0.0, 1.0, 0.0);
-
 in vec3 f_normal;
+
+uniform vec3 material_color;
 
 out vec4 fragment_color;
 
@@ -37,7 +36,7 @@ void main() {
     float diffuse_s = max(dot(f_normal, LIGHT_DIR), 0.0);
     vec3 diffuse = diffuse_s * LIGHT_COLOR;
 
-    vec3 result = (ambient + diffuse) * OBJ_COLOR;
+    vec3 result = (ambient + diffuse) * material_color;
 
     fragment_color = vec4(result, 1.0);
 }

@@ -16,22 +16,22 @@ struct Program {
 
 struct SubMeshInfo {
     // @Todo: submesh material index
-    u32 fist_index;
+    u32 first_index;
     u32 index_count;
 };
 
 struct Mesh {
+    // OpenGL buffers
     u32 vao;
     u32 vbo;
     u32 nbo;
     u32 ebo;
 
-    Array<SubMeshInfo> sub_meshes;
-
     // Loaded data
-    Array<Vector3> verticies;
-    Array<Vector3> normals;
-    Array<u32>     indicies;
+    Array<SubMeshInfo> sub_meshes;
+    Array<Vector3>     verticies;
+    Array<Vector3>     normals;
+    Array<u32>         indicies;
 };
 
 #endif

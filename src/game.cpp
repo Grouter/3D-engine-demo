@@ -1,5 +1,5 @@
 internal void init() {
-    game_state.camera = create_camera(VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H, 80.0);
+    game_state.camera = create_camera(VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H, 80.0f);
     game_state.camera.rotation.yaw = 90.0f;
     game_state.camera.position.z = 10.0f;
 
@@ -52,5 +52,7 @@ internal void render() {
         glUniformMatrix4fv(view_handle, 1, GL_FALSE, game_state.camera.transform.raw);
     }
 
-   game_state.entities.base_entities.for_each(render_entity);
+    set_material_color(game_state.resources.programs[0], make_vector3(0.0f, 1.0f, 0.0f));
+
+    game_state.entities.base_entities.for_each(render_entity);
 }

@@ -1,7 +1,10 @@
-// Uncomment for release mode
-//#define NDEBUG
+//#define RELEASE_MODE
 
-#define DEBUG_CONSOLE
+#if defined(RELEASE_MODE)
+    #define NDEBUG
+#else
+    #define DEBUG_CONSOLE
+#endif
 
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -83,6 +86,7 @@ global GameState game_state;
 global InputState input_state;
 
 #include "input.cpp"
+#include "render.h"
 #include "render.cpp"
 #include "game.h"
 #include "game.cpp"

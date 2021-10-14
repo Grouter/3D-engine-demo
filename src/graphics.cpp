@@ -164,6 +164,7 @@ internal Mesh create_cube(f32 size) {
 // @Todo: This mesh loading is wasting a lot of memory!
 // We allocate the same amount of verticies and normals as we have indicies.
 // I think some of the data is always duplicate (which wastes memory)...
+// We should actually backcheck if the vertex already exists and if not, only then add it.
 internal Mesh load_model(const char *name) {
     printf("Loading %s 3D model\n", name);
 
@@ -212,7 +213,7 @@ internal Mesh load_model(const char *name) {
 
         SubMeshInfo sub_mesh_info = {};
 
-        sub_mesh_info.fist_index = (u32)mesh.indicies.length;
+        sub_mesh_info.first_index = (u32)mesh.indicies.length;
         sub_mesh_info.index_count = (u32)sub_mesh->indices.size();
 
         mesh.sub_meshes.add(sub_mesh_info);
