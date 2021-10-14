@@ -8,6 +8,9 @@ internal void init() {
     game_state.resources.meshes[0]   = load_model("monkey.obj");
     game_state.resources.meshes[1]   = load_model("cube.obj");
 
+    game_state.resources.textures[0] = load_texture("1.jpg");
+    game_state.resources.textures[1] = load_texture("2.png");
+
     // Send camera perspective to the shader uniform
     {
         glUseProgram(game_state.resources.programs[0].handle);
@@ -53,6 +56,8 @@ internal void render() {
     }
 
     set_material_color(game_state.resources.programs[0], make_vector3(0.0f, 1.0f, 0.0f));
+
+    glUniform1i(glGetUniformLocation(game_state.resources.programs[0].handle, "diffuse_texture"), 0);
 
     game_state.entities.base_entities.for_each(render_entity);
 }
