@@ -40,6 +40,14 @@ void Array<T>::add(T item) {
 }
 
 template <typename T>
+void Array<T>::fast_add(T item) {
+    assert(this->length < this->capacity);
+
+    this->data[this->length] = item;
+    this->length += 1;
+}
+
+template <typename T>
 void Array<T>::remove(u64 index) {
     assert(index < this->length);
 
