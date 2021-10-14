@@ -86,7 +86,7 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
         glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
         glBufferData(GL_ARRAY_BUFFER, mesh.verticies.length * sizeof(Vector3), mesh.verticies.data, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), nullptr);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(0);
     }
 
@@ -95,8 +95,17 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
         glBindBuffer(GL_ARRAY_BUFFER, mesh.nbo);
         glBufferData(GL_ARRAY_BUFFER, mesh.normals.length * sizeof(Vector3), mesh.normals.data, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), nullptr);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(1);
+    }
+
+    {   // UV data
+        glGenBuffers(1, &mesh.tbo);
+        glBindBuffer(GL_ARRAY_BUFFER, mesh.tbo);
+        glBufferData(GL_ARRAY_BUFFER, mesh.uvs.length * sizeof(Vector2), mesh.uvs.data, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(2);
     }
 
     {   // Index data
@@ -205,6 +214,7 @@ internal Mesh load_model(const char *name) {
     allocate_array(mesh.verticies,  index_count);
     allocate_array(mesh.normals,    index_count);
     allocate_array(mesh.indicies,   index_count);
+    allocate_array(mesh.uvs,        index_count);
 
     // Indicies and normals
     for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
@@ -248,6 +258,16 @@ internal Mesh load_model(const char *name) {
 
                     mesh.normals.add(normal);
                 }
+
+                // UVs
+                if (idx.texcoord_index >= 0) {
+                    Vector2 uv = {};
+
+                    uv.x = data.texcoords[2 * (u64)idx.texcoord_index + 0];
+                    uv.y = data.texcoords[2 * (u64)idx.texcoord_index + 1];
+
+                    mesh.uvs.add(uv);
+                }
             }
 
             index_offset += fv;
@@ -258,6 +278,7 @@ internal Mesh load_model(const char *name) {
     printf("Mesh verticies:  %llu\n", mesh.verticies.length);
     printf("Mesh normals:    %llu\n", mesh.normals.length);
     printf("Mesh indicies:   %llu\n", mesh.indicies.length);
+    printf("Mesh uv:         %llu\n", mesh.uvs.length);
 
     bind_mesh_buffer_objects(mesh);
 

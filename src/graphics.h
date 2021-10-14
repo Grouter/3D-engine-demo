@@ -26,12 +26,14 @@ struct Mesh {
     u32 vbo;
     u32 nbo;
     u32 ebo;
+    u32 tbo;
 
     // Loaded data
     Array<SubMeshInfo> sub_meshes;
     Array<Vector3>     verticies;
     Array<Vector3>     normals;
     Array<u32>         indicies;
+    Array<Vector2>     uvs;
 };
 
 #endif
