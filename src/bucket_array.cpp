@@ -116,6 +116,8 @@ T* BucketArray<T>::get(BucketLocation location) {
     return result;
 }
 
+// @Speed: I don't like this iteration solution...
+// @Note: do macro for this
 template <typename T>
 void BucketArray<T>::for_each(void (*f)(T &e)) {
     for (u64 bucket = 0; bucket < this->buckets.length; bucket++) {
