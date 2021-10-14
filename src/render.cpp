@@ -82,8 +82,6 @@ internal int _draw_call_cmp(const void *a, const void *b) {
 }
 
 internal void flush_draw_calls() {
-    DrawCallData *data;
-
     u32 active_vao = UINT32_MAX;
 
     Material *material;
@@ -94,9 +92,8 @@ internal void flush_draw_calls() {
     // This will batch the draw calls
     qsort(draw_calls.data, draw_calls.length, sizeof(DrawCallData), _draw_call_cmp);
 
-    for (u32 i = 0; i < draw_calls.length; i++) {
-        data = &draw_calls.data[i];
-
+    DrawCallData *data;
+    array_foreach(draw_calls, data) {
         // VAO switching
         if (active_vao != data->mesh->vao) {
             active_vao = data->mesh->vao;

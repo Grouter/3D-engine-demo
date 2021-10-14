@@ -5,6 +5,8 @@
 
 #define free_array(a) {if ((a).data) { free((a).data); } }
 
+#define array_foreach(a, it) for ((it) = (a).data; ((it) - (a).data) < (i64)(a).length; (it)++)
+
 template <typename T>
 struct Array {
     u64 length;
