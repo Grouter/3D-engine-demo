@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <algorithm>    // @Todo: implement own sort
 #include <tiny_obj_loader.h>
+#include <stb_image.h>
 
 #include "platform.h"
 #include "opengl.cpp"
