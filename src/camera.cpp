@@ -17,7 +17,7 @@ internal Camera create_camera(u32 window_w, u32 window_h, f32 fov) {
     return camera;
 }
 
-internal void camera_update(Camera &camera, InputState &input_state) {
+internal void camera_update(Camera &camera) {
     if (camera.rotation.pitch > 89.0f)
         camera.rotation.pitch = 89.0f;
     else if (camera.rotation.pitch < -89.0f)

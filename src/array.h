@@ -13,15 +13,13 @@ struct Array {
 
     void reserve(u32 amount);
     void add(T item);
-
     // Adds an item without checking for a resize.
     void fast_add(T item);
-
-    void remove(u64 index);
     T* get(u64 index);
-
+    void remove(u64 index);
     // This will reorder the array!
     void fast_remove(u64 index);
+    void clear();
 };
 
 #endif

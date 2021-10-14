@@ -14,6 +14,11 @@ struct Program {
     u32 handle;
 };
 
+struct Material {
+    u32 texture;
+    Vector3 color;
+};
+
 struct SubMeshInfo {
     // @Todo: submesh material index
     u32 first_index;

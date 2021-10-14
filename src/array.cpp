@@ -48,6 +48,13 @@ void Array<T>::fast_add(T item) {
 }
 
 template <typename T>
+T* Array<T>::get(u64 index) {
+    assert(index < this->length);
+
+    return (this->data + index);
+}
+
+template <typename T>
 void Array<T>::remove(u64 index) {
     assert(index < this->length);
 
@@ -60,13 +67,6 @@ void Array<T>::remove(u64 index) {
         memmove(this->data + index, this->data + index + 1, sizeof(T) * right_part);
         this->length -= 1;
     }
-}
-
-template <typename T>
-T* Array<T>::get(u64 index) {
-    assert(index < this->length);
-
-    return (this->data + index);
 }
 
 template <typename T>
@@ -87,4 +87,9 @@ void Array<T>::fast_remove(u64 index) {
 
         this->length -= 1;
     }
+}
+
+template <typename T>
+void Array<T>::clear() {
+    this->length = 0;
 }

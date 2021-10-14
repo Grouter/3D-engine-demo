@@ -53,15 +53,14 @@ const u32 TARGET_ASPECT_H = 9;
 #include "math/matrix.cpp"
 #include "math/quaternion.h"
 #include "math/quaternion.cpp"
+
 #include "graphics.h"
-#include "graphics.cpp"
 #include "resources.h"
-#include "resources.cpp"
 #include "entity.h"
-#include "entity.cpp"
-#include "input.h"
 #include "camera.h"
-#include "camera.cpp"
+#include "input.h"
+#include "render.h"
+#include "game.h"
 
 struct Viewport {
     i32 left, bottom;
@@ -86,10 +85,16 @@ struct GameState {
 global GameState game_state;
 global InputState input_state;
 
+global Program *current_shader;
+
+global Array<DrawCallData> draw_calls;
+
+#include "graphics.cpp"
+#include "resources.cpp"
+#include "entity.cpp"
+#include "camera.cpp"
 #include "input.cpp"
-#include "render.h"
 #include "render.cpp"
-#include "game.h"
 #include "game.cpp"
 
 LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {
@@ -255,6 +260,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
     }
 #endif
 
+    init_renderer();
     init();
 
     MSG message = {};

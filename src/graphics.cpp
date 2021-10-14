@@ -120,56 +120,6 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
     glBindVertexArray(0);
 }
 
-internal Mesh create_cube(f32 size) {
-    f32 half_size = size / 2.0f;
-
-    Mesh mesh = {};
-
-    allocate_array(mesh.verticies, 8);
-
-    mesh.verticies.add(make_vector3(-half_size,  half_size, half_size));
-    mesh.verticies.add(make_vector3( half_size,  half_size, half_size));
-    mesh.verticies.add(make_vector3( half_size, -half_size, half_size));
-    mesh.verticies.add(make_vector3(-half_size, -half_size, half_size));
-    mesh.verticies.add(make_vector3(-half_size,  half_size, -half_size));
-    mesh.verticies.add(make_vector3( half_size,  half_size, -half_size));
-    mesh.verticies.add(make_vector3( half_size, -half_size, -half_size));
-    mesh.verticies.add(make_vector3(-half_size, -half_size, -half_size));
-
-    // This is hardcoded array initialization... we can do better
-    mesh.indicies.data = new u32[] {
-         // Front
-        1, 0, 3,
-        3, 2, 1,
-
-        // Left
-        5, 1, 2,
-        2, 6, 5,
-
-        // Back
-        4, 5, 6,
-        6, 7, 4,
-
-        // Right
-        0, 4, 7,
-        7, 3, 0,
-
-        // Top
-        5, 4, 0,
-        0, 1, 5,
-
-        // Bottom
-        2, 3, 7,
-        7, 6, 2,
-    };
-    mesh.indicies.length = 36;
-    mesh.indicies.capacity = 36;
-
-    bind_mesh_buffer_objects(mesh);
-
-    return mesh;
-}
-
 // @Todo: This mesh loading is wasting a lot of memory!
 // We allocate the same amount of verticies and normals as we have indicies.
 // I think some of the data is always duplicate (which wastes memory)...
@@ -216,7 +166,6 @@ internal Mesh load_model(const char *name) {
     allocate_array(mesh.indicies,   index_count);
     allocate_array(mesh.uvs,        index_count);
 
-    // Indicies and normals
     for (u64 shape_index = 0; shape_index < shapes.size(); shape_index++) {
         u64 index_offset = 0;
         sub_mesh = &shapes[shape_index].mesh;

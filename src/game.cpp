@@ -8,10 +8,28 @@ internal void init() {
     game_state.resources.meshes[0]   = load_model("monkey.obj");
     game_state.resources.meshes[1]   = load_model("cube.obj");
 
-    game_state.resources.textures[0] = load_texture("1.jpg");
-    game_state.resources.textures[1] = load_texture("2.png");
+    game_state.resources.textures[0] = create_white_texture();
+    game_state.resources.textures[1] = load_texture("1.jpg");
+    game_state.resources.textures[2] = load_texture("2.png");
 
-    // Send camera perspective to the shader uniform
+    {
+        Material m1;
+        m1.texture = game_state.resources.textures[0];
+        m1.color   = make_vector3(0.0f, 1.0f, 0.0f);
+
+        game_state.resources.materials[0] = m1;
+    }
+
+    {
+        Material m2;
+        m2.texture = game_state.resources.textures[2];
+        m2.color   = make_vector3(1.0f, 1.0f, 1.0f);
+
+        game_state.resources.materials[1] = m2;
+    }
+
+
+    // Send camera perspective to the shader uniform.
     {
         glUseProgram(game_state.resources.programs[0].handle);
         i32 p = glGetUniformLocation(game_state.resources.programs[0].handle, "projection");
@@ -25,14 +43,25 @@ internal void init() {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = &game_state.resources.meshes[0];
         e->program = &game_state.resources.programs[0];
+        e->material_index = 0;
     }
 
     {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = &game_state.resources.meshes[1];
         e->program = &game_state.resources.programs[0];
+        e->material_index = 1;
 
         e->position.x = 10.0f;
+    }
+
+    {
+        Entity *e = create_base_entity(game_state.entities);
+        e->mesh = &game_state.resources.meshes[1];
+        e->program = &game_state.resources.programs[0];
+        e->material_index = 1;
+
+        e->position.x = -10.0f;
     }
 }
 
@@ -42,25 +71,17 @@ internal void rotate_entity(Entity &entity) {
 }
 
 internal void tick() {
-    camera_update(game_state.camera, input_state);
+    camera_update(game_state.camera);
 
     game_state.entities.base_entities.for_each(rotate_entity);
 }
 
 internal void render() {
-    glUseProgram(game_state.resources.programs[0].handle);
+    set_shader(ShaderResource::Default);
 
-    {   // Update view uniform
-        i32 view_handle = glGetUniformLocation(game_state.resources.programs[0].handle, "view");
-        glUniformMatrix4fv(view_handle, 1, GL_FALSE, game_state.camera.transform.raw);
-    }
-
-    set_material_color(game_state.resources.programs[0], make_vector3(1.0f, 1.0f, 1.0f));
-
-    {
-        i32 texture_loc = glGetUniformLocation(game_state.resources.programs[0].handle, "diffuse_texture");
-        glUniform1i(texture_loc, 0);
-    }
+    set_shader_view(game_state.camera.transform);
 
     game_state.entities.base_entities.for_each(render_entity);
+
+    flush_draw_calls();
 }
