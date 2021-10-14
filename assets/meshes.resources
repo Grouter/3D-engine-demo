@@ -1,5 +1,6 @@
 ! monkey
 monkey.obj
-0: brick_material
+brick_material
+
 ! cube
 cube.obj
