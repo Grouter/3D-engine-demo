@@ -5,8 +5,10 @@ internal void init() {
 
     game_state.resources.programs[0] = load_program("shaders/default.glsl");
 
-    game_state.resources.meshes[0]   = load_model("monkey.obj");
-    game_state.resources.meshes[1]   = load_model("cube.obj");
+    allocate_array(game_state.resources.meshes, 5);
+    allocate_resource_catalog(game_state.resources.mesh_catalog, 5);
+    // game_state.resources.meshes.add(load_model("monkey.obj"));
+    // game_state.resources.meshes.add(load_model("cube.obj"));
 
     allocate_array(game_state.resources.textures, 5);
     allocate_resource_catalog(game_state.resources.texture_catalog, 5);
@@ -16,6 +18,7 @@ internal void init() {
     allocate_resource_catalog(game_state.resources.material_catalog, 5);
 
     load_material_file();
+    load_mesh_file();
 
     // Send camera perspective to the shader uniform.
     {
@@ -29,14 +32,14 @@ internal void init() {
 
     {
         Entity *e = create_base_entity(game_state.entities);
-        e->mesh = &game_state.resources.meshes[0];
+        e->mesh = get_mesh("monkey");
         e->program = &game_state.resources.programs[0];
         e->material_index = get_material_index("default");;
     }
 
     {
         Entity *e = create_base_entity(game_state.entities);
-        e->mesh = &game_state.resources.meshes[1];
+        e->mesh = get_mesh("cube");
         e->program = &game_state.resources.programs[0];
         e->material_index = get_material_index("restt");
 
@@ -45,7 +48,7 @@ internal void init() {
 
     {
         Entity *e = create_base_entity(game_state.entities);
-        e->mesh = &game_state.resources.meshes[1];
+        e->mesh = get_mesh("cube");
         e->program = &game_state.resources.programs[0];
         e->material_index = get_material_index("restt");
 

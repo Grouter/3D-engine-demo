@@ -1,6 +1,7 @@
 ! monkey
 monkey.obj
-brick_material
+default
 
 ! cube
 cube.obj
+restt

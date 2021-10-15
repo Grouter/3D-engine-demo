@@ -10,8 +10,8 @@ struct Resources {
     ResourceCatalog texture_catalog;
     ResourceCatalog material_catalog;
 
-    Mesh     meshes[2];
     Program  programs[1];
+    Array<Mesh>     meshes;
     Array<u32>      textures;
     Array<Material> materials;
 };

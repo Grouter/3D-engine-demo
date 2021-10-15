@@ -20,7 +20,7 @@ struct Material {
 };
 
 struct SubMeshInfo {
-    // @Todo: submesh material index
+    u64 material_index;
     u32 first_index;
     u32 index_count;
 };

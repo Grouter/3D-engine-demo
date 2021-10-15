@@ -1,3 +1,31 @@
+internal u64 get_material_index(const char *name) {
+    u64 index = catalog_get(game_state.resources.material_catalog, name);
+
+    assert(index != UINT64_MAX);
+
+    return index;
+}
+
+internal u32 get_texture(const char *name) {
+    u64 index = catalog_get(game_state.resources.texture_catalog, name);
+
+    assert(index != UINT64_MAX);
+
+    u32 texture = *game_state.resources.textures.get(index);
+
+    return texture;
+}
+
+internal Mesh *get_mesh(const char *name) {
+    u64 index = catalog_get(game_state.resources.mesh_catalog, name);
+
+    assert(index != UINT64_MAX);
+
+    Mesh *result = game_state.resources.meshes.get(index);
+
+    return result;
+}
+
 internal u32 load_texture(const char *image) {
     std::string path = "textures/";
     path.append(image);
@@ -71,22 +99,14 @@ internal u32 create_white_texture() {
     return texture;
 }
 
-internal u32 get_texture(const char *name) {
-    u64 index = catalog_get(game_state.resources.texture_catalog, name);
-
-    assert(index != UINT64_MAX);
-
-    u32 texture = *game_state.resources.textures.get(index);
-
-    return texture;
-}
-
 // @Todo: This mesh loading is wasting a lot of memory!
 // We allocate the same amount of verticies and normals as we have indicies.
 // I think some of the data is always duplicate (which wastes memory)...
 // We should actually backcheck if the vertex already exists and if not, only then add it.
-internal Mesh load_model(const char *name) {
+internal void load_model(const char *name, Mesh &mesh) {
     printf("Loading %s 3D model\n", name);
+
+    mesh = {};
 
     tinyobj::ObjReader reader;
 
@@ -118,8 +138,6 @@ internal Mesh load_model(const char *name) {
         u64 sub_mesh_indicies = sub_mesh->num_face_vertices.size() * 3;
         index_count += sub_mesh_indicies;
     }
-
-    Mesh mesh = {};
 
     allocate_array(mesh.sub_meshes, shapes.size());
     allocate_array(mesh.verticies,  index_count);
@@ -191,8 +209,104 @@ internal Mesh load_model(const char *name) {
     printf("Mesh uv:         %llu\n", mesh.uvs.length);
 
     bind_mesh_buffer_objects(mesh);
+}
 
-    return mesh;
+internal void load_mesh_file(const char *override_name = nullptr) {
+    const char *name = override_name ? override_name : "mesh.resources";
+
+    Resources *resources = &game_state.resources;
+
+    Array<char> buffer = {};
+    read_whole_file(name, buffer);
+
+    std::string mesh_name;
+    Mesh mesh = {};
+    u64 sub_mesh_index = 0;
+
+    std::string material_name;
+
+    char *walker = buffer.data;
+
+    while(walker[0] > 0) {
+        eat_whitespace(&walker);
+
+        if (walker[0] == 0)
+            break;
+
+        if (walker[0] == '#') {
+            eat_until(&walker, '\n');
+            continue;
+        }
+
+        if (walker[0] == '!') { // New mesh!
+
+            // We already parsed a mesh, save it!
+            if (mesh_name.length() != 0) {
+                printf("Loaded mesh: %s\n", mesh_name.c_str());
+
+                resources->meshes.add(mesh);
+
+                u64 mesh_index = resources->meshes.length - 1;
+
+                catalog_put(resources->mesh_catalog, mesh_name.c_str(), mesh_index);
+            }
+
+            mesh_name.clear();
+            mesh = {};
+            sub_mesh_index = 0;
+
+            walker++;   // Skip '!' char
+            eat_whitespace(&walker);
+
+            // Parse name
+            {
+                u64 mesh_name_len = word_length(walker);
+                mesh_name.append(walker, mesh_name_len);
+                walker += mesh_name_len;
+            }
+
+            eat_whitespace(&walker);
+
+            // Parse mesh file
+            {
+                u64 mesh_file_name_len = word_length(walker);
+                std::string mesh_file;
+                mesh_file.append(walker, mesh_file_name_len);
+
+                load_model(mesh_file.c_str(), mesh);
+                // @Todo: check if mesh is loaded!
+
+                walker += mesh_file_name_len;
+            }
+
+            continue;
+        }
+
+        u64 material_name_len = word_length(walker);
+        material_name.clear();
+        material_name.append(walker, material_name_len);
+
+        if (sub_mesh_index < mesh.sub_meshes.length) {
+            mesh.sub_meshes.data[sub_mesh_index].material_index = get_material_index(material_name.c_str());
+            sub_mesh_index += 1;
+        }
+        else {
+            printf("Too much materials for mesh: %s (skipping material %s)\n", mesh_name.c_str(), material_name.c_str());
+        }
+
+        walker += material_name_len;
+    }
+
+    // Save the last parsed mesh
+    {
+        printf("Loaded mesh: %s\n", mesh_name.c_str());
+
+        resources->meshes.add(mesh);
+
+        u64 mesh_index = resources->meshes.length - 1;
+
+        catalog_put(resources->mesh_catalog, mesh_name.c_str(), mesh_index);
+    }
 }
 
 internal void load_material_file(const char *override_name = nullptr) {
@@ -213,6 +327,11 @@ internal void load_material_file(const char *override_name = nullptr) {
 
         if (walker[0] == 0)
             break;
+
+        if (walker[0] == '#') {
+            eat_until(&walker, '\n');
+            continue;
+        }
 
         if (walker[0] == '!') { // New material!
 
@@ -288,12 +407,4 @@ internal void load_material_file(const char *override_name = nullptr) {
 
         catalog_put(resources->material_catalog, material_name.c_str(), material_index);
     }
-}
-
-internal u64 get_material_index(const char *name) {
-    u64 index = catalog_get(game_state.resources.material_catalog, name);
-
-    assert(index != UINT64_MAX);
-
-    return index;
 }
