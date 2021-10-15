@@ -53,6 +53,8 @@ const u32 TARGET_ASPECT_H = 9;
 #include "math/matrix.cpp"
 #include "math/quaternion.h"
 #include "math/quaternion.cpp"
+#include "catalog.h"
+#include "catalog.cpp"
 #include "parse_utils.cpp"
 
 #include "graphics.h"
