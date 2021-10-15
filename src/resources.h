@@ -6,7 +6,7 @@ struct ResourceCatalog {
 
     struct Entry {
         char  *key;
-        void  *data;
+        u64   index;
         Entry *next_in_hash;
     };
 
@@ -24,8 +24,8 @@ struct Resources {
 
     Mesh     meshes[2];
     Program  programs[1];
-    u32      textures[3];
-    Material materials[2];
+    Array<u32>      textures;
+    Array<Material> materials;
 };
 
 #endif

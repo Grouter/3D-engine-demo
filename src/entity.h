@@ -8,7 +8,7 @@ struct Entity {
     Vector3 rotation;   // Radians
     Vector3 scale;
 
-    u32 material_index;
+    u64 material_index;
 
     Program *program;
     Mesh *mesh;

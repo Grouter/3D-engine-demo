@@ -17,9 +17,9 @@
 #include <wglew.h>
 #include <gl/gl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
 #include <math.h>
 #include <cmath>
 #include <assert.h>
@@ -53,6 +53,7 @@ const u32 TARGET_ASPECT_H = 9;
 #include "math/matrix.cpp"
 #include "math/quaternion.h"
 #include "math/quaternion.cpp"
+#include "parse_utils.cpp"
 
 #include "graphics.h"
 #include "resources.h"

@@ -9,7 +9,7 @@ internal u64 _catalog_hash(const char *key) {
     return key[0] * 33 * _catalog_hash(key + 1);
 }
 
-internal void catalog_put(ResourceCatalog &catalog, const char *key, void *data_ptr) {
+internal void catalog_put(ResourceCatalog &catalog, const char *key, u64 index) {
     u64 hashed_index = _catalog_hash(key) % catalog.size;
     u64 key_size = strlen(key);
 
@@ -23,7 +23,7 @@ internal void catalog_put(ResourceCatalog &catalog, const char *key, void *data_
         entry->key = (char *)malloc((key_size + 1) * sizeof(char));
         strcpy_s(entry->key, key_size + 1, key);
 
-        entry->data = data_ptr;
+        entry->index = index;
         entry->next_in_hash = nullptr;
 
         return;
@@ -31,7 +31,7 @@ internal void catalog_put(ResourceCatalog &catalog, const char *key, void *data_
 
     while (1) {
         if (strcmp(entry->key, key) == 0) { // We just update the value.
-            entry->data = data_ptr;
+            entry->index = index;
             return;
         }
 
@@ -40,7 +40,7 @@ internal void catalog_put(ResourceCatalog &catalog, const char *key, void *data_
 
             new_entry->key = (char *)malloc((key_size + 1) * sizeof(char));
             strcpy_s(new_entry->key, key_size + 1, key);
-            new_entry->data = data_ptr;
+            new_entry->index = index;
             new_entry->next_in_hash = nullptr;
 
             entry->next_in_hash = new_entry;
@@ -91,7 +91,7 @@ internal void catalog_remove(ResourceCatalog &catalog, const char *key) {
     printf("Trying to remove unexistent entry (key: %s)\n", key);
 }
 
-internal void *catalog_get(ResourceCatalog &catalog, const char *key) {
+internal u64 catalog_get(ResourceCatalog &catalog, const char *key) {
     ResourceCatalog::Entry *walker;
 
     for (u64 i = 0; i < catalog.size; i++) {
@@ -99,14 +99,14 @@ internal void *catalog_get(ResourceCatalog &catalog, const char *key) {
 
         while(walker) {
             if (strcmp(walker->key, key) == 0) {
-                return walker->data;
+                return walker->index;
             }
 
             walker = walker->next_in_hash;
         }
     }
 
-    return nullptr;
+    return UINT64_MAX;
 }
 
 internal bool catalog_cointains(ResourceCatalog &catalog, const char *key) {
@@ -142,10 +142,9 @@ internal void catalog_dump(ResourceCatalog &catalog) {
     }
 }
 
-internal u32 load_texture(char *image) {
-
-    char path[] = "textures/";
-    strcat(path, image);
+internal u32 load_texture(const char *image) {
+    std::string path = "textures/";
+    path.append(image);
 
     u32 texture;
     glGenTextures(1, &texture);
@@ -159,7 +158,7 @@ internal u32 load_texture(char *image) {
     stbi_set_flip_vertically_on_load(true);
 
     i32 width, height, nr_channels;
-    u8 *data = stbi_load(path, &width, &height, &nr_channels, 0);
+    u8 *data = stbi_load(path.c_str(), &width, &height, &nr_channels, 0);
 
     if (data) {
         if (nr_channels == 3) {
@@ -180,6 +179,20 @@ internal u32 load_texture(char *image) {
 
     stbi_image_free(data);
 
+    if (catalog_cointains(game_state.resources.texture_catalog, image)) {
+        u32 *old_texture = (u32 *)catalog_get(game_state.resources.texture_catalog, image);
+        u64 old_texture_index = old_texture - game_state.resources.textures.data;
+
+        game_state.resources.textures.data[old_texture_index] = texture;
+    }
+    else {
+        game_state.resources.textures.add(texture);
+
+        u64 texture_index = game_state.resources.textures.length - 1;
+
+        catalog_put(game_state.resources.texture_catalog, image, texture_index);
+    }
+
     return texture;
 }
 
@@ -198,6 +211,16 @@ internal u32 create_white_texture() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     glGenerateMipmap(GL_TEXTURE_2D);
+
+    return texture;
+}
+
+internal u32 get_texture(const char *name) {
+    u64 index = catalog_get(game_state.resources.texture_catalog, name);
+
+    assert(index != UINT64_MAX);
+
+    u32 texture = *game_state.resources.textures.get(index);
 
     return texture;
 }
@@ -314,4 +337,107 @@ internal Mesh load_model(const char *name) {
     bind_mesh_buffer_objects(mesh);
 
     return mesh;
+}
+
+internal void load_material_file(const char *override_name = nullptr) {
+    const char *name = override_name ? override_name : "material.resources";
+
+    Resources *resources = &game_state.resources;
+
+    Array<char> buffer = {};
+    read_whole_file(name, buffer);
+
+    std::string material_name;
+    Material material = {};
+
+    char *walker = buffer.data;
+
+    while(walker[0] > 0) {
+        eat_whitespace(&walker);
+
+        if (walker[0] == 0)
+            break;
+
+        if (walker[0] == '!') { // New material!
+
+            // We already parsed a material, save it!
+            if (material_name.length() != 0) {
+                printf("Loaded material: %s\n", material_name.c_str());
+
+                resources->materials.add(material);
+
+                u64 material_index = resources->materials.length - 1;
+
+                catalog_put(resources->material_catalog, material_name.c_str(), material_index);
+            }
+
+            material_name.clear();
+
+            walker++;   // Skip '!' char
+            eat_whitespace(&walker);
+
+            u64 material_name_len = word_length(walker);
+            material_name.append(walker, material_name_len);
+
+            material = {};
+            material.texture = resources->textures.data[0]; // Default texture;
+
+            walker += material_name_len;
+
+            continue;
+        }
+
+        u64 attr_name_len = find(walker, ':');
+
+        if (strncmp(walker, "color", attr_name_len) == 0) {
+            walker += attr_name_len + 1;
+            eat_whitespace(&walker);
+
+            sscanf(walker, "%f %f %f", &material.color.x, &material.color.y, &material.color.z);
+
+            eat_until(&walker, '\n');
+        }
+        else if (strncmp(walker, "texture", attr_name_len) == 0) {
+            walker += attr_name_len + 1;
+            eat_whitespace(&walker);
+
+            u64 texture_name_len = word_length(walker);
+
+            std::string texture_name;
+
+            texture_name.append(walker, texture_name_len);
+
+            u32 texture;
+
+            if (catalog_cointains(game_state.resources.texture_catalog, texture_name.c_str())) {
+                texture = get_texture(texture_name.c_str());
+            }
+            else {
+                texture = load_texture(texture_name.c_str());
+            }
+
+            material.texture = texture;
+
+            eat_until(&walker, '\n');
+        }
+    }
+
+    // Save the last parsed material
+    {
+        printf("Loaded material: %s\n", material_name.c_str());
+
+        resources->materials.add(material);
+
+        u64 material_index = resources->materials.length - 1;
+
+        catalog_put(resources->material_catalog, material_name.c_str(), material_index);
+    }
+}
+
+internal u64 get_material_index(const char *name) {
+    u64 index = catalog_get(game_state.resources.material_catalog, name);
+
+    assert(index != UINT64_MAX);
+
+    return index;
 }

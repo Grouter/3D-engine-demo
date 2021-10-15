@@ -8,26 +8,14 @@ internal void init() {
     game_state.resources.meshes[0]   = load_model("monkey.obj");
     game_state.resources.meshes[1]   = load_model("cube.obj");
 
-    game_state.resources.textures[0] = create_white_texture();
-    game_state.resources.textures[1] = load_texture("1.jpg");
-    game_state.resources.textures[2] = load_texture("2.png");
+    allocate_array(game_state.resources.textures, 5);
+    allocate_resource_catalog(game_state.resources.texture_catalog, 5);
+    game_state.resources.textures.add(create_white_texture());
 
-    {
-        Material m1;
-        m1.texture = game_state.resources.textures[0];
-        m1.color   = make_vector3(0.0f, 1.0f, 0.0f);
+    allocate_array(game_state.resources.materials, 5);
+    allocate_resource_catalog(game_state.resources.material_catalog, 5);
 
-        game_state.resources.materials[0] = m1;
-    }
-
-    {
-        Material m2;
-        m2.texture = game_state.resources.textures[2];
-        m2.color   = make_vector3(1.0f, 1.0f, 1.0f);
-
-        game_state.resources.materials[1] = m2;
-    }
-
+    load_material_file();
 
     // Send camera perspective to the shader uniform.
     {
@@ -43,14 +31,14 @@ internal void init() {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = &game_state.resources.meshes[0];
         e->program = &game_state.resources.programs[0];
-        e->material_index = 0;
+        e->material_index = get_material_index("default");;
     }
 
     {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = &game_state.resources.meshes[1];
         e->program = &game_state.resources.programs[0];
-        e->material_index = 1;
+        e->material_index = get_material_index("restt");
 
         e->position.x = 10.0f;
     }
@@ -59,7 +47,7 @@ internal void init() {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = &game_state.resources.meshes[1];
         e->program = &game_state.resources.programs[0];
-        e->material_index = 1;
+        e->material_index = get_material_index("restt");
 
         e->position.x = -10.0f;
     }

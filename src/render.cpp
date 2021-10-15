@@ -85,7 +85,7 @@ internal void flush_draw_calls() {
     u32 active_vao = UINT32_MAX;
 
     Material *material;
-    u32 active_material_index = UINT32_MAX;
+    u64 active_material_index = UINT64_MAX;
 
     u32 active_texture = UINT32_MAX;
 
@@ -102,12 +102,12 @@ internal void flush_draw_calls() {
 
         // Material switching
         {
-            u32 material_index = (u32)(data->flags >> RenderDataFlagBits::ShaderBits);
-            material_index &= ~(UINT32_MAX << RenderDataFlagBits::MaterialBits);
+            u64 material_index = (u64)(data->flags >> RenderDataFlagBits::ShaderBits);
+            material_index &= ~(UINT64_MAX << RenderDataFlagBits::MaterialBits);
 
             if (active_material_index != material_index) {
                 active_material_index = material_index;
-                material = &game_state.resources.materials[material_index];
+                material = game_state.resources.materials.get(material_index);
 
                 set_material_color(material->color);
 
