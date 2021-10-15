@@ -18,4 +18,15 @@ typedef double   f64;
 #define global static
 #define internal static
 
+internal void log_print(const char* format, ...) {
+    static char print_buffer[1024];
+
+    va_list args;
+    va_start(args, format);
+    _vsnprintf(print_buffer, 1024, format, args);
+    va_end(args);
+
+    OutputDebugStringA(print_buffer);
+}
+
 #endif

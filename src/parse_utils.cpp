@@ -2,7 +2,7 @@ internal void read_whole_file(const char *name, Array<char> &buffer) {
     FILE *f = fopen(name, "r");
 
     if (!f) {
-        printf("Error opening file: %s\n", name);
+        log_print("Error opening file: %s\n", name);
         exit(1);
     }
 

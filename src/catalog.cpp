@@ -58,7 +58,7 @@ internal void catalog_remove(ResourceCatalog &catalog, const char *key) {
     ResourceCatalog::Entry *walker = catalog.entries[hashed_index];
 
     if (walker == nullptr) {
-        printf("Trying to remove unexistent entry (key: %s)\n", key);
+        log_print("Trying to remove unexistent entry (key: %s)\n", key);
         return;
     }
 
@@ -88,7 +88,7 @@ internal void catalog_remove(ResourceCatalog &catalog, const char *key) {
         walker = walker->next_in_hash;
     }
 
-    printf("Trying to remove unexistent entry (key: %s)\n", key);
+    log_print("Trying to remove unexistent entry (key: %s)\n", key);
 }
 
 internal u64 catalog_get(ResourceCatalog &catalog, const char *key) {
@@ -131,13 +131,13 @@ internal void catalog_dump(ResourceCatalog &catalog) {
     for (u64 i = 0; i < catalog.size; i++) {
         ResourceCatalog::Entry *walker = catalog.entries[i];
 
-        printf("[%llu] o-> ", i);
+        log_print("[%llu] o-> ", i);
 
         while(walker) {
-            printf("%s o-> ", walker->key);
+            log_print("%s o-> ", walker->key);
             walker = walker->next_in_hash;
         }
 
-        printf("\n");
+        log_print("\n");
     }
 }

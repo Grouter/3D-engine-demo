@@ -3,7 +3,7 @@
 #if defined(RELEASE_MODE)
     #define NDEBUG
 #else
-    #define DEBUG_CONSOLE
+
 #endif
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -250,18 +250,6 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
     ShowWindow(window, show_code);
     UpdateWindow(window);
-
-#if defined(DEBUG_CONSOLE)
-    {
-        bool console = AllocConsole();
-        if (console) {
-            freopen("CONOUT$", "w", stdout);
-        }
-        else {
-            OutputDebugStringA("Failed to open a debug console\n");
-        }
-    }
-#endif
 
     init_renderer();
     init();

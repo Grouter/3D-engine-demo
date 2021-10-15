@@ -5,7 +5,7 @@
     glGetShaderiv(handle, GL_COMPILE_STATUS, &status);\
     if (!status) {\
         glGetShaderInfoLog(handle, log_size, NULL, log);\
-        printf("%s shader compilation failed:\n%s\n", log_type, log);\
+        log_print("%s shader compilation failed:\n%s\n", log_type, log);\
         exit(1);\
     }\
 }

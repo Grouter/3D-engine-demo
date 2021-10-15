@@ -22,7 +22,7 @@ internal void init_gl_extensions() {
 
     HDC fake_DC = GetDC(fake_window);
     if (!fake_DC) {
-        printf("Create a fake window!\n");
+        log_print("Create a fake window!\n");
         exit(1);
     }
 
@@ -37,29 +37,29 @@ internal void init_gl_extensions() {
 
     int fake_PFD_ID = ChoosePixelFormat(fake_DC, &fake_PFD);
     if (!fake_PFD_ID) {
-        printf("Could not choos a fake pixel format!\n");
+        log_print("Could not choos a fake pixel format!\n");
         exit(1);
     }
 
     if (!SetPixelFormat(fake_DC, fake_PFD_ID, &fake_PFD)) {
-        printf("Could not set a fake pixel format!\n");
+        log_print("Could not set a fake pixel format!\n");
         exit(1);
     }
 
     HGLRC fake_RC = wglCreateContext(fake_DC);
     if (!fake_RC) {
-        printf("Could create a fake gl render context!\n");
+        log_print("Could create a fake gl render context!\n");
         exit(1);
     }
 
     if (!wglMakeCurrent(fake_DC, fake_RC)) {
-        printf("Could not set a fake render context!\n");
+        log_print("Could not set a fake render context!\n");
         exit(1);
     }
 
     GLenum glew_state = glewInit();
     if (glew_state != GLEW_OK) {
-        printf("Error while initializing GL extensions!\n");
+        log_print("Error while initializing GL extensions!\n");
         exit(1);
     }
 
@@ -90,7 +90,7 @@ internal HGLRC create_gl_context(HDC window_context) {
 
     bool status = wglChoosePixelFormatARB(window_context, pixel_attribs, 0, 1, &pixel_format_ID, &num_formats);
     if (!status || num_formats == 0) {
-        printf("GL could not choose a pixel format!\n");
+        log_print("GL could not choose a pixel format!\n");
         exit(1);
     }
 
@@ -107,12 +107,12 @@ internal HGLRC create_gl_context(HDC window_context) {
 
     HGLRC gl_render_context = wglCreateContextAttribsARB(window_context, NULL, context_attribs);
     if (gl_render_context == NULL) {
-        printf("OpenGL render context could not be created!\n");
+        log_print("OpenGL render context could not be created!\n");
         exit(1);
     }
 
     if (!wglMakeCurrent(window_context, gl_render_context)) {
-        printf("Could not set opengl render context to window context\n");
+        log_print("Could not set opengl render context to window context\n");
         exit(1);
     }
 

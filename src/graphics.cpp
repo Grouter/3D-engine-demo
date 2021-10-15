@@ -6,11 +6,11 @@ internal Program load_program(const char *name) {
     errno_t open_err = fopen_s(&shader_file, name, "r");
 
     if(open_err) {
-        printf("Error opening a shader file: %s\n", name);
+        log_print("Error opening a shader file: %s\n", name);
         exit(1);
     }
     else {
-        printf("Loaded shader: %s\n", name);
+        log_print("Loaded shader: %s\n", name);
     }
 
     char *shader_source;

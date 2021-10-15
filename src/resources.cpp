@@ -52,13 +52,13 @@ internal u32 load_texture(const char *image) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         }
         else {
-            printf("Unsupported texture channels number\n");
+            log_print("Unsupported texture channels number\n");
         }
 
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else {
-        printf("Error loading texture.\n");
+        log_print("Error loading texture.\n");
     }
 
     stbi_image_free(data);
@@ -104,7 +104,7 @@ internal u32 create_white_texture() {
 // I think some of the data is always duplicate (which wastes memory)...
 // We should actually backcheck if the vertex already exists and if not, only then add it.
 internal void load_model(const char *name, Mesh &mesh) {
-    printf("Loading %s 3D model\n", name);
+    log_print("Loading %s 3D model\n", name);
 
     mesh = {};
 
@@ -112,14 +112,14 @@ internal void load_model(const char *name, Mesh &mesh) {
 
     bool result = reader.ParseFromFile(name);
     if (!result) {
-        printf("Error loading %s 3D model file\n", name);
+        log_print("Error loading %s 3D model file\n", name);
         if (!reader.Error().empty()) {
-            printf(reader.Error().c_str());
+            log_print(reader.Error().c_str());
         }
     }
 
     if (!reader.Warning().empty()) {
-        printf(reader.Warning().c_str());
+        log_print(reader.Warning().c_str());
     }
 
     tinyobj::attrib_t              data   = reader.GetAttrib();
@@ -202,11 +202,11 @@ internal void load_model(const char *name, Mesh &mesh) {
         }
     }
 
-    printf("Mesh sub meshes: %llu\n", mesh.sub_meshes.length);
-    printf("Mesh verticies:  %llu\n", mesh.verticies.length);
-    printf("Mesh normals:    %llu\n", mesh.normals.length);
-    printf("Mesh indicies:   %llu\n", mesh.indicies.length);
-    printf("Mesh uv:         %llu\n", mesh.uvs.length);
+    log_print("Mesh sub meshes: %llu\n", mesh.sub_meshes.length);
+    log_print("Mesh verticies:  %llu\n", mesh.verticies.length);
+    log_print("Mesh normals:    %llu\n", mesh.normals.length);
+    log_print("Mesh indicies:   %llu\n", mesh.indicies.length);
+    log_print("Mesh uv:         %llu\n", mesh.uvs.length);
 
     bind_mesh_buffer_objects(mesh);
 }
@@ -242,7 +242,7 @@ internal void load_mesh_file(const char *override_name = nullptr) {
 
             // We already parsed a mesh, save it!
             if (mesh_name.length() != 0) {
-                printf("Loaded mesh: %s\n", mesh_name.c_str());
+                log_print("Loaded mesh: %s\n", mesh_name.c_str());
 
                 resources->meshes.add(mesh);
 
@@ -291,7 +291,7 @@ internal void load_mesh_file(const char *override_name = nullptr) {
             sub_mesh_index += 1;
         }
         else {
-            printf("Too much materials for mesh: %s (skipping material %s)\n", mesh_name.c_str(), material_name.c_str());
+            log_print("Too much materials for mesh: %s (skipping material %s)\n", mesh_name.c_str(), material_name.c_str());
         }
 
         walker += material_name_len;
@@ -299,7 +299,7 @@ internal void load_mesh_file(const char *override_name = nullptr) {
 
     // Save the last parsed mesh
     {
-        printf("Loaded mesh: %s\n", mesh_name.c_str());
+        log_print("Loaded mesh: %s\n", mesh_name.c_str());
 
         resources->meshes.add(mesh);
 
@@ -337,7 +337,7 @@ internal void load_material_file(const char *override_name = nullptr) {
 
             // We already parsed a material, save it!
             if (material_name.length() != 0) {
-                printf("Loaded material: %s\n", material_name.c_str());
+                log_print("Loaded material: %s\n", material_name.c_str());
 
                 resources->materials.add(material);
 
@@ -399,7 +399,7 @@ internal void load_material_file(const char *override_name = nullptr) {
 
     // Save the last parsed material
     {
-        printf("Loaded material: %s\n", material_name.c_str());
+        log_print("Loaded material: %s\n", material_name.c_str());
 
         resources->materials.add(material);
 

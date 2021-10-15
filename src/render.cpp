@@ -20,7 +20,7 @@ internal void set_shader_diffuse_texture(u32 texture_handle) {
         glUniform1i(loc, 0);
     }
     else {
-        printf("Shader set diffuse texture loc error!\n");
+        log_print("Shader set diffuse texture loc error!\n");
     }
 }
 
@@ -31,7 +31,7 @@ internal void set_shader_view(Matrix4x4 view) {
         glUniformMatrix4fv(loc, 1, GL_FALSE, game_state.camera.transform.raw);
     }
     else {
-        printf("Shader set view loc error!\n");
+        log_print("Shader set view loc error!\n");
     }
 }
 
@@ -42,7 +42,7 @@ internal void set_material_color(Vector3 color) {
         glUniform3f(loc, color.r, color.g, color.b);
     }
     else {
-        printf("Shader set material_color loc error!\n");
+        log_print("Shader set material_color loc error!\n");
     }
 }
 
