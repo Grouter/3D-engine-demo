@@ -1,4 +1,148 @@
-u32 load_texture(char *image) {
+internal void allocate_resource_catalog(ResourceCatalog &catalog, u64 size) {
+    catalog.size = size;
+    catalog.entries = (ResourceCatalog::Entry **)calloc(size, sizeof(ResourceCatalog::Entry *));
+}
+
+internal u64 _catalog_hash(const char *key) {
+    if (!key || !key[0]) return 1;
+
+    return key[0] * 33 * _catalog_hash(key + 1);
+}
+
+internal void catalog_put(ResourceCatalog &catalog, const char *key, void *data_ptr) {
+    u64 hashed_index = _catalog_hash(key) % catalog.size;
+    u64 key_size = strlen(key);
+
+    ResourceCatalog::Entry *entry = catalog.entries[hashed_index];
+
+    if (entry == nullptr) {
+        catalog.entries[hashed_index] = (ResourceCatalog::Entry *)malloc(sizeof(ResourceCatalog::Entry));
+
+        entry = catalog.entries[hashed_index];
+
+        entry->key = (char *)malloc((key_size + 1) * sizeof(char));
+        strcpy_s(entry->key, key_size + 1, key);
+
+        entry->data = data_ptr;
+        entry->next_in_hash = nullptr;
+
+        return;
+    }
+
+    while (1) {
+        if (strcmp(entry->key, key) == 0) { // We just update the value.
+            entry->data = data_ptr;
+            return;
+        }
+
+        if (entry->next_in_hash == nullptr) {   // We found the last one!
+            ResourceCatalog::Entry *new_entry = (ResourceCatalog::Entry *)malloc(sizeof(ResourceCatalog::Entry));
+
+            new_entry->key = (char *)malloc((key_size + 1) * sizeof(char));
+            strcpy_s(new_entry->key, key_size + 1, key);
+            new_entry->data = data_ptr;
+            new_entry->next_in_hash = nullptr;
+
+            entry->next_in_hash = new_entry;
+
+            return;
+        }
+
+        entry = entry->next_in_hash;
+    }
+}
+
+internal void catalog_remove(ResourceCatalog &catalog, const char *key) {
+    u64 hashed_index = _catalog_hash(key) % catalog.size;
+
+    ResourceCatalog::Entry *walker = catalog.entries[hashed_index];
+
+    if (walker == nullptr) {
+        printf("Trying to remove unexistent entry (key: %s)\n", key);
+        return;
+    }
+
+    if (strcmp(walker->key, key) == 0) {    // Removing the first entry
+        catalog.entries[hashed_index] = catalog.entries[hashed_index]->next_in_hash;
+
+        free(walker->key);
+        free(walker);
+
+        return;
+    }
+
+    ResourceCatalog::Entry *prev = walker;
+    walker = walker->next_in_hash;
+
+    while (walker) {
+        if (strcmp(walker->key, key) == 0) {    // Remove!
+            prev->next_in_hash = walker->next_in_hash;
+
+            free(walker->key);
+            free(walker);
+
+            return;
+        }
+
+        prev = walker;
+        walker = walker->next_in_hash;
+    }
+
+    printf("Trying to remove unexistent entry (key: %s)\n", key);
+}
+
+internal void *catalog_get(ResourceCatalog &catalog, const char *key) {
+    ResourceCatalog::Entry *walker;
+
+    for (u64 i = 0; i < catalog.size; i++) {
+        walker = catalog.entries[i];
+
+        while(walker) {
+            if (strcmp(walker->key, key) == 0) {
+                return walker->data;
+            }
+
+            walker = walker->next_in_hash;
+        }
+    }
+
+    return nullptr;
+}
+
+internal bool catalog_cointains(ResourceCatalog &catalog, const char *key) {
+    ResourceCatalog::Entry *walker;
+
+    for (u64 i = 0; i < catalog.size; i++) {
+        walker = catalog.entries[i];
+
+        while(walker) {
+            if (strcmp(walker->key, key) == 0) {
+                return true;
+            }
+
+            walker = walker->next_in_hash;
+        }
+    }
+
+    return false;
+}
+
+internal void catalog_dump(ResourceCatalog &catalog) {
+    for (u64 i = 0; i < catalog.size; i++) {
+        ResourceCatalog::Entry *walker = catalog.entries[i];
+
+        printf("[%llu] o-> ", i);
+
+        while(walker) {
+            printf("%s o-> ", walker->key);
+            walker = walker->next_in_hash;
+        }
+
+        printf("\n");
+    }
+}
+
+internal u32 load_texture(char *image) {
 
     char path[] = "textures/";
     strcat(path, image);
@@ -39,7 +183,7 @@ u32 load_texture(char *image) {
     return texture;
 }
 
-u32 create_white_texture() {
+internal u32 create_white_texture() {
     u32 texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
