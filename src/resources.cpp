@@ -1,7 +1,10 @@
 internal u64 get_material_index(const char *name) {
     u64 index = catalog_get(game_state.resources.material_catalog, name);
 
-    assert(index != UINT64_MAX);
+    if (index == UINT64_MAX) {
+        printf("Couldn't find a material with name: %s\n", name);
+        index = 0;   // Set to default material
+    }
 
     return index;
 }
@@ -9,9 +12,12 @@ internal u64 get_material_index(const char *name) {
 internal u32 get_texture(const char *name) {
     u64 index = catalog_get(game_state.resources.texture_catalog, name);
 
-    assert(index != UINT64_MAX);
+    if (index == UINT64_MAX) {
+        printf("Couldn't find a texture with name: %s\n", name);
+        index = 0;  // Set to white texture
+    }
 
-    u32 texture = *game_state.resources.textures.get(index);
+    u32 texture = game_state.resources.textures.data[index];
 
     return texture;
 }
@@ -19,7 +25,10 @@ internal u32 get_texture(const char *name) {
 internal Mesh *get_mesh(const char *name) {
     u64 index = catalog_get(game_state.resources.mesh_catalog, name);
 
-    assert(index != UINT64_MAX);
+    if (index == UINT64_MAX) {
+        printf("Couldn't find a mesh with name: %s\n", name);
+        return nullptr;
+    }
 
     Mesh *result = game_state.resources.meshes.get(index);
 
@@ -407,4 +416,35 @@ internal void load_material_file(const char *override_name = nullptr) {
 
         catalog_put(resources->material_catalog, material_name.c_str(), material_index);
     }
+}
+
+internal void init_resources(Resources &resources) {
+    resources.programs[0] = load_program("shaders/default.glsl");
+
+    // Meshes
+    allocate_array(resources.meshes, 50);
+    allocate_resource_catalog(resources.mesh_catalog, 50);
+
+    // Textures
+    allocate_array(resources.textures, 50);
+    allocate_resource_catalog(resources.texture_catalog, 50);
+    resources.textures.add(create_white_texture());
+
+    // Materials
+    allocate_array(resources.materials, 50);
+    allocate_resource_catalog(resources.material_catalog, 50);
+
+    // Default material (always first in the materials list)
+    {
+        Material default_mat = {};
+
+        default_mat.color = make_vector3(1.0f, 1.0f, 1.0f);
+        default_mat.texture = resources.textures.data[0];
+
+        resources.materials.add(default_mat);
+        catalog_put(resources.material_catalog, "default", 0);
+    }
+
+    // @Todo: Error material? This material would be returned
+    // when user tries to find a non-existing material.
 }

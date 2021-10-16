@@ -47,13 +47,16 @@ internal void set_material_color(Vector3 color) {
 }
 
 internal void render_entity(Entity &entity) {
+    Mesh *mesh = entity.mesh;
+    if (mesh == nullptr) {
+        return;
+    }
+
     Matrix4x4 transform = identity();
     translate(transform, entity.position.x, entity.position.y, entity.position.z);
 
     // @Todo: quaternions here!
     rotate(transform, entity.rotation.x, entity.rotation.y, entity.rotation.z);
-
-    Mesh *mesh = entity.mesh;
 
     for (u32 i = 0; i < mesh->sub_meshes.length; i++) {
         DrawCallData data;

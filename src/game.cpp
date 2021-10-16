@@ -3,20 +3,7 @@ internal void init() {
     game_state.camera.rotation.yaw = 90.0f;
     game_state.camera.position.z = 10.0f;
 
-    game_state.resources.programs[0] = load_program("shaders/default.glsl");
-
-    allocate_array(game_state.resources.meshes, 5);
-    allocate_resource_catalog(game_state.resources.mesh_catalog, 5);
-    // game_state.resources.meshes.add(load_model("monkey.obj"));
-    // game_state.resources.meshes.add(load_model("cube.obj"));
-
-    allocate_array(game_state.resources.textures, 5);
-    allocate_resource_catalog(game_state.resources.texture_catalog, 5);
-    game_state.resources.textures.add(create_white_texture());
-
-    allocate_array(game_state.resources.materials, 5);
-    allocate_resource_catalog(game_state.resources.material_catalog, 5);
-
+    init_resources(game_state.resources);
     load_material_file();
     load_mesh_file();
 
