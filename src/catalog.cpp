@@ -141,3 +141,23 @@ internal void catalog_dump(ResourceCatalog &catalog) {
         log_print("\n");
     }
 }
+
+internal void catalog_clear(ResourceCatalog &catalog) {
+    ResourceCatalog::Entry *walker;
+    ResourceCatalog::Entry *next_in_hash;
+
+    for (u64 i = 0; i < catalog.size; i++) {
+        walker = catalog.entries[i];
+
+        while(walker) {
+            next_in_hash = walker->next_in_hash;
+
+            free(walker->key);
+            free(walker);
+
+            walker = next_in_hash;
+        }
+
+        catalog.entries[i] = nullptr;
+    }
+}

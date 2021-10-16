@@ -428,7 +428,12 @@ internal void init_resources(Resources &resources) {
     // Textures
     allocate_array(resources.textures, 50);
     allocate_resource_catalog(resources.texture_catalog, 50);
-    resources.textures.add(create_white_texture());
+
+    // Default white texture
+    {
+        resources.textures.add(create_white_texture());
+        catalog_put(game_state.resources.texture_catalog, "white", 0);
+    }
 
     // Materials
     allocate_array(resources.materials, 50);
@@ -447,4 +452,47 @@ internal void init_resources(Resources &resources) {
 
     // @Todo: Error material? This material would be returned
     // when user tries to find a non-existing material.
+}
+
+internal void unload_meshes() {
+    Mesh *it;
+
+    array_foreach(game_state.resources.meshes, it) {
+        glDeleteBuffers(1, &it->vao);
+        glDeleteBuffers(1, &it->vbo);
+        glDeleteBuffers(1, &it->nbo);
+        glDeleteBuffers(1, &it->ebo);
+        glDeleteBuffers(1, &it->tbo);
+
+        free_array(it->sub_meshes);
+
+        free_array(it->verticies);
+        free_array(it->indicies);
+        free_array(it->normals);
+        free_array(it->uvs);
+    }
+
+    game_state.resources.meshes.clear();
+    catalog_clear(game_state.resources.mesh_catalog);
+}
+
+// Unloads all texture except the first default one!
+internal void unload_textures() {
+    for (u64 i = 0; i < game_state.resources.textures.length; i++) {
+        glDeleteTextures(1, &game_state.resources.textures.data[i]);
+    }
+
+    game_state.resources.textures.clear();
+    game_state.resources.textures.length = 1;   // This will keep the first white texture
+
+    catalog_clear(game_state.resources.texture_catalog);
+    catalog_put(game_state.resources.texture_catalog, "white", 0);
+}
+
+internal void unload_materials() {
+    game_state.resources.materials.clear();
+    game_state.resources.materials.length = 1;  // Keep the first default material
+
+    catalog_clear(game_state.resources.material_catalog);
+    catalog_put(game_state.resources.material_catalog, "default", 0);
 }
