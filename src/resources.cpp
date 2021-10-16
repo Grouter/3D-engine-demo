@@ -2,7 +2,7 @@ internal u64 get_material_index(const char *name) {
     u64 index = catalog_get(game_state.resources.material_catalog, name);
 
     if (index == UINT64_MAX) {
-        printf("Couldn't find a material with name: %s\n", name);
+        log_print("Couldn't find a material with name: %s\n", name);
         index = 0;   // Set to default material
     }
 
@@ -13,7 +13,7 @@ internal u32 get_texture(const char *name) {
     u64 index = catalog_get(game_state.resources.texture_catalog, name);
 
     if (index == UINT64_MAX) {
-        printf("Couldn't find a texture with name: %s\n", name);
+        log_print("Couldn't find a texture with name: %s\n", name);
         index = 0;  // Set to white texture
     }
 
@@ -26,7 +26,7 @@ internal Mesh *get_mesh(const char *name) {
     u64 index = catalog_get(game_state.resources.mesh_catalog, name);
 
     if (index == UINT64_MAX) {
-        printf("Couldn't find a mesh with name: %s\n", name);
+        log_print("Couldn't find a mesh with name: %s\n", name);
         return nullptr;
     }
 

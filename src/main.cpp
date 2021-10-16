@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <thread>
 #include <math.h>
 #include <cmath>
 #include <assert.h>
@@ -56,6 +57,8 @@ const u32 TARGET_ASPECT_H = 9;
 #include "catalog.h"
 #include "catalog.cpp"
 #include "parse_utils.cpp"
+#include "hotload.h"
+#include "hotload.cpp"
 
 #include "graphics.h"
 #include "resources.h"
@@ -253,6 +256,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
     init_renderer();
     init();
+
+    // std::thread hotload_thread(hotload_watcher);
 
     MSG message = {};
 
