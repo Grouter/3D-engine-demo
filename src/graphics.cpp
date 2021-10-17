@@ -1,31 +1,11 @@
-internal Program load_program(const char *name) {
-    Program program;
+internal bool load_program(const char *path, Program &shader) {
+    Array<char> shader_source;
 
-    FILE *shader_file;
+    bool success = read_whole_file(path, shader_source);
 
-    errno_t open_err = fopen_s(&shader_file, name, "r");
-
-    if(open_err) {
-        log_print("Error opening a shader file: %s\n", name);
-        exit(1);
+    if (!success) {
+        return false;
     }
-    else {
-        log_print("Loaded shader: %s\n", name);
-    }
-
-    char *shader_source;
-    u64   shader_file_bytes;
-
-    {   // Allocate enough bytes for reading the shader file
-        fseek(shader_file, 0, SEEK_END);
-        shader_file_bytes = ftell(shader_file);
-        rewind(shader_file);
-
-        shader_source = (char *)calloc(shader_file_bytes, sizeof(char));
-    }
-
-    fread(shader_source, sizeof(char), shader_file_bytes, shader_file);
-    fclose(shader_file);
 
     i32  compile_status;
     char compile_log[512];
@@ -39,13 +19,19 @@ internal Program load_program(const char *name) {
         char *vertex_strings[3] = {
             "#version 330\n",
             "#define VERTEX\n",
-            shader_source
+            shader_source.data
         };
 
         glShaderSource(vertex_handle, 3, vertex_strings, NULL);
         glCompileShader(vertex_handle);
 
         SHADER_COMPILATION_CHECK(vertex_handle, compile_status, compile_log, 512, "Vertex");
+
+        if (!compile_status) {
+            glDeleteShader(vertex_handle);
+            free_array(shader_source);
+            return false;
+        }
     }
 
     {   // Compile the fragment part
@@ -54,27 +40,61 @@ internal Program load_program(const char *name) {
         char *fragment_strings[3] = {
             "#version 330\n",
             "#define FRAGMENT\n",
-            shader_source
+            shader_source.data
         };
 
         glShaderSource(fragment_handle, 3, fragment_strings, NULL);
         glCompileShader(fragment_handle);
 
         SHADER_COMPILATION_CHECK(fragment_handle, compile_status, compile_log, 512, "Fragment");
+
+        if (!compile_status) {
+            glDeleteShader(fragment_handle);
+            free_array(shader_source);
+            return false;
+        }
     }
 
-    program.handle = glCreateProgram();
-    glAttachShader(program.handle, vertex_handle);
-    glAttachShader(program.handle, fragment_handle);
+    shader = {};
 
-    glLinkProgram(program.handle);
+    shader.handle = glCreateProgram();
+    glAttachShader(shader.handle, vertex_handle);
+    glAttachShader(shader.handle, fragment_handle);
 
-    glDetachShader(program.handle, vertex_handle);
-    glDetachShader(program.handle, fragment_handle);
+    glLinkProgram(shader.handle);
 
-    free(shader_source);
+    // Check link status
+    {
+        glGetProgramiv(shader.handle, GL_LINK_STATUS, &compile_status);
 
-    return program;
+        if (!compile_status) {
+            glGetProgramInfoLog(shader.handle, 512, NULL, compile_log);
+
+            log_print("Program link error!\n");
+            log_print("%s\n", compile_log);
+
+            glDeleteShader(vertex_handle);
+            glDeleteShader(fragment_handle);
+
+            glDeleteProgram(shader.handle);
+
+            free_array(shader_source);
+
+            return false;
+        }
+    }
+
+    glDetachShader(shader.handle, vertex_handle);
+    glDetachShader(shader.handle, fragment_handle);
+
+    glDeleteShader(vertex_handle);
+    glDeleteShader(fragment_handle);
+
+    free_array(shader_source);
+
+    log_print("Loaded shader: %s\n", path);
+
+    return true;
 }
 
 internal void bind_mesh_buffer_objects(Mesh &mesh) {

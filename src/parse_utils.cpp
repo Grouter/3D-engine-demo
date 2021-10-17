@@ -1,23 +1,27 @@
-internal void read_whole_file(const char *name, Array<char> &buffer) {
-    FILE *f = fopen(name, "r");
+internal bool read_whole_file(const char *name, Array<char> &buffer) {
+    FILE *f;
 
-    if (!f) {
-        log_print("Error opening file: %s\n", name);
-        exit(1);
+    errno_t open_err = fopen_s(&f, name, "r");
+
+    if (open_err) {
+        log_print("Error opening file: %s (err no.: %d)\n", name, open_err);
+        return false;
     }
 
     fseek(f, 0, SEEK_END);
     u64 size = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    rewind(f);
 
     allocate_array(buffer, size + 1);
+    memset(buffer.data, 0, size + 1);
 
     fread(buffer.data, sizeof(char), size, f);
-    buffer.data[size] = 0; // Zero terminate
 
     buffer.length = size + 1;
 
     fclose(f);
+
+    return true;
 }
 
 inline void eat_whitespace(char **buffer) {

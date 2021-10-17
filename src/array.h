@@ -21,6 +21,7 @@ struct Array {
     void remove(u64 index);
     // This will reorder the array!
     void fast_remove(u64 index);
+    void remove_last();
     void clear();
 };
 

@@ -90,6 +90,13 @@ void Array<T>::fast_remove(u64 index) {
 }
 
 template <typename T>
+void Array<T>::remove_last() {
+    assert(this->length > 0);
+
+    this->length--;
+}
+
+template <typename T>
 void Array<T>::clear() {
     this->length = 0;
 }

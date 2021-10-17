@@ -1,3 +1,10 @@
+global std::mutex _hotload_mutex;
+global Array<HotloadShaderEntry> _hotload_shader_queue;
+
+internal void init_hotload() {
+    allocate_array(_hotload_shader_queue, 10);
+}
+
 internal void hotload_watcher() {
     log_print("Hotload started!\n");
 
@@ -12,7 +19,7 @@ internal void hotload_watcher() {
     );
 
     u8 *buffer = (u8 *)calloc(2048, 1);
-    char file_name[2048];
+    char file_path[2048];
 
     DWORD b_returned;
 
@@ -37,29 +44,97 @@ internal void hotload_watcher() {
 
         if (info->Action != FILE_ACTION_MODIFIED) continue;
 
-        u64 file_name_size = info->FileNameLength / sizeof(wchar_t);
+        u64 file_path_size = info->FileNameLength / sizeof(wchar_t);
 
         // Reset the filename buffer and convert wide chars to normal chars
         // while writing the the filename buffer
-        memset(file_name, 0, 2048);
-        for (u64 i = 0; i < file_name_size; i++) {
-            file_name[i] = (char)info->FileName[i];
+        memset(file_path, 0, 2048);
+        for (u64 i = 0; i < file_path_size; i++) {
+            file_path[i] = (char)info->FileName[i];
         }
 
-        log_print("Hotload trigger: %s\n", file_name);
+        log_print("Hotload trigger: %s\n", file_path);
+
+        char *file_name = file_path + file_path_size;
+        while (file_name != file_path) {
+            if (*file_name == '\\' || *file_name == '/') {
+                file_name += 1;
+                break;
+            }
+            file_name -= 1;
+        }
+
+        u64 file_name_size = file_path_size - (file_name - file_path);
 
         // File extension
-        // char *extension = file_name;
-        // eat_until(&extension, '.');
-        // extension += 1;
+        char *extension = file_path;
+        eat_until(&extension, '.');
+        extension += 1;
 
-        // if (strncmp(extension, "glsl", 4) == 0) {
+        if (strncmp(extension, "glsl", 4) == 0) {
+            bool contains = false;
+            for (u64 i = 0; i < _hotload_shader_queue.length; i++) {
+                char *name = _hotload_shader_queue.data[i].shader_name;
 
-        // }
-        // else {
+                if (strncmp(name, file_name, file_name_size) == 0) {
+                    contains = true;
+                    break;
+                }
+            }
 
-        // }
+            if (!contains) {
+                _hotload_mutex.lock();
+
+                HotloadShaderEntry shader_queue_entry = {};
+                strncpy(shader_queue_entry.shader_name, file_name, file_name_size);
+                _hotload_shader_queue.add(shader_queue_entry);
+
+                _hotload_mutex.unlock();
+            }
+        }
+        else {
+
+        }
     }
 
     free(buffer);
+}
+
+internal void process_hotload_queue(Resources &resources) {
+    _hotload_mutex.lock();
+
+    for (i64 i = _hotload_shader_queue.length - 1; i >= 0; i--) {
+        char *shader_name = _hotload_shader_queue.data[i].shader_name;
+
+        std::string path = "shaders/";
+        path.append(shader_name);
+
+        u64 shader_index = catalog_get(resources.shader_catalog, shader_name);
+
+        if (shader_index == UINT64_MAX) {
+            log_print("Hotloaded invalid shader: %s\n", path.c_str());
+            continue;
+        }
+
+        // @Todo: first try to compile the new shader and only if it succeeds, replace the old one!
+
+        log_print("Reloding shader: %s (old handle: %u)\n", shader_name, resources.programs[shader_index].handle);
+
+        Program reloaded_shader = {};
+
+        bool success = load_program(path.c_str(), reloaded_shader);
+
+        if (success) {
+            glUseProgram(0);
+            
+            glDeleteProgram(resources.programs[shader_index].handle);
+            resources.programs[shader_index] = reloaded_shader;
+
+            log_print("New handle %u\n", resources.programs[shader_index].handle);
+        }
+
+        _hotload_shader_queue.remove_last();
+    }
+
+    _hotload_mutex.unlock();
 }

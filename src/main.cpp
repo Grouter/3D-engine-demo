@@ -21,6 +21,7 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
+#include <mutex>
 #include <math.h>
 #include <cmath>
 #include <assert.h>
@@ -57,15 +58,14 @@ const u32 TARGET_ASPECT_H = 9;
 #include "catalog.h"
 #include "catalog.cpp"
 #include "parse_utils.cpp"
-#include "hotload.h"
-#include "hotload.cpp"
 
 #include "graphics.h"
 #include "resources.h"
-#include "entity.h"
+#include "hotload.h"
 #include "camera.h"
 #include "input.h"
 #include "render.h"
+#include "entity.h"
 #include "game.h"
 
 struct Viewport {
@@ -97,10 +97,11 @@ global Array<DrawCallData> draw_calls;
 
 #include "graphics.cpp"
 #include "resources.cpp"
-#include "entity.cpp"
+#include "hotload.cpp"
 #include "camera.cpp"
 #include "input.cpp"
 #include "render.cpp"
+#include "entity.cpp"
 #include "game.cpp"
 
 LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {
@@ -255,9 +256,10 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
     UpdateWindow(window);
 
     init_renderer();
+    init_hotload();
     init();
 
-    // std::thread hotload_thread(hotload_watcher);
+    std::thread hotload_thread(hotload_watcher);
 
     MSG message = {};
 
@@ -272,6 +274,10 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
             }
         }
 
+#if !defined(RELEASE_MODE)
+        process_hotload_queue(game_state.resources);
+#endif
+
         handle_mouse_input();
 
         tick();
@@ -285,6 +291,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
         SwapBuffers(window_context);
     }
+
+    hotload_thread.join();
 
     return 0;
 }

@@ -6,6 +6,7 @@ enum ShaderResource {
 };
 
 struct Resources {
+    ResourceCatalog shader_catalog;
     ResourceCatalog mesh_catalog;
     ResourceCatalog texture_catalog;
     ResourceCatalog material_catalog;

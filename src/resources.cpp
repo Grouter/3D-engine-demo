@@ -419,7 +419,16 @@ internal void load_material_file(const char *override_name = nullptr) {
 }
 
 internal void init_resources(Resources &resources) {
-    resources.programs[0] = load_program("shaders/default.glsl");
+    allocate_resource_catalog(resources.shader_catalog, 5);
+
+    // Default shader
+    {
+        bool status = load_program("shaders/default.glsl", resources.programs[0]);
+        if (!status) {
+            exit(1);
+        }
+        catalog_put(resources.shader_catalog, "default.glsl", 0);
+    }
 
     // Meshes
     allocate_array(resources.meshes, 50);

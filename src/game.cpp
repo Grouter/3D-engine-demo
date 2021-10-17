@@ -7,14 +7,6 @@ internal void init() {
     load_material_file();
     load_mesh_file();
 
-    // Send camera perspective to the shader uniform.
-    {
-        glUseProgram(game_state.resources.programs[0].handle);
-        i32 p = glGetUniformLocation(game_state.resources.programs[0].handle, "projection");
-        glUniformMatrix4fv(p, 1, false, game_state.camera.perspective.raw);
-        glUseProgram(0);
-    }
-
     allocate_entity_storage(game_state.entities);
 
     {
@@ -55,11 +47,7 @@ internal void tick() {
 }
 
 internal void render() {
-    set_shader(ShaderResource::Default);
-
-    set_shader_view(game_state.camera.transform);
-
-    game_state.entities.base_entities.for_each(render_entity);
+    render_entities();
 
     flush_draw_calls();
 }

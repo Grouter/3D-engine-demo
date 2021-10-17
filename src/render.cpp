@@ -10,6 +10,17 @@ internal void set_shader(ShaderResource shader) {
     glUseProgram(current_shader->handle);
 }
 
+internal void set_shader_perspective(Matrix4x4 perspective) {
+    i32 loc = glGetUniformLocation(current_shader->handle, "projection");
+
+    if (loc >= 0) {
+        glUniformMatrix4fv(loc, 1, false, perspective.raw);
+    }
+    else {
+        log_print("Shader perspective loc error!\n");
+    }
+}
+
 internal void set_shader_diffuse_texture(u32 texture_handle) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture_handle);
@@ -28,7 +39,7 @@ internal void set_shader_view(Matrix4x4 view) {
     i32 loc = glGetUniformLocation(current_shader->handle, "view");
 
     if (loc >= 0) {
-        glUniformMatrix4fv(loc, 1, GL_FALSE, game_state.camera.transform.raw);
+        glUniformMatrix4fv(loc, 1, GL_FALSE, view.raw);
     }
     else {
         log_print("Shader set view loc error!\n");
