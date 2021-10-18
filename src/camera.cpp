@@ -58,27 +58,6 @@ inline Vector3 get_side_vector(Camera &camera) {
     return { camera.transform.raw[0], camera.transform.raw[4], camera.transform.raw[8] };
 }
 
-// @Speed: creating new vectors everytime
-internal void camera_handle_input(Camera &camera, const KeyInput &input) {
-    const f32 CAMERA_SPEED = 10.0f;
-
-    Vector3 forward = get_forward_vector(camera);
-    Vector3 side = get_side_vector(camera);
-
-    if (input.virtual_code == VK_LEFT) {
-        camera.position = add(camera.position, multiply(side, -CAMERA_SPEED));
-    }
-    else if (input.virtual_code == VK_RIGHT) {
-        camera.position = add(camera.position, multiply(side, CAMERA_SPEED));
-    }
-    else if (input.virtual_code == VK_UP) {
-        camera.position = add(camera.position, multiply(forward, -CAMERA_SPEED));
-    }
-    else if (input.virtual_code == VK_DOWN) {
-        camera.position = add(camera.position, multiply(forward, CAMERA_SPEED));
-    }
-}
-
 internal void camera_handle_mouse(Camera &camera, i32 dx, i32 dy) {
     camera.rotation.yaw   += (f32)dx * CAMERA_SENS;
     camera.rotation.pitch += (f32)dy * CAMERA_SENS;
