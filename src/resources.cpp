@@ -112,14 +112,18 @@ internal u32 create_white_texture() {
 // We allocate the same amount of verticies and normals as we have indicies.
 // I think some of the data is always duplicate (which wastes memory)...
 // We should actually backcheck if the vertex already exists and if not, only then add it.
+// @Broken: multi-submesh meshes are not loaded properly!
 internal void load_model(const char *name, Mesh &mesh) {
     log_print("Loading %s 3D model\n", name);
 
     mesh = {};
 
     tinyobj::ObjReader reader;
+    tinyobj::ObjReaderConfig reader_config = {};
+    reader_config.triangulate = false;
+    reader_config.vertex_color = true;
 
-    bool result = reader.ParseFromFile(name);
+    bool result = reader.ParseFromFile(name, reader_config);
     if (!result) {
         log_print("Error loading %s 3D model file\n", name);
         if (!reader.Error().empty()) {
@@ -220,13 +224,16 @@ internal void load_model(const char *name, Mesh &mesh) {
     bind_mesh_buffer_objects(mesh);
 }
 
-internal void load_mesh_file(const char *override_name = nullptr) {
+internal bool load_mesh_file(const char *override_name = nullptr) {
     const char *name = override_name ? override_name : "mesh.resources";
 
     Resources *resources = &game_state.resources;
 
     Array<char> buffer = {};
-    read_whole_file(name, buffer);
+    bool success = read_whole_file(name, buffer);
+    if (!success) {
+        return false;
+    }
 
     std::string mesh_name;
     Mesh mesh = {};
@@ -252,6 +259,8 @@ internal void load_mesh_file(const char *override_name = nullptr) {
             // We already parsed a mesh, save it!
             if (mesh_name.length() != 0) {
                 log_print("Loaded mesh: %s\n", mesh_name.c_str());
+
+                mesh.loaded = true;
 
                 resources->meshes.add(mesh);
 
@@ -310,21 +319,29 @@ internal void load_mesh_file(const char *override_name = nullptr) {
     {
         log_print("Loaded mesh: %s\n", mesh_name.c_str());
 
+        mesh.loaded = true;
+
         resources->meshes.add(mesh);
 
         u64 mesh_index = resources->meshes.length - 1;
 
         catalog_put(resources->mesh_catalog, mesh_name.c_str(), mesh_index);
     }
+
+    return true;
 }
 
-internal void load_material_file(const char *override_name = nullptr) {
+internal bool load_material_file(const char *override_name = nullptr) {
     const char *name = override_name ? override_name : "material.resources";
 
     Resources *resources = &game_state.resources;
 
     Array<char> buffer = {};
-    read_whole_file(name, buffer);
+
+    bool success = read_whole_file(name, buffer);
+    if (!success) {
+        return false;
+    }
 
     std::string material_name;
     Material material = {};
@@ -416,6 +433,8 @@ internal void load_material_file(const char *override_name = nullptr) {
 
         catalog_put(resources->material_catalog, material_name.c_str(), material_index);
     }
+
+    return true;
 }
 
 internal void init_resources(Resources &resources) {
@@ -479,6 +498,8 @@ internal void unload_meshes() {
         free_array(it->indicies);
         free_array(it->normals);
         free_array(it->uvs);
+
+        it->loaded = false;
     }
 
     game_state.resources.meshes.clear();
@@ -487,9 +508,10 @@ internal void unload_meshes() {
 
 // Unloads all texture except the first default one!
 internal void unload_textures() {
-    for (u64 i = 0; i < game_state.resources.textures.length; i++) {
-        glDeleteTextures(1, &game_state.resources.textures.data[i]);
-    }
+    glDeleteTextures(
+        (i32)game_state.resources.textures.length - 1,
+        game_state.resources.textures.data + 1
+    );
 
     game_state.resources.textures.clear();
     game_state.resources.textures.length = 1;   // This will keep the first white texture

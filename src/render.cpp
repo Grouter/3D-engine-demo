@@ -59,7 +59,8 @@ internal void set_material_color(Vector3 color) {
 
 internal void render_entity(Entity &entity) {
     Mesh *mesh = entity.mesh;
-    if (mesh == nullptr) {
+
+    if (mesh == nullptr || mesh->loaded == false) {
         return;
     }
 
@@ -73,9 +74,13 @@ internal void render_entity(Entity &entity) {
         DrawCallData data;
         data.flags = 0;
 
-        {
-            // @Todo: set shader to flags
-            data.flags |= (entity.material_index << RenderDataFlagBits::ShaderBits);
+        // @Todo: set shader to flags
+
+        if (mesh->sub_meshes.data[i].material_index >= game_state.resources.materials.length) {
+            data.flags |= (0 << RenderDataFlagBits::ShaderBits);
+        }
+        else {
+            data.flags |= (mesh->sub_meshes.data[i].material_index << RenderDataFlagBits::ShaderBits);
         }
 
         data.info = mesh->sub_meshes.data[i];
@@ -137,8 +142,8 @@ internal void flush_draw_calls() {
             glUniformMatrix4fv(loc, 1, GL_FALSE, data->transform.raw);
         }
 
-        u64 offset = data->info.first_index * data->info.index_count;
-        glDrawElements(GL_TRIANGLES, (i32)data->info.index_count, GL_UNSIGNED_INT, (const void *)offset);
+        u32 last_index = data->info.first_index + data->info.index_count;
+        glDrawRangeElements(GL_TRIANGLES, data->info.first_index, last_index, data->info.index_count, GL_UNSIGNED_INT, nullptr);
     }
 
     draw_calls.clear();

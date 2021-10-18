@@ -13,14 +13,12 @@ internal void init() {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = get_mesh("monkey");
         e->program = &game_state.resources.programs[0];
-        e->material_index = get_material_index("default");;
     }
 
     {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = get_mesh("cube");
         e->program = &game_state.resources.programs[0];
-        e->material_index = get_material_index("restt");
 
         e->position.x = 10.0f;
     }
@@ -29,7 +27,6 @@ internal void init() {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = get_mesh("cube");
         e->program = &game_state.resources.programs[0];
-        e->material_index = get_material_index("restt");
 
         e->position.x = -10.0f;
     }

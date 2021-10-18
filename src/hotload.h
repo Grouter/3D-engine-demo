@@ -1,8 +1,9 @@
 #if !defined(HOTLOAD_H)
 #define HOTLOAD_H
 
-enum HotloadFileType {
-    Shaders,
+enum HotloadResource {
+    Materials,
+    Meshes
 };
 
 struct HotloadShaderEntry {

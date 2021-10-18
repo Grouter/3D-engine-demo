@@ -26,6 +26,8 @@ struct SubMeshInfo {
 };
 
 struct Mesh {
+    bool32 loaded;
+
     // OpenGL buffers
     u32 vao;
     u32 vbo;

@@ -1,5 +1,7 @@
 global std::mutex _hotload_mutex;
+
 global Array<HotloadShaderEntry> _hotload_shader_queue;
+global bool _hotload_resource_queue[2];
 
 internal void init_hotload() {
     allocate_array(_hotload_shader_queue, 10);
@@ -72,6 +74,7 @@ internal void hotload_watcher() {
         extension += 1;
 
         if (strncmp(extension, "glsl", 4) == 0) {
+            // @Todo: I don't like this for loop check
             bool contains = false;
             for (u64 i = 0; i < _hotload_shader_queue.length; i++) {
                 char *name = _hotload_shader_queue.data[i].shader_name;
@@ -92,8 +95,22 @@ internal void hotload_watcher() {
                 _hotload_mutex.unlock();
             }
         }
-        else {
+        else if (strncmp(extension, "resources", 9) == 0) {
+            if (strncmp(file_name, "mesh", 4) == 0) {
+                _hotload_mutex.lock();
 
+                _hotload_resource_queue[HotloadResource::Meshes] = true;
+
+                _hotload_mutex.unlock();
+
+            }
+            else if (strncmp(file_name, "material", 8) == 0) {
+                _hotload_mutex.lock();
+
+                _hotload_resource_queue[HotloadResource::Materials] = true;
+
+                _hotload_mutex.unlock();
+            }
         }
     }
 
@@ -126,7 +143,7 @@ internal void process_hotload_queue(Resources &resources) {
 
         if (success) {
             glUseProgram(0);
-            
+
             glDeleteProgram(resources.programs[shader_index].handle);
             resources.programs[shader_index] = reloaded_shader;
 
@@ -134,6 +151,26 @@ internal void process_hotload_queue(Resources &resources) {
         }
 
         _hotload_shader_queue.remove_last();
+    }
+
+    if (_hotload_resource_queue[HotloadResource::Meshes]) {
+        log_print("Reloading mesh resources!\n");
+
+        unload_meshes();
+        load_mesh_file();
+
+        _hotload_resource_queue[HotloadResource::Meshes] = false;
+    }
+
+    if (_hotload_resource_queue[HotloadResource::Materials]) {
+        log_print("Reloading material resources!\n");
+
+        unload_textures();
+        unload_materials();
+
+        load_material_file();
+
+        _hotload_resource_queue[HotloadResource::Materials] = false;
     }
 
     _hotload_mutex.unlock();
