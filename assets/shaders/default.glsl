@@ -23,7 +23,7 @@ void main() {
 
 #ifdef FRAGMENT
 
-const vec3  LIGHT_DIR        = vec3(0.0, 0.0, 0.5);
+const vec3  LIGHT_DIR        = vec3(0.0, 0.0, 1.0);
 const vec3  LIGHT_COLOR      = vec3(1.0, 1.0, 1.0);
 const float AMBIENT_STRENGTH = 0.2;
 
