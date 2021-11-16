@@ -174,9 +174,6 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
             u8 scan_code     = LOBYTE(HIWORD(l_param));
             bool alt_down    = (HIWORD(l_param) & KF_ALTDOWN) == KF_ALTDOWN;
             bool up_flag     = (HIWORD(l_param) & KF_UP) == KF_UP;
-            bool repeat_flag = (HIWORD(l_param) & KF_REPEAT) == KF_REPEAT;
-
-            if (repeat_flag) break; // We will handle repeat our way...
 
             if (up_flag) {
                 handle_key_up(scan_code, virtual_code, alt_down);

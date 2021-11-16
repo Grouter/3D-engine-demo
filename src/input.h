@@ -11,6 +11,7 @@ struct KeyInput {
 
 struct InputState {
     bool32 mouse_locked;
+    bool32 key_down[256];
 
     i32 mouse_x;
     i32 mouse_y;

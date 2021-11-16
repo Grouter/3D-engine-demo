@@ -38,6 +38,8 @@ internal void rotate_entity(Entity &entity) {
 }
 
 internal void tick() {
+    camera_handle_input(game_state.camera);
+
     camera_update(game_state.camera);
 
     game_state.entities.base_entities.for_each(rotate_entity);
