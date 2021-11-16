@@ -75,6 +75,7 @@ struct GameState {
     Viewport viewport;
 
     f32 unit_to_pixels;
+    f32 pixels_to_units;
 
     // Gameplay
     Resources resources;
@@ -144,6 +145,7 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
             }
 
             game_state.unit_to_pixels = (f32)game_state.viewport.width / (f32)TARGET_ASPECT_W;
+            game_state.pixels_to_units = 1.0f / game_state.unit_to_pixels;
         } break;
 
         case WM_DESTROY: {
