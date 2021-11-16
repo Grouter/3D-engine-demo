@@ -142,8 +142,8 @@ internal void flush_draw_calls() {
             glUniformMatrix4fv(loc, 1, GL_FALSE, data->transform.raw);
         }
 
-        u32 last_index = data->info.first_index + data->info.index_count;
-        glDrawRangeElements(GL_TRIANGLES, data->info.first_index, last_index, data->info.index_count, GL_UNSIGNED_INT, nullptr);
+        u64 offset = data->info.first_index * sizeof(u32);
+        glDrawElements(GL_TRIANGLES, (i32)data->info.index_count, GL_UNSIGNED_INT, (void *)offset);
     }
 
     draw_calls.clear();

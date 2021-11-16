@@ -129,7 +129,7 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
                 u32 w = game_state.window_width;
                 u32 h = game_state.window_height;
 
-                if (game_state.window_width * TARGET_ASPECT_H > game_state.window_height * TARGET_ASPECT_H) {
+                if (game_state.window_width * TARGET_ASPECT_H > game_state.window_height * TARGET_ASPECT_W) {
                     w = game_state.window_height * TARGET_ASPECT_W / TARGET_ASPECT_H;
                 }
                 else if (game_state.window_width * TARGET_ASPECT_H < game_state.window_height * TARGET_ASPECT_W) {

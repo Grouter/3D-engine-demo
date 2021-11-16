@@ -101,6 +101,13 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
     glGenVertexArrays(1, &mesh.vao);
     glBindVertexArray(mesh.vao);
 
+    {   // Index data
+        glGenBuffers(1, &mesh.ebo);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indicies.length * sizeof(u32), mesh.indicies.data, GL_STATIC_DRAW);
+    }
+
     {   // Vertex data
         glGenBuffers(1, &mesh.vbo);
         glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
@@ -126,13 +133,6 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
 
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(2);
-    }
-
-    {   // Index data
-        glGenBuffers(1, &mesh.ebo);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indicies.length * sizeof(u32), mesh.indicies.data, GL_STATIC_DRAW);
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

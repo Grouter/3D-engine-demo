@@ -165,7 +165,7 @@ internal void load_model(const char *name, Mesh &mesh) {
         SubMeshInfo sub_mesh_info = {};
 
         sub_mesh_info.first_index = (u32)mesh.indicies.length;
-        sub_mesh_info.index_count = (u32)sub_mesh->indices.size();
+        sub_mesh_info.index_count = (u32)sub_mesh->num_face_vertices.size() * 3;
 
         mesh.sub_meshes.add(sub_mesh_info);
 
@@ -176,7 +176,7 @@ internal void load_model(const char *name, Mesh &mesh) {
                 tinyobj::index_t idx = sub_mesh->indices[index_offset + v];
 
                 // Indicies
-                mesh.indicies.add((u32)(index_offset + v));
+                mesh.indicies.add((u32)(mesh.indicies.length));
 
                 // Position
                 {
