@@ -10,12 +10,6 @@ inline Vector2 make_vector2(f32 x, f32 y) {
     return result;
 }
 
-inline Vector2 make_vector2() {
-    Vector2 result = { 0, 0 };
-
-    return result;
-}
-
 //
 // Vector3
 //
@@ -24,12 +18,6 @@ const Vector3 V3_UP = Vector3 { 0.0f, 1.0f, 0.0f };
 
 inline Vector3 make_vector3(f32 x, f32 y, f32 z) {
     Vector3 result = { x, y, z };
-
-    return result;
-}
-
-inline Vector3 make_vector3() {
-    Vector3 result = { 0, 0, 0 };
 
     return result;
 }

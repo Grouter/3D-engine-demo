@@ -51,7 +51,7 @@ internal void camera_handle_input(Camera &camera) {
 
     Vector3 forward = get_forward_vector(camera);
     Vector3 side    = get_side_vector(camera);
-    Vector3 input   = make_vector3();
+    Vector3 input   = {};
 
     if (key_is_pressed(VK_LEFT)) {
         input.x = -1;
