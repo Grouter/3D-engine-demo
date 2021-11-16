@@ -45,18 +45,12 @@ const u32 TARGET_ASPECT_W = 16;
 const u32 TARGET_ASPECT_H = 9;
 
 #include "array.h"
-#include "array.cpp"
 #include "bucket_array.h"
-#include "bucket_array.cpp"
 #include "math/math.h"
 #include "math/vector.h"
-#include "math/vector.cpp"
 #include "math/matrix.h"
-#include "math/matrix.cpp"
 #include "math/quaternion.h"
-#include "math/quaternion.cpp"
 #include "catalog.h"
-#include "catalog.cpp"
 #include "parse_utils.cpp"
 
 #include "graphics.h"
