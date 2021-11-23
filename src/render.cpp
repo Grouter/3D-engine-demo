@@ -1,4 +1,4 @@
-internal void _allocate_font_instance_buffer(u32 *vao, u32 *instance_buffer, u64 size) {
+internal void _allocate_instance_buffer(u32 *vao, u32 *instance_buffer, u64 size) {
     Mesh *quad = &game_state.resources.meshes[MeshResource_Quad];
 
     glGenVertexArrays(1, vao);
@@ -25,10 +25,10 @@ internal void _allocate_font_instance_buffer(u32 *vao, u32 *instance_buffer, u64
         glGenBuffers(1, instance_buffer);
         glBindBuffer(GL_ARRAY_BUFFER, *instance_buffer);
 
-        glBufferData(GL_ARRAY_BUFFER, size * sizeof(FontDrawCallData), nullptr, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, size * sizeof(DrawCallData2D), nullptr, GL_STATIC_DRAW);
 
         i32 vector4_size = sizeof(Vector4);
-        i32 stride = sizeof(FontDrawCallData);
+        i32 stride = sizeof(DrawCallData2D);
         i32 attr_index = 2;
         u64 offset = 0;
 
@@ -86,9 +86,9 @@ internal void _allocate_font_instance_buffer(u32 *vao, u32 *instance_buffer, u64
     glBindVertexArray(0);
 }
 
-internal void _allocate_font_draw_call_buffer(FontDrawCallBuffer &buffer, u64 size) {
+internal void _allocate_font_draw_call_buffer(DrawCallBuffer2D &buffer, u64 size) {
     allocate_array(buffer.data, size);
-    _allocate_font_instance_buffer(&buffer.vao, &buffer.instance_buffer, size);
+    _allocate_instance_buffer(&buffer.vao, &buffer.instance_buffer, size);
 }
 
 internal void init_renderer() {
@@ -97,6 +97,9 @@ internal void init_renderer() {
     _allocate_font_draw_call_buffer(_font_draw_calls[FontResource_Small],  MAX_DRAW_CALLS);
     _allocate_font_draw_call_buffer(_font_draw_calls[FontResource_Medium], MAX_DRAW_CALLS);
     _allocate_font_draw_call_buffer(_font_draw_calls[FontResource_Big],    MAX_DRAW_CALLS);
+
+    allocate_array(_2d_shapes_draw_calls.data, MAX_DRAW_CALLS);
+    _allocate_instance_buffer(&_2d_shapes_draw_calls.vao, &_2d_shapes_draw_calls.instance_buffer, MAX_DRAW_CALLS);
 }
 
 internal void set_shader(ShaderResource shader) {
@@ -154,6 +157,17 @@ internal void set_shader_material_color(Vector4 color) {
     }
 }
 
+internal void set_shader_int(const char *name, i32 value) {
+    i32 loc = glGetUniformLocation(current_shader->handle, name);
+
+    if (loc >= 0) {
+        glUniform1i(loc, value);
+    }
+    else {
+        log_print("Shader set int loc error! (attribute: %s)\n", name);
+    }
+}
+
 // Position = bottom left of the rendered text bounding box
 internal void draw_text(const Font &font, char *text, Vector3 position, Color color, f32 size_scale = 1.0f) {
     while (*text) {
@@ -166,7 +180,7 @@ internal void draw_text(const Font &font, char *text, Vector3 position, Color co
             continue;
         }
 
-        FontDrawCallData draw_call = {};
+        DrawCallData2D draw_call = {};
         {
             draw_call.color = color_to_v4(color);
             draw_call.transform = identity();
@@ -192,6 +206,26 @@ internal void draw_text(const Font &font, char *text, Vector3 position, Color co
         position.x += glyph.x_advance * size_scale * game_state.pixels_to_units;
         text += 1;
     }
+}
+
+internal void draw_rect(Vector3 position, Vector2 size, Color color) {
+    DrawCallData2D draw_call = {};
+    {
+        draw_call.color = color_to_v4(color);
+
+        draw_call.transform = identity();
+        translate(draw_call.transform, position.x, position.y, position.z);
+        scale(draw_call.transform, size.x, size.y, 1.0f);
+
+        draw_call.uv_offset = {};
+        draw_call.uv_scale  = V2_ONE;
+    }
+
+    if (_2d_shapes_draw_calls.data.is_full()) {
+        log_print("Exceeding 2D shapes draw calls capacity!!!\n");
+    }
+
+    _2d_shapes_draw_calls.data.add(draw_call);
 }
 
 internal void render_entity(Entity &entity) {
@@ -238,18 +272,19 @@ internal int _draw_call_cmp(const void *a, const void *b) {
 }
 
 internal void flush_font_draw_calls() {
-    set_shader(ShaderResource::ShaderResource_Font);
-    set_shader_projection(game_state.font_proj);
+    set_shader(ShaderResource::ShaderResource_2D);
+    set_shader_projection(game_state.ortho_proj);
+    set_shader_int("diffuse_alpha_mask", 1);
 
     for (u32 i = 0; i < FontResource_COUNT; i++) {
-        FontDrawCallBuffer &draw_calls = _font_draw_calls[i];
+        DrawCallBuffer2D &draw_calls = _font_draw_calls[i];
 
         if (draw_calls.data.length == 0) continue;
 
         Font &font = game_state.resources.fonts[i];
 
         // Upload new data to the instance buffer
-        glNamedBufferSubData(draw_calls.instance_buffer, 0, draw_calls.data.length * sizeof(FontDrawCallData), draw_calls.data.data);
+        glNamedBufferSubData(draw_calls.instance_buffer, 0, draw_calls.data.length * sizeof(DrawCallData2D), draw_calls.data.data);
 
         glBindVertexArray(draw_calls.vao);
 
@@ -259,6 +294,28 @@ internal void flush_font_draw_calls() {
 
         draw_calls.data.clear();
     }
+}
+
+internal void flush_2d_shapes_draw_calls() {
+    DrawCallBuffer2D &draw_calls = _2d_shapes_draw_calls;
+
+    if (draw_calls.data.length == 0) return;
+
+    set_shader(ShaderResource::ShaderResource_2D);
+    set_shader_projection(game_state.ortho_proj);
+    set_shader_int("diffuse_alpha_mask", 0);
+
+    // Upload new data to the instance buffer
+    glNamedBufferSubData(draw_calls.instance_buffer, 0, draw_calls.data.length * sizeof(DrawCallData2D), draw_calls.data.data);
+
+    glBindVertexArray(draw_calls.vao);
+
+    // White texture
+    set_shader_diffuse_texture(game_state.resources.textures[0]);
+
+    glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, (i32)draw_calls.data.length, 0);
+
+    draw_calls.data.clear();
 }
 
 internal void flush_draw_calls() {

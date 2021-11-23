@@ -35,7 +35,9 @@ in vec2 f_uv;
 in vec2 f_uv_offset;
 in vec2 f_uv_scale;
 
+uniform vec4 material_color;
 uniform sampler2D diffuse_texture;
+uniform bool diffuse_alpha_mask;
 
 out vec4 fragment_color;
 
@@ -47,8 +49,13 @@ void main() {
 
     vec4 texture_sample = texture2D(diffuse_texture, mapped_uv);
 
-    fragment_color = f_color;
-    fragment_color.a *= texture_sample.r;
+    if (diffuse_alpha_mask) {
+        fragment_color = f_color;
+        fragment_color.a *= texture_sample.r;
+    }
+    else {
+        fragment_color = f_color;
+    }
 
     if (fragment_color.a == 0) discard;
 }

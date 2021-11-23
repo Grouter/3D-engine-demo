@@ -3,7 +3,7 @@
 
 enum ShaderResource {
     ShaderResource_Default,
-    ShaderResource_Font
+    ShaderResource_2D
 };
 
 const u64 MeshResource_Quad = 0;

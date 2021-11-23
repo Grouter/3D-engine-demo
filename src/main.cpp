@@ -76,6 +76,7 @@ const u32 TARGET_ASPECT_H = 9;
 #include "camera.h"
 #include "input.h"
 #include "render.h"
+#include "text_input.h"
 #include "entity.h"
 #include "game.h"
 
@@ -94,7 +95,7 @@ struct GameState {
     f32 unit_to_pixels;
     f32 pixels_to_units;
 
-    Matrix4x4 font_proj;
+    Matrix4x4 ortho_proj;
 
     // Gameplay
     Resources resources;
@@ -114,6 +115,7 @@ global Program *current_shader;
 #include "camera.cpp"
 #include "input.cpp"
 #include "render.cpp"
+#include "text_input.cpp"
 #include "entity.cpp"
 #include "game.cpp"
 

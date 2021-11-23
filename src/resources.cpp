@@ -457,11 +457,11 @@ internal void init_resources(Resources &resources) {
 
     // Font shader
     {
-        bool status = load_program("shaders/font.glsl", resources.programs[1]);
+        bool status = load_program("shaders/2d.glsl", resources.programs[1]);
         if (!status) {
             exit(1);
         }
-        catalog_put(resources.shader_catalog, "font.glsl", 1);
+        catalog_put(resources.shader_catalog, "2d.glsl", 1);
     }
 
     // Meshes

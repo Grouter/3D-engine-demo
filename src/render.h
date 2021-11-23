@@ -17,20 +17,21 @@ struct DrawCallData {
     Matrix4x4   transform;
 };
 
-struct FontDrawCallData {
+struct DrawCallData2D {
     Vector4   color     = V4_ONE;
     Vector2   uv_offset = {};
     Vector2   uv_scale  = V2_ONE;
     Matrix4x4 transform;
 };
 
-struct FontDrawCallBuffer {
+struct DrawCallBuffer2D {
     u32 vao;
     u32 instance_buffer;
-    Array<FontDrawCallData> data;
+    Array<DrawCallData2D> data;
 };
 
-global FontDrawCallBuffer _font_draw_calls[FontResource_COUNT];
+global DrawCallBuffer2D _font_draw_calls[FontResource_COUNT];
+global DrawCallBuffer2D _2d_shapes_draw_calls;
 global Array<DrawCallData> _draw_calls;
 
 #endif

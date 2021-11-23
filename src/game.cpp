@@ -3,7 +3,7 @@ internal void init_game() {
     game_state.camera.rotation.y = 90.0f;
     game_state.camera.position.z = 10.0f;
 
-    game_state.font_proj = ortho(-1.0f, 1.0f, VIRTUAL_WINDOW_W_FONT, VIRTUAL_WINDOW_H_FONT);
+    game_state.ortho_proj = ortho(-1.0f, 1.0f, VIRTUAL_WINDOW_W_FONT, VIRTUAL_WINDOW_H_FONT);
 
     init_resources(game_state.resources);
     load_material_file();
@@ -54,6 +54,10 @@ internal void tick(f32 dt) {
 internal void render() {
     render_entities();
 
+    glEnable(GL_DEPTH_TEST);
     flush_draw_calls();
+
+    glDisable(GL_DEPTH_TEST);
+    flush_2d_shapes_draw_calls();
     flush_font_draw_calls();
 }
