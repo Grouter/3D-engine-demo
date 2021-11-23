@@ -30,7 +30,7 @@ const float AMBIENT_STRENGTH = 0.2;
 in vec3 f_normal;
 in vec2 f_uv;
 
-uniform vec3 material_color;
+uniform vec4 material_color;
 uniform sampler2D diffuse_texture;
 
 out vec4 fragment_color;
@@ -41,7 +41,7 @@ void main() {
     float diffuse_s = max(dot(f_normal, LIGHT_DIR), 0.0);
     vec3 diffuse = diffuse_s * LIGHT_COLOR;
 
-    vec3 result = (ambient + diffuse) * material_color;
+    vec3 result = (ambient + diffuse) * material_color.xyz;
 
     vec4 texture_sample = texture(diffuse_texture, f_uv);
 

@@ -6,8 +6,16 @@
 
 #endif
 
-#define STB_IMAGE_IMPLEMENTATION
 #define TINYOBJLOADER_IMPLEMENTATION
+
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_STATIC
+
+#define STB_RECT_PACK_IMPLEMENTATION
+#define STBRP_STATIC
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#define STBTT_STATIC
 
 // @Todo: check if RVO is happening
 
@@ -26,8 +34,11 @@
 #include <cmath>
 #include <assert.h>
 #include <algorithm>    // @Todo: implement own sort
+
 #include <tiny_obj_loader.h>
 #include <stb_image.h>
+#include <stb_rect_pack.h>
+#include <stb_truetype.h>
 
 #include "platform.h"
 #include "opengl.cpp"
@@ -41,6 +52,9 @@ const u32 INITIAL_WINDOW_H = 1080;
 const u32 VIRTUAL_WINDOW_W = 1920;
 const u32 VIRTUAL_WINDOW_H = 1080;
 
+const u32 VIRTUAL_WINDOW_W_FONT = 32;
+const u32 VIRTUAL_WINDOW_H_FONT = 18;
+
 const u32 TARGET_ASPECT_W = 16;
 const u32 TARGET_ASPECT_H = 9;
 
@@ -52,8 +66,10 @@ const u32 TARGET_ASPECT_H = 9;
 #include "math/quaternion.h"
 #include "catalog.h"
 #include "parse_utils.cpp"
+#include "color.h"
 
 #include "graphics.h"
+#include "font.h"
 #include "animation.h"
 #include "resources.h"
 #include "hotload.h"
@@ -78,6 +94,8 @@ struct GameState {
     f32 unit_to_pixels;
     f32 pixels_to_units;
 
+    Matrix4x4 font_proj;
+
     // Gameplay
     Resources resources;
     Camera camera;
@@ -89,9 +107,8 @@ global InputState input_state;
 
 global Program *current_shader;
 
-global Array<DrawCallData> draw_calls;
-
 #include "graphics.cpp"
+#include "font.cpp"
 #include "resources.cpp"
 #include "hotload.cpp"
 #include "camera.cpp"
@@ -233,13 +250,21 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
     RegisterClass(&window_class);
 
+    RECT w_rect;
+    w_rect.left   = 100;
+    w_rect.right  = 100 + INITIAL_WINDOW_W;
+    w_rect.bottom = 100 + INITIAL_WINDOW_H;
+    w_rect.top    = 100;
+
+    AdjustWindowRect(&w_rect, WS_OVERLAPPEDWINDOW, false);
+
     HWND window = CreateWindowEx(
         0,
         window_class.lpszClassName,
         TEXT("Window"),
         WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT,
-        INITIAL_WINDOW_W, INITIAL_WINDOW_H,
+        w_rect.left, w_rect.top,
+        w_rect.right - w_rect.left, w_rect.bottom - w_rect.top,
         NULL, NULL,
         instance,
         NULL
@@ -257,9 +282,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
     ShowWindow(window, show_code);
     UpdateWindow(window);
 
+    init_game();
     init_renderer();
     init_hotload();
-    init();
 
     std::thread hotload_thread(hotload_watcher);
 

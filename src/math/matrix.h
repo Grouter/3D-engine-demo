@@ -17,7 +17,7 @@ inline Matrix4x4 identity() {
     return result;
 }
 
-inline Matrix4x4 scale(f32 x, f32 y, f32 z) {
+inline Matrix4x4 scaling(f32 x, f32 y, f32 z) {
     Matrix4x4 result = {
         x, 0, 0, 0,
         0, y, 0, 0,
@@ -170,6 +170,12 @@ internal void rotate(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
     matrix = multiply(matrix, x_rotation);
     matrix = multiply(matrix, y_rotation);
     matrix = multiply(matrix, z_rotation);
+}
+
+inline void scale(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
+    Matrix4x4 scale_m = scaling(x, y, z);
+
+    matrix = multiply(matrix, scale_m);
 }
 
 #endif

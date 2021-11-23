@@ -1,7 +1,9 @@
-internal void init() {
+internal void init_game() {
     game_state.camera = create_camera(VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H, 80.0f);
     game_state.camera.rotation.y = 90.0f;
     game_state.camera.position.z = 10.0f;
+
+    game_state.font_proj = ortho(-1.0f, 1.0f, VIRTUAL_WINDOW_W_FONT, VIRTUAL_WINDOW_H_FONT);
 
     init_resources(game_state.resources);
     load_material_file();
@@ -53,4 +55,5 @@ internal void render() {
     render_entities();
 
     flush_draw_calls();
+    flush_font_draw_calls();
 }

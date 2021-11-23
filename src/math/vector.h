@@ -28,9 +28,27 @@ union Vector3 {
     f32 data[3];
 };
 
+union Vector4 {
+    struct {
+        f32 x;
+        f32 y;
+        f32 z;
+        f32 w;
+    };
+    struct {
+        f32 r;
+        f32 g;
+        f32 b;
+        f32 a;
+    };
+    f32 data[4];
+};
+
 //
-// @Vector2
+// :Vector2
 //
+
+const Vector2 V2_ONE = { 1.0f, 1.0f };
 
 inline Vector2 make_vector2(f32 x, f32 y) {
     Vector2 result = { x, y };
@@ -39,7 +57,7 @@ inline Vector2 make_vector2(f32 x, f32 y) {
 }
 
 //
-// @Vector3
+// :Vector3
 //
 
 const Vector3 V3_UP = Vector3 { 0.0f, 1.0f, 0.0f };
@@ -98,6 +116,22 @@ inline Vector3 lerp(Vector3 a, Vector3 b, f32 t) {
     result.z = lerp(a.z, b.z, t);
 
     return result;
+}
+
+//
+// :Vector4
+//
+
+const Vector4 V4_ONE = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+inline Vector4 make_vector4(f32 x, f32 y, f32 z, f32 w) {
+    Vector4 result = { x, y, z, w };
+
+    return result;
+}
+
+inline void dump_vector(Vector4 &v) {
+    log_print("Vector4: %f %f %f %f\n", v.x, v.y, v.z, v.w);
 }
 
 #endif

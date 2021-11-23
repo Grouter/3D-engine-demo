@@ -92,7 +92,7 @@ internal bool load_program(const char *path, Program &shader) {
 
     free_array(shader_source);
 
-    log_print("Loaded shader: %s\n", path);
+    log_print("Loaded shader: %s (handle: %d)\n", path, shader.handle);
 
     return true;
 }
@@ -117,7 +117,8 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
         glEnableVertexAttribArray(0);
     }
 
-    {   // Normal data
+    // Normal data
+    if (mesh.normals.length > 0) {
         glGenBuffers(1, &mesh.nbo);
         glBindBuffer(GL_ARRAY_BUFFER, mesh.nbo);
         glBufferData(GL_ARRAY_BUFFER, mesh.normals.length * sizeof(Vector3), mesh.normals.data, GL_STATIC_DRAW);
@@ -138,4 +139,33 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
+}
+
+internal Mesh create_mesh_2d_quad() {
+    Mesh quad = {};
+
+    allocate_array(quad.verticies, 4);
+    allocate_array(quad.uvs,       4);
+    allocate_array(quad.indicies,  6);
+
+    quad.verticies.add(make_vector3(-0.5f,  0.5f, 0.0f));
+    quad.verticies.add(make_vector3( 0.5f,  0.5f, 0.0f));
+    quad.verticies.add(make_vector3( 0.5f, -0.5f, 0.0f));
+    quad.verticies.add(make_vector3(-0.5f, -0.5f, 0.0f));
+
+    quad.uvs.add(make_vector2(0.0f, 1.0f));
+    quad.uvs.add(make_vector2(1.0f, 1.0f));
+    quad.uvs.add(make_vector2(1.0f, 0.0f));
+    quad.uvs.add(make_vector2(0.0f, 0.0f));
+
+    quad.indicies.add(1);
+    quad.indicies.add(0);
+    quad.indicies.add(3);
+    quad.indicies.add(3);
+    quad.indicies.add(2);
+    quad.indicies.add(1);
+
+    bind_mesh_buffer_objects(quad);
+
+    return quad;
 }

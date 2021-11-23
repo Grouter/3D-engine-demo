@@ -35,6 +35,12 @@ internal Mesh *get_mesh(const char *name) {
     return result;
 }
 
+inline Font &get_font(FontResource font_resource) {
+    Font &font = game_state.resources.fonts[font_resource];
+
+    return font;
+}
+
 internal u32 load_texture(const char *image) {
     std::string path = "textures/";
     path.append(image);
@@ -394,7 +400,7 @@ internal bool load_material_file(const char *override_name = nullptr) {
             walker += attr_name_len + 1;
             walker = eat_whitespace(walker);
 
-            sscanf(walker, "%f %f %f", &material.color.x, &material.color.y, &material.color.z);
+            sscanf(walker, "%f %f %f %f", &material.color.r, &material.color.g, &material.color.b, &material.color.a);
 
             walker = eat_until(walker, '\n');
         }
@@ -438,7 +444,7 @@ internal bool load_material_file(const char *override_name = nullptr) {
 }
 
 internal void init_resources(Resources &resources) {
-    allocate_resource_catalog(resources.shader_catalog, 5);
+    allocate_resource_catalog(resources.shader_catalog, 2);
 
     // Default shader
     {
@@ -449,9 +455,19 @@ internal void init_resources(Resources &resources) {
         catalog_put(resources.shader_catalog, "default.glsl", 0);
     }
 
+    // Font shader
+    {
+        bool status = load_program("shaders/font.glsl", resources.programs[1]);
+        if (!status) {
+            exit(1);
+        }
+        catalog_put(resources.shader_catalog, "font.glsl", 1);
+    }
+
     // Meshes
     allocate_array(resources.meshes, 50);
     allocate_resource_catalog(resources.mesh_catalog, 50);
+    resources.meshes.add(create_mesh_2d_quad());
 
     // Textures
     allocate_array(resources.textures, 50);
@@ -471,7 +487,7 @@ internal void init_resources(Resources &resources) {
     {
         Material default_mat = {};
 
-        default_mat.color = make_vector3(1.0f, 1.0f, 1.0f);
+        default_mat.color = make_vector4(1.0f, 1.0f, 1.0f, 1.0f);
         default_mat.texture = resources.textures.data[0];
 
         resources.materials.add(default_mat);
@@ -481,13 +497,23 @@ internal void init_resources(Resources &resources) {
     // @Todo: Error material? This material would be returned
     // when user tries to find a non-existing material.
 
+    // Fonts
+    allocate_array(resources.fonts, 3);
+    resources.fonts.add(load_font("karmina_regular.otf", FONT_SIZE_SMALL,  FontResource_Small));
+    resources.fonts.add(load_font("karmina_regular.otf", FONT_SIZE_MEDIUM, FontResource_Medium));
+    resources.fonts.add(load_font("karmina_regular.otf", FONT_SIZE_BIG,    FontResource_Big));
+
+    // Animation
     resources.camera_animation = load_camera_animation("test.keyframes");
 }
 
 internal void unload_meshes() {
     Mesh *it;
 
-    array_foreach(game_state.resources.meshes, it) {
+    // Stop at index 1 to not remove the first quad for font rendering
+    for (i64 i = game_state.resources.meshes.length - 1; i > 0; i--) {
+        it = &game_state.resources.meshes[i];
+
         glDeleteBuffers(1, &it->vao);
         glDeleteBuffers(1, &it->vbo);
         glDeleteBuffers(1, &it->nbo);
@@ -502,9 +528,10 @@ internal void unload_meshes() {
         free_array(it->uvs);
 
         it->loaded = false;
+
+        game_state.resources.meshes.remove_last();
     }
 
-    game_state.resources.meshes.clear();
     catalog_clear(game_state.resources.mesh_catalog);
 }
 
