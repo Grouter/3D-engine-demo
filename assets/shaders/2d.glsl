@@ -47,6 +47,7 @@ void main() {
     mapped_uv.x = f_uv_offset.x + (f_uv.x * f_uv_scale.x);
     mapped_uv.y = f_uv_offset.y + (f_uv.y * f_uv_scale.y);
 
+    // @Todo: sample only in font rendering
     vec4 texture_sample = texture2D(diffuse_texture, mapped_uv);
 
     if (diffuse_alpha_mask) {
