@@ -66,7 +66,7 @@ internal f32 get_string_width_in_units(const Font &font, const char *text, f32 s
         text += 1;
     }
 
-    return (pixel_width * game_state.pixels_to_units);
+    return (pixel_width * game_state.pixels_to_units_2d);
 }
 
 internal f32 get_integer_width_in_units(const Font &font, i32 number, f32 scale_factor = 1.0f) {
@@ -81,7 +81,7 @@ internal f32 get_char_width_in_units(const Font &font, u8 c, f32 scale_factor = 
     i32 index = (i32)(c) - (i32)font.first_char;
     GlyphData *glyph = &font.glyphs[index];
 
-    return (glyph->xadvance * scale_factor * game_state.pixels_to_units);
+    return (glyph->xadvance * scale_factor * game_state.pixels_to_units_2d);
 }
 
 // @Speed
@@ -102,8 +102,8 @@ internal GlyphRenderData get_glyph(const Font &font, char c) {
     data.uv_scale.x = (f32)(raw->x1 - raw->x0) / font.texture_width;
     data.uv_scale.y = (f32)(raw->y1 - raw->y0) / font.texture_height * -1.0f; // -1 because font bitmap is inverted
 
-    data.world_scale.x = (f32)(raw->x1 - raw->x0) * game_state.pixels_to_units;
-    data.world_scale.y = (f32)(raw->y1 - raw->y0) * game_state.pixels_to_units;
+    data.world_scale.x = (f32)(raw->x1 - raw->x0) * game_state.pixels_to_units_2d;
+    data.world_scale.y = (f32)(raw->y1 - raw->y0) * game_state.pixels_to_units_2d;
 
     data.offset = make_vector2(raw->xoff, raw->yoff2);
     data.x_advance = raw->xadvance;

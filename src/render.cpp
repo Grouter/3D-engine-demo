@@ -175,7 +175,7 @@ internal void draw_text(const Font &font, char *text, Vector3 position, Color co
 
         if (*text == ' ') {
             // If space, just advance to the next character
-            position.x += glyph.x_advance * size_scale * game_state.pixels_to_units;
+            position.x += glyph.x_advance * size_scale * game_state.pixels_to_units_2d;
             text += 1;
             continue;
         }
@@ -185,8 +185,8 @@ internal void draw_text(const Font &font, char *text, Vector3 position, Color co
             draw_call.color = color_to_v4(color);
             draw_call.transform = identity();
 
-            f32 x_offset = (glyph.world_scale.x * size_scale * 0.5f) + (glyph.offset.x * size_scale * game_state.pixels_to_units);
-            f32 y_offset = (glyph.world_scale.y * size_scale * 0.5f) - (glyph.offset.y * size_scale * game_state.pixels_to_units);
+            f32 x_offset = (glyph.world_scale.x * size_scale * 0.5f) + (glyph.offset.x * size_scale * game_state.pixels_to_units_2d);
+            f32 y_offset = (glyph.world_scale.y * size_scale * 0.5f) - (glyph.offset.y * size_scale * game_state.pixels_to_units_2d);
 
             translate(draw_call.transform, position.x + x_offset, position.y + y_offset, position.z);
 
@@ -203,7 +203,7 @@ internal void draw_text(const Font &font, char *text, Vector3 position, Color co
         _font_draw_calls[font.resource_id].data.add(draw_call);
 
         // Advance to the next character
-        position.x += glyph.x_advance * size_scale * game_state.pixels_to_units;
+        position.x += glyph.x_advance * size_scale * game_state.pixels_to_units_2d;
         text += 1;
     }
 }

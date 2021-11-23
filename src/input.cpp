@@ -11,9 +11,15 @@ internal void handle_key_down(u8 scan_code, u16 virtual_code, bool alt_down) {
 
     input_state.key_down[virtual_code] = true;
 
-    if (virtual_code == VK_ESCAPE) {
+    if (virtual_code == VK_F1) {
+        toggle_console();
+    }
+    else if (virtual_code == VK_F2) {
         input_state.mouse_locked = !input_state.mouse_locked;
         ShowCursor(!input_state.mouse_locked);
+    }
+    else if (virtual_code == VK_ESCAPE) {
+        exit(0);
     }
 }
 
@@ -31,6 +37,10 @@ internal void handle_char(wchar_t c) {
     KeyInput key = {};
     key.character = c;
     key.pressed   = true;
+
+    if (console_open) {
+        console_handle_char_input(key);
+    }
 }
 
 internal void handle_mouse_input() {
@@ -44,34 +54,3 @@ internal void handle_mouse_input() {
         camera_handle_mouse(game_state.camera, input_state.mouse_dx, input_state.mouse_dy);
     }
 }
-
-// @Speed: creating new vectors everytime
-internal void camera_handle_input(Camera &camera) {
-    const f32 CAMERA_SPEED = .5f;
-
-    Vector3 forward = get_forward_vector(camera);
-    Vector3 side    = get_side_vector(camera);
-    Vector3 input   = {};
-
-    if (key_is_pressed(VK_LEFT)) {
-        input.x = -1;
-    }
-    if (key_is_pressed(VK_RIGHT)) {
-        input.x = 1;
-    }
-    if (key_is_pressed(VK_UP)) {
-        input.y = -1;
-    }
-    if (key_is_pressed(VK_DOWN)) {
-        input.y = 1;
-    }
-    
-    normalize(input);
-
-    Vector3 offset = multiply(input, CAMERA_SPEED);
-
-    camera.position = add(camera.position, multiply(side, offset.x));
-    camera.position = add(camera.position, multiply(forward, offset.y));
-}
-
-

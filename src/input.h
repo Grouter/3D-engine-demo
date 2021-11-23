@@ -23,4 +23,6 @@ struct InputState {
     i32 mouse_old_y;
 };
 
+inline bool key_is_pressed(char keycode);
+
 #endif

@@ -52,8 +52,8 @@ const u32 INITIAL_WINDOW_H = 1080;
 const u32 VIRTUAL_WINDOW_W = 1920;
 const u32 VIRTUAL_WINDOW_H = 1080;
 
-const u32 VIRTUAL_WINDOW_W_FONT = 32;
-const u32 VIRTUAL_WINDOW_H_FONT = 18;
+const u32 VIRTUAL_WINDOW_W_2D = 32;
+const u32 VIRTUAL_WINDOW_H_2D = 18;
 
 const u32 TARGET_ASPECT_W = 16;
 const u32 TARGET_ASPECT_H = 9;
@@ -67,6 +67,7 @@ const u32 TARGET_ASPECT_H = 9;
 #include "catalog.h"
 #include "parse_utils.cpp"
 #include "color.h"
+#include "utils.h"
 
 #include "graphics.h"
 #include "font.h"
@@ -78,7 +79,9 @@ const u32 TARGET_ASPECT_H = 9;
 #include "render.h"
 #include "text_input.h"
 #include "entity.h"
+#include "console.h"
 #include "game.h"
+#include "commands.h"
 
 struct Viewport {
     i32 left, bottom;
@@ -94,6 +97,9 @@ struct GameState {
 
     f32 unit_to_pixels;
     f32 pixels_to_units;
+
+    f32 unit_to_pixels_2d;
+    f32 pixels_to_units_2d;
 
     Matrix4x4 ortho_proj;
 
@@ -113,11 +119,13 @@ global Program *current_shader;
 #include "resources.cpp"
 #include "hotload.cpp"
 #include "camera.cpp"
-#include "input.cpp"
 #include "render.cpp"
 #include "text_input.cpp"
 #include "entity.cpp"
+#include "console.cpp"
 #include "game.cpp"
+#include "input.cpp"
+#include "commands.cpp"
 
 LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {
     LRESULT result = 1;
@@ -164,8 +172,11 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
                 );
             }
 
-            game_state.unit_to_pixels = (f32)game_state.viewport.width / (f32)TARGET_ASPECT_W;
+            game_state.unit_to_pixels = (f32)game_state.viewport.width / (f32)VIRTUAL_WINDOW_W;
             game_state.pixels_to_units = 1.0f / game_state.unit_to_pixels;
+
+            game_state.unit_to_pixels_2d = (f32)game_state.viewport.width / (f32)VIRTUAL_WINDOW_W_2D;
+            game_state.pixels_to_units_2d = 1.0f / game_state.unit_to_pixels_2d;
         } break;
 
         case WM_DESTROY: {
@@ -234,14 +245,6 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
     return result;
 }
 
-inline u64 millis() {
-    timespec t;
-
-    timespec_get(&t, TIME_UTC);
-
-    return (t.tv_sec * 1000) + (t.tv_nsec / 1000000);
-}
-
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_line, int show_code) {
     WNDCLASS window_class = {};
 
@@ -286,6 +289,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
     init_game();
     init_renderer();
+    init_commands();
+    init_console();
     init_hotload();
 
     std::thread hotload_thread(hotload_watcher);
@@ -321,6 +326,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
         glClearColor(1.0, 0.0, 1.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        draw_console(delta_time);
 
         render();
 

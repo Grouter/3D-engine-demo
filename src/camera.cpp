@@ -113,3 +113,32 @@ internal void camera_handle_mouse(Camera &camera, i32 dx, i32 dy) {
         camera.rotation.pitch += 360.0f;
     }
 }
+
+// @Speed: creating new vectors everytime
+internal void camera_handle_input(Camera &camera) {
+    const f32 CAMERA_SPEED = .5f;
+
+    Vector3 forward = get_forward_vector(camera);
+    Vector3 side    = get_side_vector(camera);
+    Vector3 input   = {};
+
+    if (key_is_pressed(VK_LEFT)) {
+        input.x = -1;
+    }
+    if (key_is_pressed(VK_RIGHT)) {
+        input.x = 1;
+    }
+    if (key_is_pressed(VK_UP)) {
+        input.y = -1;
+    }
+    if (key_is_pressed(VK_DOWN)) {
+        input.y = 1;
+    }
+
+    normalize(input);
+
+    Vector3 offset = multiply(input, CAMERA_SPEED);
+
+    camera.position = add(camera.position, multiply(side, offset.x));
+    camera.position = add(camera.position, multiply(forward, offset.y));
+}

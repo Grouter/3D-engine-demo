@@ -1,5 +1,5 @@
 internal void draw_text_input(TextInput &input, f32 dt, Vector3 bottom_left, Vector2 size, Font &font, f32 font_scale, Color text_color = Color_BLACK) {
-    f32 font_unit_height = font.size * game_state.pixels_to_units * font_scale;
+    f32 font_unit_height = font.size * game_state.pixels_to_units_2d * font_scale;
 
     // Draw text
     {
