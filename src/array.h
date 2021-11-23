@@ -1,11 +1,10 @@
 #if !defined(ARRAY_H)
 #define ARRAY_H
 
-// @Todo: fast add without resize checks
-
 #define free_array(a) {if ((a).data) { free((a).data); } }
 
 #define array_foreach(a, it) for ((it) = (a).data; ((it) - (a).data) < (i64)(a).length; (it)++)
+#define array_iterate_back(a, it, idx) for ((idx) = ((a).length - 1), (it) = ((a).data + (a).length - 1); (idx) >= 0; (idx)--, (it)--)
 
 template <typename T>
 struct Array {
@@ -13,15 +12,25 @@ struct Array {
     u64 capacity;
     T *data;
 
+    inline bool is_full();
+
     void reserve(u32 amount);
+
     void add(T item);
     // Adds an item without checking for a resize.
     void fast_add(T item);
-    T* get(u64 index);
+    // Allocates space from item and returns pointer to that space.
+    T* allocate();
+
+    T& operator[] (u64 index);
+    T& last();
+
     void remove(u64 index);
     // This will reorder the array!
     void fast_remove(u64 index);
     void remove_last();
+    void remove_last_and_zero_out();
+
     void clear();
 };
 
@@ -36,6 +45,11 @@ internal void allocate_array(Array<T> &array, u64 size) {
     else {
         array.data = (T*)malloc(sizeof(T) * size);
     }
+}
+
+template <typename T>
+inline bool Array<T>::is_full() {
+    return this->length == this->capacity;
 }
 
 template <typename T>
@@ -67,6 +81,20 @@ void Array<T>::add(T item) {
 }
 
 template <typename T>
+T* Array<T>::allocate() {
+    if (this->length >= this->capacity) {
+        // @Todo: do we want to +1 the capacity or more?
+        this->reserve(1);
+    }
+
+    assert(this->length < this->capacity);
+
+    this->length += 1;
+
+    return (this->data + this->length - 1);
+}
+
+template <typename T>
 void Array<T>::fast_add(T item) {
     assert(this->length < this->capacity);
 
@@ -75,10 +103,19 @@ void Array<T>::fast_add(T item) {
 }
 
 template <typename T>
-T* Array<T>::get(u64 index) {
+T& Array<T>::operator[] (u64 index) {
     assert(index < this->length);
 
-    return (this->data + index);
+    T& result = this->data[index];
+
+    return result;
+}
+
+template <typename T>
+T& Array<T>::last() {
+    assert(this->length > 0);
+
+    return (this->data + this->length - 1);
 }
 
 template <typename T>
@@ -119,6 +156,15 @@ void Array<T>::fast_remove(u64 index) {
 template <typename T>
 void Array<T>::remove_last() {
     assert(this->length > 0);
+
+    this->length--;
+}
+
+template <typename T>
+void Array<T>::remove_last_and_zero_out() {
+    assert(this->length > 0);
+
+    memset(this->data + this->length - 1, 0, sizeof(T));
 
     this->length--;
 }

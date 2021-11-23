@@ -90,4 +90,14 @@ inline Vector3 add(Vector3 a, Vector3 b) {
     return { a.x + b.x, a.y + b.y, a.z + b.z };
 }
 
+inline Vector3 lerp(Vector3 a, Vector3 b, f32 t) {
+    Vector3 result;
+
+    result.x = lerp(a.x, b.x, t);
+    result.y = lerp(a.y, b.y, t);
+    result.z = lerp(a.z, b.z, t);
+
+    return result;
+}
+
 #endif

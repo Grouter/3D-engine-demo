@@ -13,6 +13,11 @@ struct Camera {
 
     Matrix4x4 perspective;
     Matrix4x4 transform;
+
+    bool32 animation_play = false;
+    f32 animation_speed = 1.0f;
+    u32 animation_key_index;
+    f32 animation_t;
 };
 
 #endif

@@ -54,6 +54,7 @@ const u32 TARGET_ASPECT_H = 9;
 #include "parse_utils.cpp"
 
 #include "graphics.h"
+#include "animation.h"
 #include "resources.h"
 #include "hotload.h"
 #include "camera.h"
@@ -214,6 +215,14 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
     return result;
 }
 
+inline u64 millis() {
+    timespec t;
+
+    timespec_get(&t, TIME_UTC);
+
+    return (t.tv_sec * 1000) + (t.tv_nsec / 1000000);
+}
+
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_line, int show_code) {
     WNDCLASS window_class = {};
 
@@ -256,6 +265,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
     MSG message = {};
 
+    u64 current_time = millis();
+
     while (1) {
         while (PeekMessage(&message, NULL, 0, 0, PM_NOREMOVE)) {
             if (GetMessage(&message, NULL, 0, 0)) {
@@ -273,7 +284,13 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
         handle_mouse_input();
 
-        tick();
+        u64 new_time = millis();
+        u64 frame_time = new_time - current_time;
+        current_time = new_time;
+
+        f32 delta_time = (f32)frame_time / 1000.0f;
+
+        tick(delta_time);
 
         glClearColor(1.0, 0.0, 1.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -24,23 +24,47 @@ internal bool read_whole_file(const char *name, Array<char> &buffer) {
     return true;
 }
 
-inline void eat_whitespace(char **buffer) {
-    while ((*buffer)[0] > 0 && isspace((*buffer)[0]))
-        *buffer = (*buffer) + 1;
+// Eats only spaces and tabs
+internal char* eat_spaces(char *buffer) {
+    while (*buffer > 0 && (*buffer == ' ' || *buffer == '\t')) buffer++;
+
+    return buffer;
 }
 
-inline void eat_until(char **buffer, char until) {
-    while ((*buffer)[0] > 0 && (*buffer)[0] != until)
-        *buffer = (*buffer) + 1;
+// Eats also end of lines
+internal char* eat_whitespace(char *buffer) {
+    while (*buffer > 0 && isspace(*buffer)) buffer++;
+
+    return buffer;
 }
 
-inline u32 find(char *buffer, char to_find) {
+internal char* eat(char *buffer, char stop, bool include_stop = false) {
+    while (*buffer > 0 && *buffer != stop) buffer++;
+
+    if (*buffer != 0 && include_stop) buffer++;
+
+    return buffer;
+}
+
+internal char* eat_until_whitespace(char *buffer) {
+    while (*buffer > 0 && !isspace(*buffer)) buffer++;
+
+    return buffer;
+}
+
+internal char* eat_until(char *buffer, char until) {
+    while (*buffer > 0 && *buffer != until) buffer++;
+
+    return buffer;
+}
+
+internal u32 find(char *buffer, char to_find) {
     u32 res = 0;
     while (buffer[res] > 0 && buffer[res] != to_find) res++;
     return res;
 }
 
-inline u32 word_length(char *buffer) {
+internal u32 word_length(char *buffer) {
     u32 res = 0;
     while (buffer[res] > 0 && !isspace(buffer[res])) res++;
     return res;

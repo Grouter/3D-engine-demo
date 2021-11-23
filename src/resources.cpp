@@ -30,7 +30,7 @@ internal Mesh *get_mesh(const char *name) {
         return nullptr;
     }
 
-    Mesh *result = game_state.resources.meshes.get(index);
+    Mesh *result = &game_state.resources.meshes[index];
 
     return result;
 }
@@ -244,13 +244,13 @@ internal bool load_mesh_file(const char *override_name = nullptr) {
     char *walker = buffer.data;
 
     while(walker[0] > 0) {
-        eat_whitespace(&walker);
+        walker = eat_whitespace(walker);
 
         if (walker[0] == 0)
             break;
 
         if (walker[0] == '#') {
-            eat_until(&walker, '\n');
+            walker = eat_until(walker, '\n');
             continue;
         }
 
@@ -274,7 +274,7 @@ internal bool load_mesh_file(const char *override_name = nullptr) {
             sub_mesh_index = 0;
 
             walker++;   // Skip '!' char
-            eat_whitespace(&walker);
+            walker = eat_whitespace(walker);
 
             // Parse name
             {
@@ -283,7 +283,7 @@ internal bool load_mesh_file(const char *override_name = nullptr) {
                 walker += mesh_name_len;
             }
 
-            eat_whitespace(&walker);
+            walker = eat_whitespace(walker);
 
             // Parse mesh file
             {
@@ -349,13 +349,13 @@ internal bool load_material_file(const char *override_name = nullptr) {
     char *walker = buffer.data;
 
     while(walker[0] > 0) {
-        eat_whitespace(&walker);
+        walker = eat_whitespace(walker);
 
         if (walker[0] == 0)
             break;
 
         if (walker[0] == '#') {
-            eat_until(&walker, '\n');
+            walker = eat_until(walker, '\n');
             continue;
         }
 
@@ -375,7 +375,7 @@ internal bool load_material_file(const char *override_name = nullptr) {
             material_name.clear();
 
             walker++;   // Skip '!' char
-            eat_whitespace(&walker);
+            walker = eat_whitespace(walker);
 
             u64 material_name_len = word_length(walker);
             material_name.append(walker, material_name_len);
@@ -392,15 +392,15 @@ internal bool load_material_file(const char *override_name = nullptr) {
 
         if (strncmp(walker, "color", attr_name_len) == 0) {
             walker += attr_name_len + 1;
-            eat_whitespace(&walker);
+            walker = eat_whitespace(walker);
 
             sscanf(walker, "%f %f %f", &material.color.x, &material.color.y, &material.color.z);
 
-            eat_until(&walker, '\n');
+            walker = eat_until(walker, '\n');
         }
         else if (strncmp(walker, "texture", attr_name_len) == 0) {
             walker += attr_name_len + 1;
-            eat_whitespace(&walker);
+            walker = eat_whitespace(walker);
 
             u64 texture_name_len = word_length(walker);
 
@@ -419,7 +419,7 @@ internal bool load_material_file(const char *override_name = nullptr) {
 
             material.texture = texture;
 
-            eat_until(&walker, '\n');
+            walker = eat_until(walker, '\n');
         }
     }
 
@@ -480,6 +480,8 @@ internal void init_resources(Resources &resources) {
 
     // @Todo: Error material? This material would be returned
     // when user tries to find a non-existing material.
+
+    resources.camera_animation = load_camera_animation("test.keyframes");
 }
 
 internal void unload_meshes() {

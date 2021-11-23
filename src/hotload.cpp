@@ -70,7 +70,7 @@ internal void hotload_watcher() {
 
         // File extension
         char *extension = file_path;
-        eat_until(&extension, '.');
+        extension = eat_until(extension, '.');
         extension += 1;
 
         if (strncmp(extension, "glsl", 4) == 0) {

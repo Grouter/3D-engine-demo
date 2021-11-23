@@ -1,6 +1,6 @@
 internal void init() {
     game_state.camera = create_camera(VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H, 80.0f);
-    game_state.camera.rotation.yaw = 90.0f;
+    game_state.camera.rotation.y = 90.0f;
     game_state.camera.position.z = 10.0f;
 
     init_resources(game_state.resources);
@@ -30,6 +30,9 @@ internal void init() {
 
         e->position.x = -10.0f;
     }
+
+    // Uncomment for animationzz
+    // camera_start_animation(game_state.camera);
 }
 
 // @Temporary: testing
@@ -37,9 +40,10 @@ internal void rotate_entity(Entity &entity) {
     entity.rotation.y += 0.01f;
 }
 
-internal void tick() {
+internal void tick(f32 dt) {
     camera_handle_input(game_state.camera);
 
+    camera_animate(game_state.camera, game_state.resources.camera_animation, dt);
     camera_update(game_state.camera);
 
     game_state.entities.base_entities.for_each(rotate_entity);

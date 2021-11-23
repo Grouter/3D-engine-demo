@@ -17,6 +17,43 @@ internal Camera create_camera(u32 window_w, u32 window_h, f32 fov) {
     return camera;
 }
 
+internal void camera_start_animation(Camera &camera) {
+    camera.animation_play = true;
+    camera.animation_key_index = 0;
+    camera.animation_t = 0.0f;
+}
+
+internal void camera_animate(Camera &camera, CameraAnimation animation, f32 dt) {
+    if (!camera.animation_play) return;
+
+    if (camera.animation_key_index >= animation.key_count) {
+        camera.animation_play = false;
+        return;
+    }
+
+    // First frame is just teleporting camera to that position/rotation
+    if (camera.animation_key_index == 0) {
+        camera.position = animation.positions[0];
+        camera.rotation = animation.rotations[0];
+
+        camera.animation_t = 0.0f;
+        camera.animation_key_index = 1;
+        return;
+    }
+
+    u32 key = camera.animation_key_index;
+
+    camera.position = lerp(animation.positions[key - 1], animation.positions[key], camera.animation_t);
+    camera.rotation = lerp(animation.rotations[key - 1], animation.rotations[key], camera.animation_t);
+
+    camera.animation_t += dt * camera.animation_speed;
+
+    if (camera.animation_t >= 1.0f) {
+        camera.animation_t = 0.0f;
+        camera.animation_key_index += 1;
+    }
+}
+
 internal void camera_update(Camera &camera) {
     if (camera.rotation.pitch > 89.0f)
         camera.rotation.pitch = 89.0f;

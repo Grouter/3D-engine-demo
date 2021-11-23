@@ -126,7 +126,7 @@ internal void flush_draw_calls() {
 
             if (active_material_index != material_index) {
                 active_material_index = material_index;
-                material = game_state.resources.materials.get(material_index);
+                material = &game_state.resources.materials[material_index];
 
                 set_material_color(material->color);
 

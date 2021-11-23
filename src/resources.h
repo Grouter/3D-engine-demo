@@ -15,6 +15,8 @@ struct Resources {
     Array<Mesh>     meshes;
     Array<u32>      textures;
     Array<Material> materials;
+
+    CameraAnimation camera_animation;
 };
 
 #endif
