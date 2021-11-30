@@ -12,6 +12,7 @@ global Array<Command> commands;
 // Forward declare commands here:
 internal void command_ping(Array<char *> &args);
 internal void command_add(Array<char *> &args);
+internal void command_start_camera(Array<char *> &args);
 
 internal void _convert(const char *src, f32 *loc) { *loc = (f32)std::atof(src); }
 internal void _convert(const char *src, i32 *loc) { *loc = std::atoi(src); }
@@ -31,6 +32,7 @@ internal void init_commands() {
 
     add_command("ping", 0, command_ping);
     add_command("add", 2, command_add);
+    add_command("start_camera", 0, command_start_camera);
 }
 
 internal void execute_command(char *input) {

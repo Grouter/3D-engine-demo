@@ -10,7 +10,7 @@ internal void init_game() {
     load_mesh_file();
 
     allocate_entity_storage(game_state.entities);
-    
+
     {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = get_mesh("island");
@@ -48,7 +48,6 @@ internal void init_game() {
         Entity *e = create_base_entity(game_state.entities);
         e->mesh = get_mesh("docks");
         e->program = &game_state.resources.programs[0];
-
         e->position.z += 47.0f;
         e->position.y -= 6.0f;
     }
@@ -81,6 +80,28 @@ internal void tick(f32 dt) {
 
                 bird_data->hover_animation += dt * BIRD_HOVER_SPEED;
                 it->position.y = BIRD_HEIGHTS + (sinf(bird_data->hover_animation) * BIRD_HOVER_AMPL);
+
+                // Find new target if current is reached
+                {
+                    f32 d = distance(it->position, bird_data->fly_target);
+                    if (d <= 1.0f) {
+                        bird_data->fly_target.x = (f32)(rand() % 50) - 25.0f;
+                        bird_data->fly_target.z = (f32)(rand() % 50) - 25.0f;
+                    }
+                }
+
+                // Move towads target
+                // @Todo: finer rotations
+                {
+                    Vector3 direction = bird_data->fly_target - it->position;
+                    normalize(direction);
+
+                    // @Todo: rotate to direction
+
+                    direction *= BIRD_SPEED * dt;
+
+                    it->position += direction;
+                }
             }
         }}
     }
