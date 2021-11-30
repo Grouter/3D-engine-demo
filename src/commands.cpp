@@ -8,3 +8,8 @@ internal void command_add(Array<char *> &args) {
 
     console_add_to_history("%d + %d = %d", a, b, a + b);
 }
+
+internal void command_start_camera(Array<char *> &args) {
+    console_add_to_history("Starting camera animation...");
+    camera_start_animation(game_state.camera);
+}

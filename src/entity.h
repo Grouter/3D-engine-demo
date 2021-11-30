@@ -4,8 +4,8 @@
 #include "platform.h"
 
 const f32 BIRD_HEIGHTS = 0.0f;
-const f32 BIRD_SPEED = 0.2f;
-const f32 BIRD_HOVER_SPEED = 0.5f;
+const f32 BIRD_SPEED = 3.0f;
+const f32 BIRD_HOVER_SPEED = 1.5f;
 const f32 BIRD_HOVER_AMPL = 0.2f;
 
 enum EntityType {

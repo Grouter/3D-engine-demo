@@ -35,7 +35,7 @@ internal void init_game() {
     }
 #endif
 
-    {
+    for (i32 i = 0; i < 10; i++) {
         Entity *e = create_bird(game_state.entities);
         e->scale = make_vector3(0.5f);
         e->mesh = get_mesh("cube");
@@ -62,6 +62,28 @@ internal void tick(f32 dt) {
 
                 bird_data->hover_animation += dt * BIRD_HOVER_SPEED;
                 it->position.y = BIRD_HEIGHTS + (sinf(bird_data->hover_animation) * BIRD_HOVER_AMPL);
+
+                // Find new target if current is reached
+                {
+                    f32 d = distance(it->position, bird_data->fly_target);
+                    if (d <= 1.0f) {
+                        bird_data->fly_target.x = (f32)(rand() % 50) - 25.0f;
+                        bird_data->fly_target.z = (f32)(rand() % 50) - 25.0f;
+                    }
+                }
+
+                // Move towads target
+                // @Todo: finer rotations
+                {
+                    Vector3 direction = bird_data->fly_target - it->position;
+                    normalize(direction);
+
+                    // @Todo: rotate to direction
+
+                    direction *= BIRD_SPEED * dt;
+
+                    it->position += direction;
+                }
             }
         }}
     }
