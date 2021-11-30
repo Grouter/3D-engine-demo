@@ -4,7 +4,7 @@
 #include "platform.h"
 
 const f32 BIRD_HEIGHTS = 0.0f;
-const f32 BIRD_SPEED = 1.0f;
+const f32 BIRD_SPEED = 0.2f;
 const f32 BIRD_HOVER_SPEED = 0.5f;
 const f32 BIRD_HOVER_AMPL = 0.2f;
 
@@ -22,7 +22,7 @@ struct Entity {
 
     Vector3 position = {};
     Vector3 rotation = {};   // Radians
-    Vector3 scale    = {};
+    Vector3 scale    = V3_ONE;
 
     Program *program = nullptr;
     Mesh *mesh       = nullptr;
@@ -30,7 +30,6 @@ struct Entity {
 
 struct BirdData {
     Vector2 direction;
-    Vector2 velocity;
     Vector3 fly_target;
     f32 hover_animation;
 };

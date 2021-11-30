@@ -60,7 +60,8 @@ inline Vector2 make_vector2(f32 x, f32 y) {
 // :Vector3
 //
 
-const Vector3 V3_UP = Vector3 { 0.0f, 1.0f, 0.0f };
+const Vector3 V3_ONE = { 1.0f, 1.0f, 1.0f };
+const Vector3 V3_UP = { 0.0f, 1.0f, 0.0f };
 
 inline Vector3 make_vector3(f32 x, f32 y, f32 z) {
     Vector3 result = { x, y, z };
@@ -80,7 +81,7 @@ inline f32 length(Vector3 v) {
     return result;
 }
 
-inline void normalize(Vector3 v) {
+inline void normalize(Vector3 &v) {
     float l = length(v);
 
     if (l == 0)
@@ -161,6 +162,15 @@ inline Vector3 lerp(Vector3 a, Vector3 b, f32 t) {
     result.z = lerp(a.z, b.z, t);
 
     return result;
+}
+
+inline void limit(Vector3 &v, f32 max_length) {
+    f32 l = length(v);
+
+    if (l <= max_length) return;
+
+    normalize(v);
+    v *= max_length;
 }
 
 inline f32 distance(Vector3 a, Vector3 b) {

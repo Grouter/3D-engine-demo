@@ -62,11 +62,6 @@ internal void tick(f32 dt) {
 
                 bird_data->hover_animation += dt * BIRD_HOVER_SPEED;
                 it->position.y = BIRD_HEIGHTS + (sinf(bird_data->hover_animation) * BIRD_HOVER_AMPL);
-
-
-
-                it->position.x += bird_data->velocity.x;
-                it->position.z += bird_data->velocity.y;
             }
         }}
     }
