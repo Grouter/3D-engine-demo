@@ -10,36 +10,55 @@ internal void init_game() {
     load_mesh_file();
 
     allocate_entity_storage(game_state.entities);
-
-#if 0
+    
     {
         Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("monkey");
+        e->mesh = get_mesh("island");
         e->program = &game_state.resources.programs[0];
+        e->scale = make_vector3(1.5f);
+        e->position.y -= 1.0f;
     }
-
     {
         Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("cube");
+        e->mesh = get_mesh("houses_left");
         e->program = &game_state.resources.programs[0];
 
-        e->position.x = 10.0f;
+        e->position.x -= 10.0f;
     }
-
     {
         Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("cube");
+        e->mesh = get_mesh("houses_right");
         e->program = &game_state.resources.programs[0];
 
-        e->position.x = -10.0f;
+        e->position.x += 10.0f;
     }
-#endif
-
     {
-        Entity *e = create_bird(game_state.entities);
-        e->scale = make_vector3(0.5f);
-        e->mesh = get_mesh("cube");
+        Entity *e = create_base_entity(game_state.entities);
+        e->mesh = get_mesh("alchym");
         e->program = &game_state.resources.programs[0];
+    }
+    {
+        Entity *e = create_base_entity(game_state.entities);
+        e->mesh = get_mesh("ship");
+        e->program = &game_state.resources.programs[0];
+
+        e->position.z += 60.0f;
+    }
+    {
+        Entity *e = create_base_entity(game_state.entities);
+        e->mesh = get_mesh("docks");
+        e->program = &game_state.resources.programs[0];
+
+        e->position.z += 47.0f;
+        e->position.y -= 6.0f;
+    }
+    {
+        Entity *e = create_base_entity(game_state.entities);
+        e->mesh = get_mesh("lanterns");
+        e->program = &game_state.resources.programs[0];
+
+        e->position.z -= 5.0f;
+        e->position.y += .5f;
     }
 
     // Uncomment for animationzz
