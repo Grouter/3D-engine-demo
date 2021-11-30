@@ -24,6 +24,7 @@ internal void init_game() {
         e->program = &game_state.resources.programs[0];
 
         e->position.x -= 10.0f;
+        e->position.z += 3.0f;
     }
     {
         Entity *e = create_base_entity(game_state.entities);
@@ -31,6 +32,7 @@ internal void init_game() {
         e->program = &game_state.resources.programs[0];
 
         e->position.x += 10.0f;
+        e->position.z += 3.0f;
     }
     {
         Entity *e = create_base_entity(game_state.entities);
@@ -56,8 +58,16 @@ internal void init_game() {
         e->mesh = get_mesh("lanterns");
         e->program = &game_state.resources.programs[0];
 
-        e->position.z -= 5.0f;
+        e->position.z -= 2.0f;
         e->position.y += .5f;
+    }
+        {
+        Entity *e = create_base_entity(game_state.entities);
+        e->mesh = get_mesh("tavern");
+        e->program = &game_state.resources.programs[0];
+
+        e->position.z -= 35.0f;
+
     }
 
     // Uncomment for animationzz
