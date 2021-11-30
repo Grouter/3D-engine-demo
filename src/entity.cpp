@@ -32,3 +32,29 @@ internal Entity* create_bird(EntityStorage &storage) {
 
     return bird_entity;
 }
+
+internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type) {
+    Entity *result;
+
+    switch (type) {
+        case EntityType_None : {
+            log_print("Cannot instantiate NONE entity!\n");
+            return nullptr;
+        } break;
+
+        case EntityType_Basic : {
+            result = create_base_entity(storage);
+        } break;
+
+        case EntityType_Bird : {
+            result = create_bird(storage);
+        } break;
+
+        default : {
+            log_print("Unknown entity in create_entity_from_type\n");
+            return nullptr;
+        } break;
+    }
+
+    return result;
+}

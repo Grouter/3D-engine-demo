@@ -1,0 +1,31 @@
+! entity
+mesh: "island"
+position: 0.0, -1.0, 0.0
+scale: 1.5, 1.5, 1.5
+
+! entity
+mesh: "houses_left"
+position: -10.0, 0.0, 3.0
+
+! entity
+mesh: "houses_right"
+position: 10.0, 0.0, 3.0
+
+! entity
+mesh: "alchym"
+
+! entity
+mesh: "ship"
+position: 0.0, 0.0, 60.0
+
+! entity
+mesh: "docks"
+position: 0.0, -6.0, 47.0
+
+! entity
+mesh: "lanterns"
+position: 0.0, 0.5, -2.0
+
+! entity
+mesh: "tavern"
+position: 0.0, 0.0, -35.0

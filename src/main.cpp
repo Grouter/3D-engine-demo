@@ -69,6 +69,7 @@ const u32 TARGET_ASPECT_H = 9;
 #include "color.h"
 #include "utils.h"
 
+#include "parser.h"
 #include "graphics.h"
 #include "font.h"
 #include "animation.h"

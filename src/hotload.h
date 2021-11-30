@@ -2,8 +2,11 @@
 #define HOTLOAD_H
 
 enum HotloadResource {
-    Materials,
-    Meshes
+    HotloadResource_MATERIALS,
+    HotloadResource_MESHES,
+    HotloadResource_WORLD,
+
+    HotloadResource_COUNT
 };
 
 struct HotloadShaderEntry {

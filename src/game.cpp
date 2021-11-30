@@ -11,64 +11,7 @@ internal void init_game() {
 
     allocate_entity_storage(game_state.entities);
 
-    {
-        Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("island");
-        e->program = &game_state.resources.programs[0];
-        e->scale = make_vector3(1.5f);
-        e->position.y -= 1.0f;
-    }
-    {
-        Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("houses_left");
-        e->program = &game_state.resources.programs[0];
-
-        e->position.x -= 10.0f;
-        e->position.z += 3.0f;
-    }
-    {
-        Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("houses_right");
-        e->program = &game_state.resources.programs[0];
-
-        e->position.x += 10.0f;
-        e->position.z += 3.0f;
-    }
-    {
-        Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("alchym");
-        e->program = &game_state.resources.programs[0];
-    }
-    {
-        Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("ship");
-        e->program = &game_state.resources.programs[0];
-
-        e->position.z += 60.0f;
-    }
-    {
-        Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("docks");
-        e->program = &game_state.resources.programs[0];
-        e->position.z += 47.0f;
-        e->position.y -= 6.0f;
-    }
-    {
-        Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("lanterns");
-        e->program = &game_state.resources.programs[0];
-
-        e->position.z -= 2.0f;
-        e->position.y += .5f;
-    }
-        {
-        Entity *e = create_base_entity(game_state.entities);
-        e->mesh = get_mesh("tavern");
-        e->program = &game_state.resources.programs[0];
-
-        e->position.z -= 35.0f;
-
-    }
+    load_world_file(game_state.entities);
 
     // Uncomment for animationzz
     // camera_start_animation(game_state.camera);

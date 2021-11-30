@@ -43,4 +43,6 @@ struct EntityStorage {
     BucketArray<EntityData> entity_data;
 };
 
+internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type);
+
 #endif

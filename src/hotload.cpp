@@ -1,7 +1,7 @@
 global std::mutex _hotload_mutex;
 
 global Array<HotloadShaderEntry> _hotload_shader_queue;
-global bool _hotload_resource_queue[2];
+global bool _hotload_resource_queue[HotloadResource_COUNT];
 
 internal void init_hotload() {
     allocate_array(_hotload_shader_queue, 10);
@@ -99,7 +99,7 @@ internal void hotload_watcher() {
             if (strncmp(file_name, "mesh", 4) == 0) {
                 _hotload_mutex.lock();
 
-                _hotload_resource_queue[HotloadResource::Meshes] = true;
+                _hotload_resource_queue[HotloadResource_MESHES] = true;
 
                 _hotload_mutex.unlock();
 
@@ -107,10 +107,17 @@ internal void hotload_watcher() {
             else if (strncmp(file_name, "material", 8) == 0) {
                 _hotload_mutex.lock();
 
-                _hotload_resource_queue[HotloadResource::Materials] = true;
+                _hotload_resource_queue[HotloadResource_MATERIALS] = true;
 
                 _hotload_mutex.unlock();
             }
+        }
+        else if (strncmp(extension, "world", 4) == 0) {
+            _hotload_mutex.lock();
+
+            _hotload_resource_queue[HotloadResource_WORLD] = true;
+
+            _hotload_mutex.unlock();
         }
     }
 
@@ -153,16 +160,16 @@ internal void process_hotload_queue(Resources &resources) {
         _hotload_shader_queue.remove_last();
     }
 
-    if (_hotload_resource_queue[HotloadResource::Meshes]) {
+    if (_hotload_resource_queue[HotloadResource_MESHES]) {
         log_print("Reloading mesh resources!\n");
 
         unload_meshes();
         load_mesh_file();
 
-        _hotload_resource_queue[HotloadResource::Meshes] = false;
+        _hotload_resource_queue[HotloadResource_MESHES] = false;
     }
 
-    if (_hotload_resource_queue[HotloadResource::Materials]) {
+    if (_hotload_resource_queue[HotloadResource_MATERIALS]) {
         log_print("Reloading material resources!\n");
 
         unload_textures();
@@ -170,7 +177,18 @@ internal void process_hotload_queue(Resources &resources) {
 
         load_material_file();
 
-        _hotload_resource_queue[HotloadResource::Materials] = false;
+        _hotload_resource_queue[HotloadResource_MATERIALS] = false;
+    }
+
+    if (_hotload_resource_queue[HotloadResource_WORLD]) {
+        log_print("Reloading world file!\n");
+
+        game_state.entities.base_entities.clear();
+        game_state.entities.entity_data.clear();
+
+        load_world_file(game_state.entities);
+
+        _hotload_resource_queue[HotloadResource_WORLD] = false;
     }
 
     _hotload_mutex.unlock();

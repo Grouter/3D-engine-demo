@@ -342,103 +342,130 @@ internal bool load_material_file(const char *override_name = nullptr) {
 
     Resources *resources = &game_state.resources;
 
-    Array<char> buffer = {};
+    Array<char> buffer;
 
     bool success = read_whole_file(name, buffer);
-    if (!success) {
-        return false;
-    }
+    if (!success) return false;
 
-    std::string material_name;
     Material material = {};
 
+    Array<VariableBinding> variables;
+    allocate_array(variables, 4);
+
+    char *material_name_start;
     char *walker = buffer.data;
 
-    while(walker[0] > 0) {
-        walker = eat_whitespace(walker);
+    while (*walker) {
+        walker = parse_file_entry(variables, &material_name_start, walker);
 
-        if (walker[0] == 0)
-            break;
+        material = {};
 
-        if (walker[0] == '#') {
-            walker = eat_until(walker, '\n');
-            continue;
-        }
-
-        if (walker[0] == '!') { // New material!
-
-            // We already parsed a material, save it!
-            if (material_name.length() != 0) {
-                log_print("Loaded material: %s\n", material_name.c_str());
-
-                resources->materials.add(material);
-
-                u64 material_index = resources->materials.length - 1;
-
-                catalog_put(resources->material_catalog, material_name.c_str(), material_index);
+        VariableBinding *it;
+        array_foreach(variables, it) {
+            if (strcmp(it->name, "color") == 0) {
+                material.color = it->value.vector4_value;
             }
+            else if (strcmp(it->name, "texture") == 0) {
+                u32 texture;
 
-            material_name.clear();
+                if (catalog_cointains(resources->texture_catalog, it->value.string_value)) {
+                    texture = get_texture(it->value.string_value);
+                }
+                else {
+                    texture = load_texture(it->value.string_value);
+                }
 
-            walker++;   // Skip '!' char
-            walker = eat_whitespace(walker);
-
-            u64 material_name_len = word_length(walker);
-            material_name.append(walker, material_name_len);
-
-            material = {};
-            material.texture = resources->textures.data[0]; // Default texture;
-
-            walker += material_name_len;
-
-            continue;
-        }
-
-        u64 attr_name_len = find(walker, ':');
-
-        if (strncmp(walker, "color", attr_name_len) == 0) {
-            walker += attr_name_len + 1;
-            walker = eat_whitespace(walker);
-
-            sscanf(walker, "%f %f %f %f", &material.color.r, &material.color.g, &material.color.b, &material.color.a);
-
-            walker = eat_until(walker, '\n');
-        }
-        else if (strncmp(walker, "texture", attr_name_len) == 0) {
-            walker += attr_name_len + 1;
-            walker = eat_whitespace(walker);
-
-            u64 texture_name_len = word_length(walker);
-
-            std::string texture_name;
-
-            texture_name.append(walker, texture_name_len);
-
-            u32 texture;
-
-            if (catalog_cointains(game_state.resources.texture_catalog, texture_name.c_str())) {
-                texture = get_texture(texture_name.c_str());
+                material.texture = texture;
             }
-            else {
-                texture = load_texture(texture_name.c_str());
-            }
-
-            material.texture = texture;
-
-            walker = eat_until(walker, '\n');
         }
+
+        // Save material
+        {
+            u32 material_name_length = word_length(material_name_start);
+            log_print("Loaded material: %.*s\n", material_name_length, material_name_start);
+
+            char *material_name = copy_string(material_name_start, material_name_length);
+
+            resources->materials.add(material);
+
+            u64 material_index = resources->materials.length - 1;
+            catalog_put(resources->material_catalog, material_name, material_index);
+
+            free(material_name);
+        }
+
+        variables.clear();
     }
 
-    // Save the last parsed material
-    {
-        log_print("Loaded material: %s\n", material_name.c_str());
+    free_array(variables);
+    free_array(buffer);
 
-        resources->materials.add(material);
+    return true;
+}
 
-        u64 material_index = resources->materials.length - 1;
+internal bool load_world_file(EntityStorage &storage) {
+    Array<char> buffer;
 
-        catalog_put(resources->material_catalog, material_name.c_str(), material_index);
+    bool success = read_whole_file("island.world", buffer);
+    if (!success) return false;
+
+    Array<VariableBinding> variables;
+    allocate_array(variables, 4);
+
+    char *entry_type;
+    char *walker = buffer.data;
+
+    while (*walker) {
+        walker = parse_file_entry(variables, &entry_type, walker);
+
+        if (strncmp(entry_type, "entity", 6) == 0) {
+            EntityType type_of_new_entity = EntityType_Basic;
+
+            // Find type
+            {
+                VariableBinding *it;
+                array_foreach(variables, it) {
+                    if (strcmp(it->name, "type") == 0) {
+                        type_of_new_entity = (EntityType)it->value.integer_value;
+                        break;
+                    }
+                }
+            }
+
+            Entity *new_entity = create_entity_from_type(storage, type_of_new_entity);
+            new_entity->program = &game_state.resources.programs[0];
+
+            if (!new_entity) {
+                log_print("Invalid entity type in world save file\n");
+                variables.clear();
+                continue;
+            }
+
+            VariableBinding *it;
+            array_foreach(variables, it) {
+                if (strcmp(it->name, "mesh") == 0) {
+                    new_entity->mesh = get_mesh(it->value.string_value);
+                }
+                else if (strcmp(it->name, "position") == 0) {
+                    new_entity->position = it->value.vector3_value;
+                }
+                else if (strcmp(it->name, "rotation") == 0) {
+                    new_entity->rotation = it->value.vector3_value;
+                }
+                else if (strcmp(it->name, "scale") == 0) {
+                    new_entity->scale = it->value.vector3_value;
+                }
+            }
+        }
+        else {
+            log_print("Unknown world save file entry\n");
+        }
+
+        variables.clear();
     }
+
+    free_array(variables);
+    free_array(buffer);
 
     return true;
 }
