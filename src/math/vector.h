@@ -68,19 +68,30 @@ inline Vector3 make_vector3(f32 x, f32 y, f32 z) {
     return result;
 }
 
-inline void normalize(Vector3 &v) {
-    float w = sqrt( v.x * v.x + v.y * v.y + v.z * v.z );
+inline Vector3 make_vector3(f32 v) {
+    Vector3 result = { v, v, v };
 
-    if (w == 0)
+    return result;
+}
+
+inline f32 length(Vector3 v) {
+    f32 result = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+
+    return result;
+}
+
+inline void normalize(Vector3 v) {
+    float l = length(v);
+
+    if (l == 0)
         return;
 
-    v.x /= w;
-    v.y /= w;
-    v.z /= w;
+    v.x /= l;
+    v.y /= l;
+    v.z /= l;
 }
 
 inline Vector3 normalized(Vector3 v) {
-
     normalize(v);
 
     return v;
@@ -96,16 +107,50 @@ inline Vector3 cross(Vector3 a, Vector3 b) {
     return cross;
 }
 
-inline Vector3 multiply(Vector3 v, f32 x) {
-    return { v.x * x, v.y * x, v.z * x };
+inline Vector3 operator* (Vector3 a, f32 b) {
+    Vector3 result;
+
+    result.x = a.x * b;
+    result.y = a.y * b;
+    result.z = a.z * b;
+
+    return result;
 }
 
-inline Vector3 multiply(Vector3 a, Vector3 b) {
-    return { a.x * b.x, a.y * b.y, a.z * b.z };
+inline Vector3 operator*= (Vector3 &a, f32 b) {
+    a.x *= b;
+    a.y *= b;
+    a.z *= b;
+
+    return a;
 }
 
-inline Vector3 add(Vector3 a, Vector3 b) {
-    return { a.x + b.x, a.y + b.y, a.z + b.z };
+inline Vector3 operator+ (Vector3 a, Vector3 b) {
+    Vector3 result;
+
+    result.x = a.x + b.x;
+    result.y = a.y + b.y;
+    result.z = a.z + b.z;
+
+    return result;
+}
+
+inline Vector3 operator+= (Vector3 &a, Vector3 b) {
+    a.x += b.x;
+    a.y += b.y;
+    a.z += b.z;
+
+    return a;
+}
+
+inline Vector3 operator- (Vector3 a, Vector3 b) {
+    Vector3 result;
+
+    result.x = a.x - b.x;
+    result.y = a.y - b.y;
+    result.z = a.z - b.z;
+
+    return result;
 }
 
 inline Vector3 lerp(Vector3 a, Vector3 b, f32 t) {
@@ -114,6 +159,14 @@ inline Vector3 lerp(Vector3 a, Vector3 b, f32 t) {
     result.x = lerp(a.x, b.x, t);
     result.y = lerp(a.y, b.y, t);
     result.z = lerp(a.z, b.z, t);
+
+    return result;
+}
+
+inline f32 distance(Vector3 a, Vector3 b) {
+    Vector3 line = b - a;
+
+    f32 result = length(line);
 
     return result;
 }

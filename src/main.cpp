@@ -192,6 +192,7 @@ LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPAR
             window_context = 0;
 
             PostQuitMessage(0);
+            exit(0);
         } break;
 
         case WM_KEYUP:

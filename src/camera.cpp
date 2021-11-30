@@ -137,8 +137,8 @@ internal void camera_handle_input(Camera &camera) {
 
     normalize(input);
 
-    Vector3 offset = multiply(input, CAMERA_SPEED);
+    Vector3 offset = input * CAMERA_SPEED;
 
-    camera.position = add(camera.position, multiply(side, offset.x));
-    camera.position = add(camera.position, multiply(forward, offset.y));
+    camera.position += (side * offset.x);
+    camera.position += (forward * offset.y);
 }
