@@ -1,3 +1,7 @@
 ! restt
 color: 1.0 1.0 1.0 1.0
 texture: restt2.png
+
+! color_palette
+color: 1.0 1.0 1.0 1.0
+texture: color_palette.png
