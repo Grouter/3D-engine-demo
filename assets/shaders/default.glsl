@@ -57,10 +57,12 @@ float calc_shadow(vec4 light_frag_pos) {
     float result = 0.0;
     vec2 texel_size = 1.0 / textureSize(shadow_texture, 0);
 
+    float bias = max(0.001 * (1.0 - dot(f_normal, sun_dir)), 0.0005);
+
     for (int x = -1; x <= 1; ++x) {
         for (int y = -1; y <= 1; ++y) {
             float pcf_depth = texture(shadow_texture, light_lookup.xy + vec2(x, y) * texel_size).r;
-            result += current_depth - 0.005 > pcf_depth ? 1.0 : 0.0;
+            result += (current_depth - bias) > pcf_depth ? 1.0 : 0.0;
         }
     }
     result /= 9.0;

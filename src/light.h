@@ -1,7 +1,7 @@
 #if !defined(LIGHT_H)
 #define LIGHT_H
 
-const u32 SHADOW_SIZE = 4096;
+const u32 SHADOW_SIZE = 8192;
 
 struct LightData {
     u32 frame_buffer;
