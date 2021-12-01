@@ -51,21 +51,25 @@ float calc_shadow(vec4 light_frag_pos) {
     float closest_depth = texture(shadow_texture, light_lookup.xy).r;
     float current_depth = light_lookup.z;
 
+    float bias = max(0.001 * (1.0 - dot(f_normal, sun_dir)), 0.0005);
+
 #if 0
-    float result = (current_depth - 0.005) > closest_depth ? 1.0 : 0.0;
+    float result = (current_depth - bias) > closest_depth ? 1.0 : 0.0;
 #else
     float result = 0.0;
     vec2 texel_size = 1.0 / textureSize(shadow_texture, 0);
 
-    float bias = max(0.001 * (1.0 - dot(f_normal, sun_dir)), 0.0005);
+    int soft_count = 2;
 
-    for (int x = -1; x <= 1; ++x) {
-        for (int y = -1; y <= 1; ++y) {
+    for (int x = -soft_count; x <= soft_count; ++x) {
+        for (int y = -soft_count; y <= soft_count; ++y) {
             float pcf_depth = texture(shadow_texture, light_lookup.xy + vec2(x, y) * texel_size).r;
             result += (current_depth - bias) > pcf_depth ? 1.0 : 0.0;
         }
     }
-    result /= 9.0;
+
+    float s = (soft_count * 2.0 + 1.0);
+    result /= (s * s);
 #endif
     return result;
 }

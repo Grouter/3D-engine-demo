@@ -21,7 +21,7 @@ internal void init_game() {
 
     // Light
     init_light_data(game_state.light_data);
-    game_state.light_data.sun_direction = normalized(make_vector3(0.2f, -1.0f, -0.3f));
+    game_state.light_data.sun_direction = normalized(make_vector3(0.2f, -1.0f, -0.2f));
 
     // Spawn rocks
     {
