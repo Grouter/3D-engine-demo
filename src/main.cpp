@@ -127,6 +127,7 @@ global Program *current_shader;
 #include "hotload.cpp"
 #include "camera.cpp"
 #include "render.cpp"
+#include "debug.cpp"
 #include "text_input.cpp"
 #include "entity.cpp"
 #include "console.cpp"
@@ -336,6 +337,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         draw_console(delta_time);
+        draw_debug_info(delta_time);
 
         render();
 
