@@ -32,6 +32,9 @@ lanterns.obj
 ! tavern
 tavern.obj
 
+! logs
+logs.obj
+
 ! rock1
 rock1.obj
 grey
