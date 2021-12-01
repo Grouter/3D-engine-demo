@@ -105,6 +105,8 @@ struct GameState {
     Matrix4x4 ortho_proj;
 
     // Gameplay
+    f32 time_elapsed;
+
     Resources resources;
     Camera camera;
     EntityStorage entities;
@@ -326,7 +328,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
         tick(delta_time);
 
-        glClearColor(1.0, 0.0, 1.0, 1.0);
+        glClearColor(0.45f, 0.82f, 0.94f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         draw_console(delta_time);
@@ -336,6 +338,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
         glFlush();
 
         SwapBuffers(window_context);
+
+        game_state.time_elapsed += delta_time;
     }
 
     hotload_thread.join();

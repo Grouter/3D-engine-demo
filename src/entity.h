@@ -3,20 +3,27 @@
 
 #include "platform.h"
 
+const u32 ROCKS          = 50;
+const u32 SUB_ROCKS      = 5;
+const u32 SUB_SUB_ROCKS  = 10;
+
+constexpr u32 ROCK_COUNT = ROCKS * SUB_ROCKS * SUB_SUB_ROCKS;
+
 const f32 BIRD_HEIGHTS = 0.0f;
 const f32 BIRD_SPEED = 3.0f;
 const f32 BIRD_HOVER_SPEED = 1.5f;
 const f32 BIRD_HOVER_AMPL = 0.2f;
 
 enum EntityType {
-    EntityType_None,
+    EntityType_NONE,
 
-    EntityType_Basic,
-    EntityType_Bird,
+    EntityType_BASIC,
+    EntityType_BIRD,
+    EntityType_FLYING_ROCK,
 };
 
 struct Entity {
-    EntityType type  = EntityType_Basic;
+    EntityType type  = EntityType_BASIC;
 
     BucketLocation data;
 
@@ -34,13 +41,27 @@ struct BirdData {
     f32 hover_animation;
 };
 
+struct FlyingRockData {
+    f32 rotation_direction = 1.0f;
+    i32 hierarchy_level = 0;
+};
+
 union EntityData {
+    FlyingRockData flying_rock_data;
     BirdData bird_data;
+};
+
+struct FlyingRockTransformHierarchy {
+    Array<Matrix4x4> local;
+    Array<i32> lookups;
+    Array<Matrix4x4> results;
 };
 
 struct EntityStorage {
     BucketArray<Entity> base_entities;
     BucketArray<EntityData> entity_data;
+
+    FlyingRockTransformHierarchy flying_rock_transforms;
 };
 
 internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type);

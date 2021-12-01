@@ -16,7 +16,7 @@ struct Program {
 
 struct Material {
     u32 texture;
-    Vector4 color;
+    Vector4 color = V4_ONE;
 };
 
 struct SubMeshInfo {

@@ -56,6 +56,14 @@ inline Vector2 make_vector2(f32 x, f32 y) {
     return result;
 }
 
+inline Vector2 rand_unit_v2() {
+    f32 a = rand_f_range(0.0f, TWO_PI);
+
+    Vector2 result = make_vector2(cosf(a), sinf(a));
+
+    return result;
+}
+
 //
 // :Vector3
 //

@@ -347,7 +347,7 @@ internal bool load_material_file(const char *override_name = nullptr) {
     bool success = read_whole_file(name, buffer);
     if (!success) return false;
 
-    Material material = {};
+    Material material;
 
     Array<VariableBinding> variables;
     allocate_array(variables, 4);
@@ -359,6 +359,7 @@ internal bool load_material_file(const char *override_name = nullptr) {
         walker = parse_file_entry(variables, &material_name_start, walker);
 
         material = {};
+        material.texture = get_texture("white");
 
         VariableBinding *it;
         array_foreach(variables, it) {
@@ -419,7 +420,7 @@ internal bool load_world_file(EntityStorage &storage) {
         walker = parse_file_entry(variables, &entry_type, walker);
 
         if (strncmp(entry_type, "entity", 6) == 0) {
-            EntityType type_of_new_entity = EntityType_Basic;
+            EntityType type_of_new_entity = EntityType_BASIC;
 
             // Find type
             {

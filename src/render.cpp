@@ -228,20 +228,12 @@ internal void draw_rect(Vector3 position, Vector2 size, Color color) {
     _2d_shapes_draw_calls.data.add(draw_call);
 }
 
-internal void render_entity(Entity &entity) {
+internal void render_entity(Entity &entity, Matrix4x4 transform) {
     Mesh *mesh = entity.mesh;
 
     if (mesh == nullptr || mesh->loaded == false) {
         return;
     }
-
-    Matrix4x4 transform = identity();
-
-    scale(transform, entity.scale.x, entity.scale.y, entity.scale.z);
-    translate(transform, entity.position.x, entity.position.y, entity.position.z);
-    // @Todo: quaternions here!
-    rotate(transform, entity.rotation.x, entity.rotation.y, entity.rotation.z);
-
 
     for (u32 i = 0; i < mesh->sub_meshes.length; i++) {
         DrawCallData data;

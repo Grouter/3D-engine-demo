@@ -178,4 +178,14 @@ inline void scale(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
     matrix = multiply(matrix, scale_m);
 }
 
+inline Matrix4x4 from(Vector3 position, Vector3 rotation, Vector3 size) {
+    Matrix4x4 result = identity();
+
+    scale(result, size.x, size.y, size.z);
+    rotate(result, rotation.x, rotation.y, rotation.z);
+    translate(result, position.x, position.y, position.z);
+
+    return result;
+}
+
 #endif
