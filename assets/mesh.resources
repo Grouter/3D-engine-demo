@@ -9,7 +9,7 @@ restt
 
 ! island
 island.obj
-restt
+grey
 
 ! houses_left
 houses_left.obj
@@ -47,6 +47,9 @@ color_palette
 
 ! tavern
 tavern.obj
+
+! logs
+logs.obj
 
 ! rock1
 rock1.obj
