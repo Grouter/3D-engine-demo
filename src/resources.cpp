@@ -472,24 +472,27 @@ internal bool load_world_file(EntityStorage &storage) {
 }
 
 internal void init_resources(Resources &resources) {
-    allocate_resource_catalog(resources.shader_catalog, 2);
+    allocate_resource_catalog(resources.shader_catalog, ShaderResource_COUNT);
 
     // Default shader
     {
-        bool status = load_program("shaders/default.glsl", resources.programs[0]);
-        if (!status) {
-            exit(1);
-        }
-        catalog_put(resources.shader_catalog, "default.glsl", 0);
+        bool status = load_program("shaders/default.glsl", resources.programs[ShaderResource_Default]);
+        if (!status) exit(1);
+        catalog_put(resources.shader_catalog, "default.glsl", ShaderResource_Default);
     }
 
     // Font shader
     {
-        bool status = load_program("shaders/2d.glsl", resources.programs[1]);
-        if (!status) {
-            exit(1);
-        }
-        catalog_put(resources.shader_catalog, "2d.glsl", 1);
+        bool status = load_program("shaders/2d.glsl", resources.programs[ShaderResource_2D]);
+        if (!status) exit(1);
+        catalog_put(resources.shader_catalog, "2d.glsl", ShaderResource_2D);
+    }
+
+    // Shadow shader
+    {
+        bool status = load_program("shaders/shadow.glsl", resources.programs[ShaderResource_Shadow]);
+        if (!status) exit(1);
+        catalog_put(resources.shader_catalog, "shadow.glsl", ShaderResource_Shadow);
     }
 
     // Meshes

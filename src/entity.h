@@ -30,6 +30,7 @@ struct Entity {
     Vector3 position = {};
     Vector3 rotation = {};   // Radians
     Vector3 scale    = V3_ONE;
+    Matrix4x4 transform;
 
     Program *program = nullptr;
     Mesh *mesh       = nullptr;
