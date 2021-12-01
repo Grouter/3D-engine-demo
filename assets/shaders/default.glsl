@@ -27,10 +27,8 @@ void main() {
 
 #ifdef FRAGMENT
 
-const vec3  SUN_DIR          = vec3(0.0, 0.0, 1.0);
 const vec3  SUN_COLOR        = vec3(1.0, 0.945, 0.788);
 const float AMBIENT_STRENGTH = 0.2;
-
 const float SPECULAR = 0.5;
 
 in vec3 f_frag_pos;
@@ -38,6 +36,7 @@ in vec4 f_light_frag_pos;
 in vec3 f_normal;
 in vec2 f_uv;
 
+uniform vec3 sun_dir;
 uniform vec3 camera_position;
 uniform vec4 material_color;
 uniform sampler2D diffuse_texture;
@@ -61,7 +60,7 @@ float calc_shadow(vec4 light_frag_pos) {
     for (int x = -1; x <= 1; ++x) {
         for (int y = -1; y <= 1; ++y) {
             float pcf_depth = texture(shadow_texture, light_lookup.xy + vec2(x, y) * texel_size).r;
-            result += current_depth - 0.05 > pcf_depth ? 1.0 : 0.0;
+            result += current_depth - 0.005 > pcf_depth ? 1.0 : 0.0;
         }
     }
     result /= 9.0;
@@ -71,14 +70,14 @@ float calc_shadow(vec4 light_frag_pos) {
 
 void main() {
     vec3 view_dir = normalize(camera_position - f_frag_pos);
-    vec3 reflect_dir = reflect(-SUN_DIR, f_normal);
+    vec3 reflect_dir = reflect(-sun_dir, f_normal);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
     vec3 specular = SPECULAR * spec * SUN_COLOR;
 
     vec3 ambient = AMBIENT_STRENGTH * SUN_COLOR;
-    vec3 sun_dir_n = normalize(SUN_DIR);
+    vec3 sun_dir_n = normalize(sun_dir);
 
-    float diffuse_s = max(dot(f_normal, SUN_DIR), 0.0);
+    float diffuse_s = max(dot(f_normal, sun_dir), 0.0);
     vec3 diffuse = diffuse_s * SUN_COLOR;
 
     float shadow = calc_shadow(f_light_frag_pos);

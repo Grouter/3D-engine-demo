@@ -21,7 +21,7 @@ internal void init_game() {
 
     // Light
     init_light_data(game_state.light_data);
-    game_state.light_data.sun_direction = normalized(make_vector3(0.0f, -1.0f, -1.0f));
+    game_state.light_data.sun_direction = normalized(make_vector3(0.2f, -1.0f, -0.3f));
 
     // Spawn rocks
     {
@@ -183,6 +183,7 @@ internal void render() {
         set_shader_vec3("camera_position", game_state.camera.position);
         set_shader_sampler("shadow_texture", 1, game_state.light_data.shadow_texture);
         set_shader_matrix4x4("sun", game_state.light_data.sun_mvp);
+        set_shader_vec3("sun_dir", game_state.light_data.sun_direction * -1.0f);
 
         flush_draw_calls();
     }

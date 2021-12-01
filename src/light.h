@@ -31,7 +31,7 @@ internal void init_light_data(LightData &data) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    data.sun_projection = ortho(-100.0f, 100.0, -50.0f, 50.0f, 50.0f, -50.0f);
+    data.sun_projection = ortho(-100.0f, 100.0, -70.0f, 70.0f, 70.0f, -70.0f);
 }
 
 #endif // LIGHT_H

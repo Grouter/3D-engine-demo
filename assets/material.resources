@@ -5,6 +5,9 @@ texture: "restt2.png"
 ! grey
 color: 0.5, 0.5, 0.5, 1.0
 
+! green
+color: 0.462, 0.788, 0.196, 1.0
+
 ! color_palette
 color: 1.0, 1.0, 1.0, 1.0
 texture: "color_palette.png"
