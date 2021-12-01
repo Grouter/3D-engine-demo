@@ -97,7 +97,7 @@ internal Entity* create_rock_formation(EntityStorage &storage) {
             sub_sub->position.z = sub_sub_offset.y * 2.0f;
             sub_sub->position.y = rand_f_range(-3.0f, 3.0f);
 
-            sub_sub->scale = make_vector3(0.2f);
+            sub_sub->scale = make_vector3(0.15f);
         }
     }
 

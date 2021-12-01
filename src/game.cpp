@@ -29,7 +29,7 @@ internal void init_game() {
             root->position.x = sinf(current_a) * radius;
             root->position.y = rand_f_range(-50, 150);
             root->position.z = cosf(current_a) * radius;
-            root->scale = make_vector3(5.0f);
+            root->scale = make_vector3(8.0f);
 
             current_a += a_part;
         }
