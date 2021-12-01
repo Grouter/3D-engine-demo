@@ -126,7 +126,7 @@ internal HGLRC create_gl_context(HDC window_context) {
 
     // Depth tests
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
 
     OutputDebugStringA("OpenGL initialized:\n");
 

@@ -154,6 +154,7 @@ internal void render() {
 
     {
         glEnable(GL_DEPTH_TEST);
+        glCullFace(GL_FRONT);
 
         glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, game_state.light_data.frame_buffer);
@@ -171,6 +172,7 @@ internal void render() {
             game_state.viewport.width,
             game_state.viewport.height
         );
+        glCullFace(GL_BACK);
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

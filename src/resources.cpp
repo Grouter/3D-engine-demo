@@ -172,6 +172,7 @@ internal void load_model(const char *name, Mesh &mesh) {
 
         sub_mesh_info.first_index = (u32)mesh.indicies.length;
         sub_mesh_info.index_count = (u32)sub_mesh->num_face_vertices.size() * 3;
+        sub_mesh_info.material_index = get_material_index("color_palette");
 
         mesh.sub_meshes.add(sub_mesh_info);
 

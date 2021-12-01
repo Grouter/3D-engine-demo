@@ -13,37 +13,21 @@ green
 
 ! houses_left
 houses_left.obj
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
 
 ! houses_right
 houses_right.obj
-restt
-default
 
 ! alchym
 alchym.obj
-color_palette
 
 ! ship
 ship.obj
-color_palette
 
 ! docks
 docks.obj
-color_palette
 
 ! lanterns
 lanterns.obj
-color_palette
 
 ! tavern
 tavern.obj
