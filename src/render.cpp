@@ -110,6 +110,17 @@ internal void set_shader(ShaderResource shader) {
     glUseProgram(current_shader->handle);
 }
 
+internal void set_shader_vec3(const char *attr, Vector3 value) {
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
+
+    if (loc >= 0) {
+        glUniform3f(loc, value.x, value.y, value.z);
+    }
+    else {
+        log_print("Shader set_shader_vec3 loc error!\n");
+    }
+}
+
 internal void set_shader_projection(Matrix4x4 perspective) {
     i32 loc = glGetUniformLocation(current_shader->handle, "projection");
 
@@ -316,6 +327,8 @@ internal void flush_draw_calls() {
     set_shader(ShaderResource::ShaderResource_Default);
     set_shader_view(game_state.camera.transform);
     set_shader_projection(game_state.camera.perspective);
+
+    set_shader_vec3("camera_position", game_state.camera.position);
 
     u32 active_vao = UINT32_MAX;
 
