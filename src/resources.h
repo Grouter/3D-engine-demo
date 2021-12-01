@@ -3,7 +3,10 @@
 
 enum ShaderResource {
     ShaderResource_Default,
-    ShaderResource_2D
+    ShaderResource_2D,
+    ShaderResource_Shadow,
+
+    ShaderResource_COUNT
 };
 
 const u64 MeshResource_Quad = 0;
@@ -22,7 +25,7 @@ struct Resources {
     ResourceCatalog texture_catalog;
     ResourceCatalog material_catalog;
 
-    Program         programs[1];
+    Program         programs[ShaderResource_COUNT];
     Array<Mesh>     meshes;
     Array<u32>      textures;
     Array<Material> materials;

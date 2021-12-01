@@ -117,54 +117,43 @@ internal void set_shader_vec3(const char *attr, Vector3 value) {
         glUniform3f(loc, value.x, value.y, value.z);
     }
     else {
-        log_print("Shader set_shader_vec3 loc error!\n");
+        log_print("Shader set_shader_vec3 (%s) loc error!\n", attr);
     }
 }
 
-internal void set_shader_projection(Matrix4x4 perspective) {
-    i32 loc = glGetUniformLocation(current_shader->handle, "projection");
+internal void set_shader_vec4(const char *attr, Vector4 value) {
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
 
     if (loc >= 0) {
-        glUniformMatrix4fv(loc, 1, false, perspective.raw);
+        glUniform4f(loc, value.x, value.y, value.z, value.w);
     }
     else {
-        log_print("Shader perspective loc error!\n");
+        log_print("Shader set_shader_vec4 (%s) loc error!\n", attr);
     }
 }
 
-internal void set_shader_diffuse_texture(u32 texture_handle) {
-    glActiveTexture(GL_TEXTURE0);
+internal void set_shader_matrix4x4(const char *attr, Matrix4x4 value) {
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
+
+    if (loc >= 0) {
+        glUniformMatrix4fv(loc, 1, false, value.raw);
+    }
+    else {
+        log_print("Shader set_shader_matrix4x4 (%s) loc error!\n", attr);
+    }
+}
+
+internal void set_shader_sampler(const char *attr, u32 texture_loc, u32 texture_handle) {
+    glActiveTexture(GL_TEXTURE0 + texture_loc);
     glBindTexture(GL_TEXTURE_2D, texture_handle);
 
-    i32 loc = glGetUniformLocation(current_shader->handle, "diffuse_texture");
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
 
     if (loc >= 0) {
-        glUniform1i(loc, 0);
+        glUniform1i(loc, texture_loc);
     }
     else {
-        log_print("Shader set diffuse texture loc error!\n");
-    }
-}
-
-internal void set_shader_view(Matrix4x4 view) {
-    i32 loc = glGetUniformLocation(current_shader->handle, "view");
-
-    if (loc >= 0) {
-        glUniformMatrix4fv(loc, 1, GL_FALSE, view.raw);
-    }
-    else {
-        log_print("Shader set view loc error!\n");
-    }
-}
-
-internal void set_shader_material_color(Vector4 color) {
-    i32 loc = glGetUniformLocation(current_shader->handle, "material_color");
-
-    if (loc >= 0) {
-        glUniform4f(loc, color.r, color.g, color.b, color.a);
-    }
-    else {
-        log_print("Shader set material_color loc error!\n");
+        log_print("Shader set smapler (%s) %d loc error!\n", attr, texture_loc);
     }
 }
 
@@ -277,10 +266,6 @@ internal int _draw_call_cmp(const void *a, const void *b) {
 }
 
 internal void flush_font_draw_calls() {
-    set_shader(ShaderResource::ShaderResource_2D);
-    set_shader_projection(game_state.ortho_proj);
-    set_shader_int("diffuse_alpha_mask", 1);
-
     for (u32 i = 0; i < FontResource_COUNT; i++) {
         DrawCallBuffer2D &draw_calls = _font_draw_calls[i];
 
@@ -293,7 +278,7 @@ internal void flush_font_draw_calls() {
 
         glBindVertexArray(draw_calls.vao);
 
-        set_shader_diffuse_texture(font.texture);
+        set_shader_sampler("diffuse_texture", 0, font.texture);
 
         glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, (i32)draw_calls.data.length, 0);
 
@@ -306,29 +291,45 @@ internal void flush_2d_shapes_draw_calls() {
 
     if (draw_calls.data.length == 0) return;
 
-    set_shader(ShaderResource::ShaderResource_2D);
-    set_shader_projection(game_state.ortho_proj);
-    set_shader_int("diffuse_alpha_mask", 0);
-
     // Upload new data to the instance buffer
     glNamedBufferSubData(draw_calls.instance_buffer, 0, draw_calls.data.length * sizeof(DrawCallData2D), draw_calls.data.data);
 
     glBindVertexArray(draw_calls.vao);
 
     // White texture
-    set_shader_diffuse_texture(game_state.resources.textures[0]);
+    glActiveTexture(GL_TEXTURE0);
+    set_shader_sampler("diffuse_texture", 0, game_state.resources.textures[0]);
 
     glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, (i32)draw_calls.data.length, 0);
 
     draw_calls.data.clear();
 }
 
-internal void flush_draw_calls() {
-    set_shader(ShaderResource::ShaderResource_Default);
-    set_shader_view(game_state.camera.transform);
-    set_shader_projection(game_state.camera.perspective);
+internal void flush_draw_calls_shadow() {
+    // This will batch the draw calls
+    qsort(_draw_calls.data, _draw_calls.length, sizeof(DrawCallData), _draw_call_cmp);
 
-    set_shader_vec3("camera_position", game_state.camera.position);
+    u32 active_vao = UINT32_MAX;
+
+    DrawCallData *data;
+    array_foreach(_draw_calls, data) {
+        // VAO switching
+        if (active_vao != data->mesh->vao) {
+            active_vao = data->mesh->vao;
+            glBindVertexArray(data->mesh->vao);
+        }
+
+        // Model transform upload
+        set_shader_matrix4x4("model", data->transform);
+
+        u64 offset = data->info.first_index * sizeof(u32);
+        glDrawElements(GL_TRIANGLES, (i32)data->info.index_count, GL_UNSIGNED_INT, (void *)offset);
+    }
+}
+
+internal void flush_draw_calls() {
+    // This will batch the draw calls
+    qsort(_draw_calls.data, _draw_calls.length, sizeof(DrawCallData), _draw_call_cmp);
 
     u32 active_vao = UINT32_MAX;
 
@@ -336,9 +337,6 @@ internal void flush_draw_calls() {
     u64 active_material_index = UINT64_MAX;
 
     u32 active_texture = UINT32_MAX;
-
-    // This will batch the draw calls
-    qsort(_draw_calls.data, _draw_calls.length, sizeof(DrawCallData), _draw_call_cmp);
 
     DrawCallData *data;
     array_foreach(_draw_calls, data) {
@@ -357,10 +355,11 @@ internal void flush_draw_calls() {
                 active_material_index = material_index;
                 material = &game_state.resources.materials[material_index];
 
-                set_shader_material_color(material->color);
+                set_shader_vec4("material_color", material->color);
 
                 if (active_texture != material->texture) {
-                    set_shader_diffuse_texture(material->texture);
+                    glActiveTexture(GL_TEXTURE0);
+                    set_shader_sampler("diffuse_texture", 0, material->texture);
                 }
             }
         }

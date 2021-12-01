@@ -142,6 +142,32 @@ inline Matrix4x4 ortho(f32 clip_near, f32 clip_far, f32 display_w, f32 display_h
     return orto;
 }
 
+inline Matrix4x4 ortho(f32 clip_near, f32 clip_far, f32 left, f32 right, f32 top, f32 bottom) {
+    Matrix4x4 orto = {};
+
+    orto.table[0][0] = 2.0f / (right - left);
+    orto.table[0][1] = 0.0f;
+    orto.table[0][2] = 0.0f;
+    orto.table[0][3] = 0.0f;
+
+    orto.table[1][0] = 0.0f;
+    orto.table[1][1] = 2.0f / (top - bottom);
+    orto.table[1][2] = 0.0f;
+    orto.table[1][3] = 0.0f;
+
+    orto.table[2][0] = 0.0f;
+    orto.table[2][1] = 0.0f;
+    orto.table[2][2] = 2.0f / (clip_far - clip_near);
+    orto.table[2][3] = 0.0f;
+
+    orto.table[3][0] = -(right + left) / (right - left);
+    orto.table[3][1] = -(top + bottom) / (top - bottom);
+    orto.table[3][2] = -(clip_far + clip_near) / (clip_far - clip_near);
+    orto.table[3][3] = 1.0f;
+
+    return orto;
+}
+
 // Multiplies matricies (in column major order), that means it will swap them and will do "bXa"
 internal Matrix4x4 multiply(const Matrix4x4 &a, const Matrix4x4 &b) {
     Matrix4x4 result = identity();
@@ -178,7 +204,26 @@ inline void scale(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
     matrix = multiply(matrix, scale_m);
 }
 
-inline Matrix4x4 from(Vector3 position, Vector3 rotation, Vector3 size) {
+inline Matrix4x4 from_direction(Vector3 direction) {
+    Vector3 forward = normalized(direction);
+    Vector3 side    = normalized(cross(V3_UP, forward));
+    Vector3 up      = cross(forward, side);
+
+    return {
+        side.x, up.x, forward.x, 0.0f,
+        side.y, up.y, forward.y, 0.0f,
+        side.z, up.z, forward.z, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+    };
+}
+
+inline Matrix4x4 look_at(Vector3 position, Vector3 target) {
+    Vector3 dir = target - position;
+
+    return from_direction(dir);
+}
+
+inline Matrix4x4 to_transform(Vector3 position, Vector3 rotation, Vector3 size) {
     Matrix4x4 result = identity();
 
     scale(result, size.x, size.y, size.z);

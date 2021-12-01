@@ -73,6 +73,7 @@ const u32 TARGET_ASPECT_H = 9;
 #include "graphics.h"
 #include "font.h"
 #include "animation.h"
+#include "light.h"
 #include "resources.h"
 #include "hotload.h"
 #include "camera.h"
@@ -103,6 +104,9 @@ struct GameState {
     f32 pixels_to_units_2d;
 
     Matrix4x4 ortho_proj;
+
+    // Light
+    LightData light_data;
 
     // Gameplay
     f32 time_elapsed;
