@@ -1,7 +1,7 @@
 #if !defined(LIGHT_H)
 #define LIGHT_H
 
-const u32 SHADOW_SIZE = 8192;
+const u32 SHADOW_SIZE = 4096;
 
 struct LightData {
     u32 frame_buffer;
@@ -31,7 +31,7 @@ internal void init_light_data(LightData &data) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    data.sun_projection = ortho(-100.0f, 100.0, -70.0f, 70.0f, 70.0f, -70.0f);
+    data.sun_projection = ortho(-50.0f, 50.0, -70.0f, 70.0f, 70.0f, -70.0f);
 }
 
 #endif // LIGHT_H
