@@ -92,12 +92,6 @@ internal void tick(f32 dt) {
         }}
     }
 
-    // Calculate sun transform for shadow calulations
-    {
-        Matrix4x4 sun_view = from_direction(game_state.light_data.sun_direction);
-        game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, sun_view);
-    }
-
     // Calculate transforms
     {
         FlyingRockTransformHierarchy &hierarchy = game_state.entities.flying_rock_transforms;
@@ -144,6 +138,20 @@ internal void tick(f32 dt) {
 }
 
 internal void render() {
+    // Calculate sun transform for shadow calulations
+    {
+        game_state.light_data.sun_view = from_direction(game_state.light_data.sun_direction);
+        game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, game_state.light_data.sun_view);
+    }
+
+    // Do PSSM!
+    #if 0
+    {
+        calc_shadowmap_split_distances(game_state.camera, game_state.light_data);
+        calc_shadowmap_cascade_projections(game_state.camera, game_state.light_data);
+    }
+    #endif
+
     // Render all entities
     {
         Entity *it;

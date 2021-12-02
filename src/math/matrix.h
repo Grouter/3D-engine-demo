@@ -182,6 +182,16 @@ internal Matrix4x4 multiply(const Matrix4x4 &a, const Matrix4x4 &b) {
     return result;
 }
 
+internal Vector3 multiply(const Matrix4x4 &a, Vector3 b) {
+    Vector3 result;
+
+    result.x = a.table[0][0] * b.x + a.table[1][0] * b.y + a.table[2][0] * b.z + a.table[3][0];
+    result.y = a.table[0][1] * b.x + a.table[1][1] * b.y + a.table[2][1] * b.z + a.table[3][1];
+    result.z = a.table[0][2] * b.x + a.table[1][2] * b.y + a.table[2][2] * b.z + a.table[3][2];
+
+    return result;
+}
+
 inline void translate(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
     matrix.table[3][0] += x;
     matrix.table[3][1] += y;
@@ -231,6 +241,18 @@ inline Matrix4x4 to_transform(Vector3 position, Vector3 rotation, Vector3 size) 
     translate(result, position.x, position.y, position.z);
 
     return result;
+}
+
+inline Vector3 get_forward_vector(Matrix4x4 &m) {
+    return { m.raw[2], m.raw[6], m.raw[10] };
+}
+
+inline Vector3 get_up_vector(Matrix4x4 &m) {
+    return { m.raw[1], m.raw[5], m.raw[9] };
+}
+
+inline Vector3 get_side_vector(Matrix4x4 &m) {
+    return { m.raw[0], m.raw[4], m.raw[8] };
 }
 
 #endif

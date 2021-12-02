@@ -123,6 +123,7 @@ global Program *current_shader;
 
 #include "graphics.cpp"
 #include "font.cpp"
+#include "light.cpp"
 #include "resources.cpp"
 #include "hotload.cpp"
 #include "camera.cpp"

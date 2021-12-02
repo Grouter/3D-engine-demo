@@ -9,8 +9,8 @@ internal Camera create_camera(u32 window_w, u32 window_h, f32 fov) {
     Camera camera = {};
 
     camera.fov = fov;
-    camera.clip_near = 0.01f;
-    camera.clip_far  = 1000.0f;
+    camera.clip_near = 0.1f;
+    camera.clip_far  = 300.0f;
 
     update_perspective(camera, window_w, window_h);
 
@@ -83,18 +83,6 @@ internal void camera_update(Camera &camera) {
     };
 }
 
-inline Vector3 get_forward_vector(Camera &camera) {
-    return { camera.transform.raw[2], camera.transform.raw[6], camera.transform.raw[10] };
-}
-
-inline Vector3 get_up_vector(Camera &camera) {
-    return { camera.transform.raw[1], camera.transform.raw[5], camera.transform.raw[9] };
-}
-
-inline Vector3 get_side_vector(Camera &camera) {
-    return { camera.transform.raw[0], camera.transform.raw[4], camera.transform.raw[8] };
-}
-
 internal void camera_handle_mouse(Camera &camera, i32 dx, i32 dy) {
     camera.rotation.yaw   += (f32)dx * CAMERA_SENS;
     camera.rotation.pitch += (f32)dy * CAMERA_SENS;
@@ -118,8 +106,8 @@ internal void camera_handle_mouse(Camera &camera, i32 dx, i32 dy) {
 internal void camera_handle_input(Camera &camera) {
     const f32 CAMERA_SPEED = .5f;
 
-    Vector3 forward = get_forward_vector(camera);
-    Vector3 side    = get_side_vector(camera);
+    Vector3 forward = get_forward_vector(camera.transform);
+    Vector3 side    = get_side_vector(camera.transform);
     Vector3 input   = {};
 
     if (key_is_pressed(VK_LEFT)) {
