@@ -59,13 +59,13 @@ float calc_shadow(int layer) {
     float bias = max(0.00001 * (1.0 - dot(f_normal, sun_dir)), 0.000001);
 
     float result = 0.0;
-#if 1
+#if 0
     float closest_depth = texture(shadow_textures, vec3(light_lookup.xy, layer)).r;
     result = (current_depth - bias) > closest_depth ? 1.0 : 0.0;
 #else
     vec2 texel_size = 1.0 / vec2(textureSize(shadow_textures, 0));
 
-    int soft_count = 1;
+    int soft_count = 2;
 
     for (int x = -soft_count; x <= soft_count; ++x) {
         for (int y = -soft_count; y <= soft_count; ++y) {

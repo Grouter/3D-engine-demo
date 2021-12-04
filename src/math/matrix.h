@@ -214,6 +214,15 @@ inline void scale(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
     matrix = multiply(matrix, scale_m);
 }
 
+inline Matrix4x4 transposed(Matrix4x4 &matrix) {
+    return {
+        matrix.table[0][0], matrix.table[1][0], matrix.table[2][0], matrix.table[3][0],
+        matrix.table[0][1], matrix.table[1][1], matrix.table[2][1], matrix.table[3][1],
+        matrix.table[0][2], matrix.table[1][2], matrix.table[2][2], matrix.table[3][2],
+        matrix.table[0][3], matrix.table[1][3], matrix.table[2][3], matrix.table[3][3]
+    };
+}
+
 inline Matrix4x4 from_direction(Vector3 direction) {
     Vector3 forward = normalized(direction);
     Vector3 side    = normalized(cross(V3_UP, forward));

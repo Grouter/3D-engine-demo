@@ -142,7 +142,6 @@ internal void render() {
     // Calculate sun transform for shadow calulations
     {
         game_state.light_data.sun_view = from_direction(game_state.light_data.sun_direction);
-        game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, game_state.light_data.sun_view);
     }
 
     // Do CSM!
@@ -153,16 +152,24 @@ internal void render() {
 
         for (int i = 0; i < SHADOW_CASCADE_COUNT; i++) {
             game_state.light_data.cascade_mvps[i] = multiply(game_state.light_data.cascade_projections[i], game_state.light_data.sun_view);
-            // game_state.light_data.cascade_mvps[i] = game_state.light_data.sun_mvp;
         }
 
-        {
-            glBindBuffer(GL_UNIFORM_BUFFER, game_state.light_data.lights_buffer_object);
-            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, game_state.light_data.cascade_mvps);
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+    #else
+    {
+        game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, game_state.light_data.sun_view);
+
+        for (int i = 0; i < SHADOW_CASCADE_COUNT; i++) {
+            game_state.light_data.cascade_mvps[i] = game_state.light_data.sun_mvp;
         }
     }
     #endif
+
+    {
+        glBindBuffer(GL_UNIFORM_BUFFER, game_state.light_data.lights_buffer_object);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, game_state.light_data.cascade_mvps);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
 
     // Render all entities
     {
@@ -178,7 +185,7 @@ internal void render() {
 
         glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, game_state.light_data.frame_buffer);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_TEXTURE_2D_ARRAY, game_state.light_data.shadow_cascades_texture, 0);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_TEXTURE_2D_ARRAY, game_state.light_data.shadow_maps, 0);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         set_shader(ShaderResource_Shadow);
@@ -206,9 +213,9 @@ internal void render() {
         // set_shader_matrix4x4("projection", game_state.light_data.cascade_projections[0]);
 
         set_shader_vec3("camera_position", game_state.camera.position);
-        set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_cascades_texture);
+        set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_maps);
         set_shader_vec3("sun_dir", game_state.light_data.sun_direction * -1.0f);
-        set_shader_float_array("cascade_distances", (game_state.light_data.split_distances + 1), SHADOW_CASCADE_COUNT);
+        set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
 
         flush_draw_calls();
     }

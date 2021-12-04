@@ -1,13 +1,12 @@
-#ifdef DO_SHADOW_CASCADES
 internal void init_light_buffers(LightData &data) {
     u32 shader_handle = game_state.resources.programs[ShaderResource_Shadow].handle;
 
-    data.lights_buffer_index = glGetUniformBlockIndex(shader_handle, "LightMatricies");
+    u32 lights_buffer_index = glGetUniformBlockIndex(shader_handle, "LightMatricies");
 
     glGenBuffers(1, &data.lights_buffer_object);
     glBindBuffer(GL_UNIFORM_BUFFER, data.lights_buffer_object);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, nullptr, GL_DYNAMIC_DRAW);
-    glUniformBlockBinding(shader_handle, data.lights_buffer_index, 0);
+    glUniformBlockBinding(shader_handle, lights_buffer_index, 0);
     glBindBufferRange(GL_UNIFORM_BUFFER, 0, data.lights_buffer_object, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
@@ -18,11 +17,11 @@ internal void calc_shadowmap_split_distances(Camera &camera, LightData &light_da
         f32 c_log = camera.clip_near * pow(camera.clip_far / camera.clip_near, f);
         f32 c_uni = camera.clip_near + (camera.clip_far - camera.clip_near) * f;
 
-        light_data.split_distances[i] = SHADOW_SPLIT_LAMBDA * c_log + (1.0f - SHADOW_SPLIT_LAMBDA) * c_uni;
+        light_data.cascade_splits[i] = SHADOW_SPLIT_LAMBDA * c_log + (1.0f - SHADOW_SPLIT_LAMBDA) * c_uni;
     }
 
-    light_data.split_distances[0] = camera.clip_near;
-    light_data.split_distances[SHADOW_CASCADE_COUNT] = camera.clip_far;
+    light_data.cascade_splits[0] = camera.clip_near;
+    light_data.cascade_splits[SHADOW_CASCADE_COUNT] = camera.clip_far;
 }
 
 internal void calc_shadowmap_cascade_projections(Camera &camera, LightData &light_data) {
@@ -35,15 +34,17 @@ internal void calc_shadowmap_cascade_projections(Camera &camera, LightData &ligh
 
     Vector3 corners[8];
 
+    Matrix4x4 light_tr = transposed(light_data.sun_view);
+
     for (i32 i = 0; i < SHADOW_CASCADE_COUNT; i++) {
-        f32 h_near = 2.0f * tan_fov * light_data.split_distances[i];
+        f32 h_near = 2.0f * tan_fov * light_data.cascade_splits[i];
         f32 w_near = h_near * aspect;
 
-        f32 h_far = 2.0f * tan_fov * light_data.split_distances[i + 1];
+        f32 h_far = 2.0f * tan_fov * light_data.cascade_splits[i + 1];
         f32 w_far = h_far * aspect;
 
-        Vector3 c_near = camera.position + (camera.direction * light_data.split_distances[i]);
-        Vector3 c_far = camera.position + (camera.direction * light_data.split_distances[i + 1]);
+        Vector3 c_near = camera.position + (camera.direction * light_data.cascade_splits[i]);
+        Vector3 c_far = camera.position + (camera.direction * light_data.cascade_splits[i + 1]);
 
         // Calc corners in world space
         corners[0] = c_near + light_up * h_near * 0.5f - light_right * w_near * 0.5f;
@@ -61,7 +62,7 @@ internal void calc_shadowmap_cascade_projections(Camera &camera, LightData &ligh
         Vector3 max_coords = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
         for (i32 j = 0; j < 8; j++) {
-            corners[j] = multiply(light_data.sun_view, corners[j]);
+            corners[j] = multiply(light_tr, corners[j]);
             min_coords.x = min(min_coords.x, corners[j].x);
             max_coords.x = max(max_coords.x, corners[j].x);
             min_coords.y = min(min_coords.y, corners[j].y);
@@ -80,4 +81,3 @@ internal void calc_shadowmap_cascade_projections(Camera &camera, LightData &ligh
         light_data.cascade_projections[i] = ortho(min_coords.z, max_coords.z, min_coords.x, max_coords.x, max_coords.y, min_coords.y);
     }
 }
-#endif
