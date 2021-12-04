@@ -1,4 +1,4 @@
-internal bool load_program(const char *path, Program &shader) {
+internal bool load_program(const char *path, Program &shader, bool geometry = false) {
     Array<char> shader_source;
 
     bool success = read_whole_file(path, shader_source);
@@ -12,12 +12,13 @@ internal bool load_program(const char *path, Program &shader) {
 
     u32 vertex_handle;
     u32 fragment_handle;
+    u32 geometry_handle = UINT32_MAX;
 
     {   // Compile the vertex part
         vertex_handle = glCreateShader(GL_VERTEX_SHADER);
 
         char *vertex_strings[3] = {
-            "#version 330\n",
+            "#version 420\n",
             "#define VERTEX\n",
             shader_source.data
         };
@@ -34,16 +35,20 @@ internal bool load_program(const char *path, Program &shader) {
         }
     }
 
+    char cascade_split_define[32];
+    snprintf(cascade_split_define, 32, "#define CASCADE_COUNT %d\n", SHADOW_CASCADE_COUNT);
+
     {   // Compile the fragment part
         fragment_handle = glCreateShader(GL_FRAGMENT_SHADER);
 
-        char *fragment_strings[3] = {
-            "#version 330\n",
+        char *fragment_strings[4] = {
+            "#version 420\n",
             "#define FRAGMENT\n",
+            cascade_split_define,
             shader_source.data
         };
 
-        glShaderSource(fragment_handle, 3, fragment_strings, NULL);
+        glShaderSource(fragment_handle, 4, fragment_strings, NULL);
         glCompileShader(fragment_handle);
 
         SHADER_COMPILATION_CHECK(fragment_handle, compile_status, compile_log, 512, "Fragment");
@@ -55,11 +60,35 @@ internal bool load_program(const char *path, Program &shader) {
         }
     }
 
+    if (geometry) {
+        geometry_handle = glCreateShader(GL_GEOMETRY_SHADER);
+
+        char *geometry_strings[4] = {
+            "#version 420\n",
+            "#define GEOMETRY\n",
+            cascade_split_define,
+            shader_source.data
+        };
+
+        glShaderSource(geometry_handle, 4, geometry_strings, NULL);
+        glCompileShader(geometry_handle);
+
+        SHADER_COMPILATION_CHECK(geometry_handle, compile_status, compile_log, 512, "Geometry");
+
+        if (!compile_status) {
+            glDeleteShader(geometry_handle);
+            free_array(shader_source);
+            return false;
+        }
+    }
+
     shader = {};
 
     shader.handle = glCreateProgram();
     glAttachShader(shader.handle, vertex_handle);
     glAttachShader(shader.handle, fragment_handle);
+
+    if (geometry && geometry_handle != UINT32_MAX) glAttachShader(shader.handle, geometry_handle);
 
     glLinkProgram(shader.handle);
 

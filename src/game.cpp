@@ -21,6 +21,7 @@ internal void init_game() {
 
     // Light
     init_light_data(game_state.light_data);
+    init_light_buffers(game_state.light_data);
     game_state.light_data.sun_direction = normalized(make_vector3(0.2f, -1.0f, -0.2f));
 
     // Spawn rocks
@@ -144,11 +145,22 @@ internal void render() {
         game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, game_state.light_data.sun_view);
     }
 
-    // Do PSSM!
-    #if 0
+    // Do CSM!
+    #ifdef DO_SHADOW_CASCADES
     {
         calc_shadowmap_split_distances(game_state.camera, game_state.light_data);
         calc_shadowmap_cascade_projections(game_state.camera, game_state.light_data);
+
+        for (int i = 0; i < SHADOW_CASCADE_COUNT; i++) {
+            game_state.light_data.cascade_mvps[i] = multiply(game_state.light_data.cascade_projections[i], game_state.light_data.sun_view);
+            // game_state.light_data.cascade_mvps[i] = game_state.light_data.sun_mvp;
+        }
+
+        {
+            glBindBuffer(GL_UNIFORM_BUFFER, game_state.light_data.lights_buffer_object);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, game_state.light_data.cascade_mvps);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
     }
     #endif
 
@@ -160,15 +172,16 @@ internal void render() {
         }}
     }
 
+    // Draw shadow maps
     {
         glEnable(GL_DEPTH_TEST);
 
         glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, game_state.light_data.frame_buffer);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_TEXTURE_2D_ARRAY, game_state.light_data.shadow_cascades_texture, 0);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         set_shader(ShaderResource_Shadow);
-        set_shader_matrix4x4("light", game_state.light_data.sun_mvp);
 
         flush_draw_calls_shadow();
 
@@ -186,12 +199,16 @@ internal void render() {
     {
         glEnable(GL_DEPTH_TEST);
         set_shader(ShaderResource_Default);
+
         set_shader_matrix4x4("view", game_state.camera.transform);
         set_shader_matrix4x4("projection", game_state.camera.perspective);
+        // set_shader_matrix4x4("view", game_state.light_data.sun_view);
+        // set_shader_matrix4x4("projection", game_state.light_data.cascade_projections[0]);
+
         set_shader_vec3("camera_position", game_state.camera.position);
-        set_shader_sampler("shadow_texture", 1, game_state.light_data.shadow_texture);
-        set_shader_matrix4x4("sun", game_state.light_data.sun_mvp);
+        set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_cascades_texture);
         set_shader_vec3("sun_dir", game_state.light_data.sun_direction * -1.0f);
+        set_shader_float_array("cascade_distances", (game_state.light_data.split_distances + 1), SHADOW_CASCADE_COUNT);
 
         flush_draw_calls();
     }

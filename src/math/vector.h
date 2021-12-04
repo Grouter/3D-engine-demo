@@ -189,6 +189,10 @@ inline f32 distance(Vector3 a, Vector3 b) {
     return result;
 }
 
+inline void dump_vector(Vector3 &v) {
+    log_print("Vector3: %f %f %f\n", v.x, v.y, v.z);
+}
+
 //
 // :Vector4
 //

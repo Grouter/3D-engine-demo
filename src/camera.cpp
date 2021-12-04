@@ -69,6 +69,8 @@ internal void camera_update(Camera &camera) {
     Vector3 side    = normalized(cross(V3_UP, forward));
     Vector3 up      = cross(forward, side);
 
+    camera.direction = forward * -1.0f;
+
     Vector3 position = make_vector3(
         -camera.position.x * side.x    - camera.position.y * side.y    - camera.position.z * side.z,
         -camera.position.x * up.x      - camera.position.y * up.y      - camera.position.z * up.z,

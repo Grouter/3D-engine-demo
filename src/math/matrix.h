@@ -217,7 +217,7 @@ inline void scale(Matrix4x4 &matrix, f32 x, f32 y, f32 z) {
 inline Matrix4x4 from_direction(Vector3 direction) {
     Vector3 forward = normalized(direction);
     Vector3 side    = normalized(cross(V3_UP, forward));
-    Vector3 up      = cross(forward, side);
+    Vector3 up      = normalized(cross(forward, side));
 
     return {
         side.x, up.x, forward.x, 0.0f,

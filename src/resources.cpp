@@ -491,7 +491,7 @@ internal void init_resources(Resources &resources) {
 
     // Shadow shader
     {
-        bool status = load_program("shaders/shadow.glsl", resources.programs[ShaderResource_Shadow]);
+        bool status = load_program("shaders/shadow.glsl", resources.programs[ShaderResource_Shadow], true);
         if (!status) exit(1);
         catalog_put(resources.shader_catalog, "shadow.glsl", ShaderResource_Shadow);
     }

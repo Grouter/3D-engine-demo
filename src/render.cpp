@@ -143,9 +143,34 @@ internal void set_shader_matrix4x4(const char *attr, Matrix4x4 value) {
     }
 }
 
+internal void set_shader_matrix4x4_array(const char *attr, Matrix4x4 *values, u32 count) {
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
+
+    if (loc >= 0) {
+        glUniformMatrix4fv(loc, count, false, (f32 *)values);
+    }
+    else {
+        log_print("Shader set_shader_matrix4x4_array (%s) loc error!\n", attr);
+    }
+}
+
 internal void set_shader_sampler(const char *attr, u32 texture_loc, u32 texture_handle) {
     glActiveTexture(GL_TEXTURE0 + texture_loc);
     glBindTexture(GL_TEXTURE_2D, texture_handle);
+
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
+
+    if (loc >= 0) {
+        glUniform1i(loc, texture_loc);
+    }
+    else {
+        log_print("Shader set smapler (%s) %d loc error!\n", attr, texture_loc);
+    }
+}
+
+internal void set_shader_sampler_array(const char *attr, u32 texture_loc, u32 texture_handle) {
+    glActiveTexture(GL_TEXTURE0 + texture_loc);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_handle);
 
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
 
@@ -165,6 +190,17 @@ internal void set_shader_int(const char *name, i32 value) {
     }
     else {
         log_print("Shader set int loc error! (attribute: %s)\n", name);
+    }
+}
+
+internal void set_shader_float_array(const char *attr, f32 *values, u32 count) {
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
+
+    if (loc >= 0) {
+        glUniform1fv(loc, count, values);
+    }
+    else {
+        log_print("Shader set int loc error! (attribute: %s)\n", attr);
     }
 }
 
