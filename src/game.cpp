@@ -2,6 +2,7 @@ internal void init_game() {
     srand((u32)time(0));
 
     game_state.time_elapsed = 0.0f;
+    game_state.bird_spawn_timer = 0.0f;
 
     game_state.camera = create_camera(VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H, 80.0f);
     game_state.camera.rotation.x = 25.0f;
@@ -50,6 +51,36 @@ internal void tick(f32 dt) {
     camera_animate(game_state.camera, game_state.resources.camera_animation, dt);
     camera_update(game_state.camera);
 
+    game_state.bird_spawn_timer += dt;
+    if (game_state.bird_spawn_timer >= BIRD_SPAWN_TIME) {
+        Entity *bird = create_bird(game_state.entities);
+        BirdData *bird_data = &game_state.entities.entity_data[bird->data].bird_data;
+
+        {
+            Vector2 r_u = rand_unit_v2() * 200.0f;
+            bird->position.x = r_u.x;
+            bird->position.y = BIRD_HEIGHTS + rand_f_range(0.0f, 5.0f);
+            bird->position.z = r_u.y;
+        }
+
+        {
+            Vector3 rand_position;
+            rand_position.x = (f32)(rand() % 50) - 25.0f;
+            rand_position.y = BIRD_HEIGHTS;
+            rand_position.z = (f32)(rand() % 50) - 25.0f;
+
+            Vector3 dir = rand_position - bird->position;
+            normalize(dir);
+
+            bird_data->direction = make_vector2(dir.x, dir.z);
+
+            f32 angle = atan2(dir.x, dir.z) + PI;
+            bird->rotation.y = angle;
+        }
+
+        game_state.bird_spawn_timer -= BIRD_SPAWN_TIME;
+    }
+
     // Update entities
     {
         Entity *it;
@@ -58,29 +89,19 @@ internal void tick(f32 dt) {
             if (it->type == EntityType_BIRD) {
                 BirdData *bird_data = &game_state.entities.entity_data[it->data].bird_data;
 
-                bird_data->hover_animation += dt * BIRD_HOVER_SPEED;
-                it->position.y = BIRD_HEIGHTS + (sinf(bird_data->hover_animation) * BIRD_HOVER_AMPL);
+                bird_data->life += dt;
 
-                // Find new target if current is reached
-                {
-                    f32 d = distance(it->position, bird_data->fly_target);
-                    if (d <= 1.0f) {
-                        bird_data->fly_target.x = (f32)(rand() % 50) - 25.0f;
-                        bird_data->fly_target.z = (f32)(rand() % 50) - 25.0f;
-                    }
+                if (bird_data->life >= BIRD_LIFESPAN) {
+                    it->flags.destroy = 1;
+                    continue;
                 }
 
                 // Move towads target
-                // @Todo: finer rotations
                 {
-                    Vector3 direction = bird_data->fly_target - it->position;
-                    normalize(direction);
-
                     // @Todo: rotate to direction
 
-                    direction *= BIRD_SPEED * dt;
-
-                    it->position += direction;
+                    it->position.x += (bird_data->direction.x * BIRD_SPEED * dt);
+                    it->position.z += (bird_data->direction.y * BIRD_SPEED * dt);
                 }
             }
             else if (it->type == EntityType_FLYING_ROCK) {
@@ -147,6 +168,8 @@ internal void tick(f32 dt) {
             }
         }}
     }
+
+    remove_flagged_entities(game_state.entities);
 }
 
 internal void render() {

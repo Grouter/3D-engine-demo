@@ -7,6 +7,25 @@ inline void allocate_entity_storage(EntityStorage &storage) {
     allocate_array(storage.flying_rock_transforms.results, ROCK_COUNT);
 }
 
+internal void remove_flagged_entities(EntityStorage &storage) {
+    Entity *e;
+    BucketLocation location;
+
+    bucket_array_foreach_w_loc(storage.base_entities, e, location) {
+        if (!e->flags.destroy) continue;
+
+        switch (e->type) {
+            case EntityType_BIRD :
+            case EntityType_SHIP :
+            case EntityType_FLYING_ROCK : {
+                storage.entity_data.remove(e->data);
+            } break;
+        }
+
+        storage.base_entities.remove(location);
+    }}
+}
+
 internal Entity* create_base_entity(EntityStorage &storage, EntityType type = EntityType_BASIC) {
     Entity *entity;
 
@@ -31,6 +50,8 @@ internal EntityData* create_entity_data(EntityStorage &storage, Entity &base) {
 
 internal Entity* create_bird(EntityStorage &storage) {
     Entity *bird_entity = create_base_entity(storage, EntityType_BIRD);
+
+    bird_entity->mesh = get_mesh("bird");
 
     create_entity_data(storage, *bird_entity);
 

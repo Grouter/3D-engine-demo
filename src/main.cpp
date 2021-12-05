@@ -110,6 +110,7 @@ struct GameState {
 
     // Gameplay
     f32 time_elapsed;
+    f32 bird_spawn_timer;
 
     Resources resources;
     Camera camera;

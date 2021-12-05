@@ -56,6 +56,15 @@ inline Vector2 make_vector2(f32 x, f32 y) {
     return result;
 }
 
+inline Vector2 operator* (Vector2 a, f32 b) {
+    Vector2 result;
+
+    result.x = a.x * b;
+    result.y = a.y * b;
+
+    return result;
+}
+
 inline Vector2 rand_unit_v2() {
     f32 a = rand_f_range(0.0f, TWO_PI);
 
