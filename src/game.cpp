@@ -90,6 +90,17 @@ internal void tick(f32 dt) {
 
                 it->position.y += sinf(game_state.time_elapsed * 0.2f) * 0.001f * rock_data->rotation_direction;
             }
+            else if (it->type == EntityType_SHIP) {
+                ShipData *data = &game_state.entities.entity_data[it->data].ship_data;
+
+                if (data->original_y_position == FLT_MAX) {
+                    data->original_y_position = it->position.y;
+                }
+
+                it->position.y = data->original_y_position + sinf(game_state.time_elapsed * 0.1f) * 0.8f;
+                it->rotation.x = sinf(game_state.time_elapsed * 0.2f) * 0.02f;
+                it->rotation.z = sinf(game_state.time_elapsed * 0.2f) * 0.05f;
+            }
         }}
     }
 

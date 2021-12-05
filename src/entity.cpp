@@ -104,6 +104,16 @@ internal Entity* create_rock_formation(EntityStorage &storage) {
     return root;
 }
 
+internal Entity* create_ship(EntityStorage &storage) {
+    Entity *root = create_base_entity(storage, EntityType_SHIP);
+
+    ShipData *data = &create_entity_data(storage, *root)->ship_data;
+
+    *data = {};
+
+    return root;
+}
+
 internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type) {
     Entity *result;
 
@@ -119,6 +129,10 @@ internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type
 
         case EntityType_BIRD : {
             result = create_bird(storage);
+        } break;
+
+        case EntityType_SHIP : {
+            result = create_ship(storage);
         } break;
 
         default : {

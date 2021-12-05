@@ -20,6 +20,7 @@ enum EntityType {
     EntityType_BASIC,
     EntityType_BIRD,
     EntityType_FLYING_ROCK,
+    EntityType_SHIP,
 };
 
 struct Entity {
@@ -36,6 +37,10 @@ struct Entity {
     Mesh *mesh       = nullptr;
 };
 
+struct ShipData {
+    f32 original_y_position = FLT_MAX;
+};
+
 struct BirdData {
     Vector2 direction;
     Vector3 fly_target;
@@ -50,6 +55,7 @@ struct FlyingRockData {
 union EntityData {
     FlyingRockData flying_rock_data;
     BirdData bird_data;
+    ShipData ship_data;
 };
 
 struct FlyingRockTransformHierarchy {

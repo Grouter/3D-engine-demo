@@ -16,6 +16,7 @@ mesh: "alchym"
 position: -5.5, 0.0, 22.0
 
 ! entity
+type: 4
 mesh: "ship"
 position: 0.0, 0.0, 60.0
 
