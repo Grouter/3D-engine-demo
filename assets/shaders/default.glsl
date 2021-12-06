@@ -65,7 +65,7 @@ float calc_shadow(int layer) {
 #else
     vec2 texel_size = 1.0 / vec2(textureSize(shadow_textures, 0));
 
-    int soft_count = 2;
+    int soft_count = 1;
 
     for (int x = -soft_count; x <= soft_count; ++x) {
         for (int y = -soft_count; y <= soft_count; ++y) {
@@ -83,7 +83,7 @@ float calc_shadow(int layer) {
 void main() {
     // Specular
     vec3 view_dir = normalize(camera_position - f_frag_pos);
-    vec3 reflect_dir = reflect(-sun_dir, f_normal);
+    vec3 reflect_dir = reflect(sun_dir, f_normal);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
     vec3 specular = SPECULAR * spec * SUN_COLOR;
 
@@ -92,7 +92,7 @@ void main() {
     vec3 sun_dir_n = normalize(sun_dir);
 
     // Diffuse
-    float diffuse_s = max(dot(f_normal, sun_dir), 0.0);
+    float diffuse_s = max(dot(f_normal, -sun_dir), 0.0);
     vec3 diffuse = diffuse_s * SUN_COLOR;
 
     // Shadows

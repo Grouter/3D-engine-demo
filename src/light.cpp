@@ -29,12 +29,12 @@ internal void calc_shadowmap_cascade_projections(Camera &camera, LightData &ligh
     f32 tan_fov = tan(fov_radians);
     f32 aspect = (f32)VIRTUAL_WINDOW_W / (f32)VIRTUAL_WINDOW_H;
 
-    Vector3 light_right = get_side_vector(light_data.sun_view);//normalized(cross(light_data.sun_direction, V3_UP));
-    Vector3 light_up = get_up_vector(light_data.sun_view);// normalized(cross(light_data.sun_direction, light_right));
+    Vector3 light_right = normalized(cross(V3_UP, light_data.sun_direction));
+    Vector3 light_up = normalized(cross(light_data.sun_direction, light_right));
 
     Vector3 corners[8];
 
-    Matrix4x4 light_tr = transposed(light_data.sun_view);
+    Matrix4x4 light_tr = light_data.sun_view;
 
     for (i32 i = 0; i < SHADOW_CASCADE_COUNT; i++) {
         f32 h_near = 2.0f * tan_fov * light_data.cascade_splits[i];

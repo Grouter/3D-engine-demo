@@ -23,7 +23,7 @@ internal void init_game() {
     // Light
     init_light_data(game_state.light_data);
     init_light_buffers(game_state.light_data);
-    game_state.light_data.sun_direction = normalized(make_vector3(0.2f, -1.0f, -0.2f));
+    game_state.light_data.sun_direction = normalized(make_vector3(-0.08f, -1.0f, -0.2f));
 
     // Spawn rocks
     {
@@ -175,7 +175,18 @@ internal void tick(f32 dt) {
 internal void render() {
     // Calculate sun transform for shadow calulations
     {
-        game_state.light_data.sun_view = from_direction(game_state.light_data.sun_direction);
+        Vector3 forward = normalized(game_state.light_data.sun_direction);
+        Vector3 side    = normalized(cross(V3_UP, forward));
+        Vector3 up      = normalized(cross(forward, side));
+
+        game_state.light_data.sun_view = {
+            side.x, up.x, forward.x, 0.0f,
+            side.y, up.y, forward.y, 0.0f,
+            side.z, up.z, forward.z, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+        };
+
+        game_state.light_data.sun_view = transposed(game_state.light_data.sun_view);
     }
 
     // Do CSM!
@@ -248,7 +259,10 @@ internal void render() {
 
         set_shader_vec3("camera_position", game_state.camera.position);
         set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_maps);
-        set_shader_vec3("sun_dir", game_state.light_data.sun_direction * -1.0f);
+        {
+            Vector3 s_d = get_forward_vector(game_state.light_data.sun_view);
+            set_shader_vec3("sun_dir", s_d);
+        }
         set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
 
         flush_draw_calls();

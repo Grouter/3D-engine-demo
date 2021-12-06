@@ -223,25 +223,6 @@ inline Matrix4x4 transposed(Matrix4x4 &matrix) {
     };
 }
 
-inline Matrix4x4 from_direction(Vector3 direction) {
-    Vector3 forward = normalized(direction);
-    Vector3 side    = normalized(cross(V3_UP, forward));
-    Vector3 up      = normalized(cross(forward, side));
-
-    return {
-        side.x, up.x, forward.x, 0.0f,
-        side.y, up.y, forward.y, 0.0f,
-        side.z, up.z, forward.z, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f,
-    };
-}
-
-inline Matrix4x4 look_at(Vector3 position, Vector3 target) {
-    Vector3 dir = target - position;
-
-    return from_direction(dir);
-}
-
 inline Matrix4x4 to_transform(Vector3 position, Vector3 rotation, Vector3 size) {
     Matrix4x4 result = identity();
 
