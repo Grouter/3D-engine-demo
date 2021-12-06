@@ -1,7 +1,6 @@
 #if !defined(LIGHT_H)
 #define LIGHT_H
 
-// @Broken: Cascades are broken and glitchy
 // #define DO_SHADOW_CASCADES
 
 #ifdef DO_SHADOW_CASCADES
@@ -14,27 +13,16 @@ const u32 SHADOW_SIZE = 4096;
 
 const f32 SHADOW_SPLIT_LAMBDA = 0.8f;
 
-struct BBox {
-    Vector3 near_top_left;
-    Vector3 near_top_right;
-    Vector3 near_bottom_left;
-    Vector3 near_bottom_right;
-    Vector3 far_top_left;
-    Vector3 far_top_right;
-    Vector3 far_bottom_left;
-    Vector3 far_bottom_right;
-};
-
 struct LightData {
     u32 frame_buffer;
 
     Vector3 sun_direction;
+
     Matrix4x4 sun_view;
     Matrix4x4 sun_projection;
     Matrix4x4 sun_mvp;
 
-    u32 lights_buffer_object;
-
+    u32 shadow_uniform_buffer;
     u32 shadow_maps;
 
     Matrix4x4 cascade_projections[SHADOW_CASCADE_COUNT];

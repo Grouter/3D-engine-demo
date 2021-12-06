@@ -34,7 +34,6 @@ in vec2 f_uv;
 
 uniform mat4 view;
 uniform vec3 sun_dir;
-uniform vec3 camera_position;
 uniform vec4 material_color;
 uniform sampler2D diffuse_texture;
 
@@ -65,7 +64,7 @@ float calc_shadow(int layer) {
 #else
     vec2 texel_size = 1.0 / vec2(textureSize(shadow_textures, 0));
 
-    int soft_count = 1;
+    int soft_count = 2;
 
     for (int x = -soft_count; x <= soft_count; ++x) {
         for (int y = -soft_count; y <= soft_count; ++y) {
@@ -81,6 +80,8 @@ float calc_shadow(int layer) {
 }
 
 void main() {
+    vec3 camera_position = vec3(view[3][0], view[3][1], view[3][2]);
+
     // Specular
     vec3 view_dir = normalize(camera_position - f_frag_pos);
     vec3 reflect_dir = reflect(sun_dir, f_normal);

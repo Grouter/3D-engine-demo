@@ -3,11 +3,11 @@ internal void init_light_buffers(LightData &data) {
 
     u32 lights_buffer_index = glGetUniformBlockIndex(shader_handle, "LightMatricies");
 
-    glGenBuffers(1, &data.lights_buffer_object);
-    glBindBuffer(GL_UNIFORM_BUFFER, data.lights_buffer_object);
+    glGenBuffers(1, &data.shadow_uniform_buffer);
+    glBindBuffer(GL_UNIFORM_BUFFER, data.shadow_uniform_buffer);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, nullptr, GL_DYNAMIC_DRAW);
     glUniformBlockBinding(shader_handle, lights_buffer_index, 0);
-    glBindBufferRange(GL_UNIFORM_BUFFER, 0, data.lights_buffer_object, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT);
+    glBindBufferRange(GL_UNIFORM_BUFFER, 0, data.shadow_uniform_buffer, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
@@ -24,7 +24,7 @@ internal void calc_shadowmap_split_distances(Camera &camera, LightData &light_da
     light_data.cascade_splits[SHADOW_CASCADE_COUNT] = camera.clip_far;
 }
 
-internal void calc_shadowmap_cascade_projections(Camera &camera, LightData &light_data) {
+internal void calc_cascade_matricies(Camera &camera, LightData &light_data) {
     f32 fov_radians = TO_RADIANS(camera.fov * 0.5f);
     f32 tan_fov = tan(fov_radians);
     f32 aspect = (f32)VIRTUAL_WINDOW_W / (f32)VIRTUAL_WINDOW_H;
@@ -33,8 +33,6 @@ internal void calc_shadowmap_cascade_projections(Camera &camera, LightData &ligh
     Vector3 light_up = normalized(cross(light_data.sun_direction, light_right));
 
     Vector3 corners[8];
-
-    Matrix4x4 light_tr = light_data.sun_view;
 
     for (i32 i = 0; i < SHADOW_CASCADE_COUNT; i++) {
         f32 h_near = 2.0f * tan_fov * light_data.cascade_splits[i];
@@ -57,27 +55,22 @@ internal void calc_shadowmap_cascade_projections(Camera &camera, LightData &ligh
         corners[6] = c_far - light_up * h_far * 0.5f - light_right * w_far * 0.5f;
         corners[7] = c_far - light_up * h_far * 0.5f + light_right * w_far * 0.5f;
 
-        // Transform corners into the light space
-        Vector3 min_coords = { FLT_MAX, FLT_MAX, FLT_MAX };
-        Vector3 max_coords = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+        Vector3 center = {};
+        for (i32 j = 0; j < 8; j++) center += corners[j];
+        center /= 8.0f;
 
+        Matrix4x4 light_view = look_at(center, center + light_data.sun_direction);
+
+        f32 radius = -FLT_MAX;
         for (i32 j = 0; j < 8; j++) {
-            corners[j] = multiply(light_tr, corners[j]);
-            min_coords.x = min(min_coords.x, corners[j].x);
-            max_coords.x = max(max_coords.x, corners[j].x);
-            min_coords.y = min(min_coords.y, corners[j].y);
-            max_coords.y = max(max_coords.y, corners[j].y);
-            min_coords.z = min(min_coords.z, corners[j].z);
-            max_coords.z = max(max_coords.z, corners[j].z);
+            f32 d = distance(center, corners[j]);
+            radius = max(radius, d);
         }
 
-        constexpr float z_mult = 10.0f;
-        if (min_coords.z < 0) min_coords.z *= z_mult;
-        else min_coords.z /= z_mult;
-
-        if (max_coords.z < 0) max_coords.z /= z_mult;
-        else max_coords.z *= z_mult;
+        Vector3 max_coords = make_vector3(radius);
+        Vector3 min_coords = make_vector3(-radius);
 
         light_data.cascade_projections[i] = ortho(min_coords.z, max_coords.z, min_coords.x, max_coords.x, max_coords.y, min_coords.y);
+        light_data.cascade_mvps[i] = multiply(light_data.cascade_projections[i], light_view);
     }
 }

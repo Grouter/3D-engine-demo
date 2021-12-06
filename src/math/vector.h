@@ -143,6 +143,14 @@ inline Vector3 operator*= (Vector3 &a, f32 b) {
     return a;
 }
 
+inline Vector3 operator/= (Vector3 &a, f32 b) {
+    a.x /= b;
+    a.y /= b;
+    a.z /= b;
+
+    return a;
+}
+
 inline Vector3 operator+ (Vector3 a, Vector3 b) {
     Vector3 result;
 
