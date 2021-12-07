@@ -55,6 +55,9 @@ const u32 VIRTUAL_WINDOW_H = 1080;
 const u32 VIRTUAL_WINDOW_W_2D = 32;
 const u32 VIRTUAL_WINDOW_H_2D = 18;
 
+const u32 HDR_TARGET_W = 2560;
+const u32 HDR_TARGET_H = 1440;
+
 const u32 TARGET_ASPECT_W = 16;
 const u32 TARGET_ASPECT_H = 9;
 
@@ -104,6 +107,13 @@ struct GameState {
     f32 pixels_to_units_2d;
 
     Matrix4x4 ortho_proj;
+
+    u32 skybox_cubemap;
+
+    // HDR
+    u32 hdr_framebuffer;
+    u32 post_color_buffer;
+    u32 post_depth_buffer;
 
     // Light
     LightData light_data;

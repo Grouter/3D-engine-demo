@@ -222,11 +222,13 @@ internal void load_model(const char *name, Mesh &mesh) {
         }
     }
 
+#if 0
     log_print("Mesh sub meshes: %llu\n", mesh.sub_meshes.length);
     log_print("Mesh verticies:  %llu\n", mesh.verticies.length);
     log_print("Mesh normals:    %llu\n", mesh.normals.length);
     log_print("Mesh indicies:   %llu\n", mesh.indicies.length);
     log_print("Mesh uv:         %llu\n", mesh.uvs.length);
+#endif
 
     bind_mesh_buffer_objects(mesh);
 }
@@ -496,10 +498,26 @@ internal void init_resources(Resources &resources) {
         catalog_put(resources.shader_catalog, "shadow.glsl", ShaderResource_Shadow);
     }
 
+    // Skybox shader
+    {
+        bool status = load_program("shaders/skybox.glsl", resources.programs[ShaderResource_Skybox]);
+        if (!status) exit(1);
+        catalog_put(resources.shader_catalog, "skybox.glsl", ShaderResource_Skybox);
+    }
+
+    // HDR shader
+    {
+        bool status = load_program("shaders/hdr.glsl", resources.programs[ShaderResource_HDR]);
+        if (!status) exit(1);
+        catalog_put(resources.shader_catalog, "hdr.glsl", ShaderResource_HDR);
+    }
+
     // Meshes
     allocate_array(resources.meshes, 50);
     allocate_resource_catalog(resources.mesh_catalog, 50);
     resources.meshes.add(create_mesh_2d_quad());
+    resources.meshes.add(create_skybox_cube());
+    resources.meshes.add(create_mesh_2d_quad(1.0f));
 
     // Textures
     allocate_array(resources.textures, 50);
@@ -537,13 +555,63 @@ internal void init_resources(Resources &resources) {
 
     // Animation
     resources.camera_animation = load_camera_animation("test.keyframes");
+
+    // Skybox Cubemap
+    {
+        u32 cubemap;
+        glGenTextures(1, &cubemap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
+
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_set_flip_vertically_on_load(false);
+
+        char *sides[6] = {
+            "cubemap/left.png",
+            "cubemap/right.png",
+            "cubemap/top.png",
+            "cubemap/bottom.png",
+            "cubemap/back.png",
+            "cubemap/front.png",
+        };
+
+        i32 width, height, nr_channels;
+
+        for (u32 i = 0; i < 6; i++) {
+            stbi_set_flip_vertically_on_load(i == 2 || i == 3);
+
+            u8 *data = stbi_load(sides[i], &width, &height, &nr_channels, 0);
+
+            if (data) {
+                i32 format = GL_RGB;
+                if (nr_channels == 4) format = GL_RGBA;
+
+                glTexImage2D(
+                    GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                    0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data
+                );
+
+                stbi_image_free(data);
+            }
+            else {
+                log_print("!!!!! Error loading a the cubemap %s side\n", sides[i]);
+                stbi_image_free(data);
+            }
+        }
+
+        game_state.skybox_cubemap = cubemap;
+    }
 }
 
 internal void unload_meshes() {
     Mesh *it;
 
-    // Stop at index 1 to not remove the first quad for font rendering
-    for (i64 i = game_state.resources.meshes.length - 1; i > 0; i--) {
+    // Stop at index 3 to not remove the first static meshes
+    for (i64 i = game_state.resources.meshes.length - 1; i >= 3; i--) {
         it = &game_state.resources.meshes[i];
 
         glDeleteBuffers(1, &it->vao);

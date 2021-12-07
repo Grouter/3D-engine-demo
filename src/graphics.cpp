@@ -130,20 +130,25 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
     glGenVertexArrays(1, &mesh.vao);
     glBindVertexArray(mesh.vao);
 
-    {   // Index data
+    // Index data
+    if (mesh.indicies.length > 0) {
         glGenBuffers(1, &mesh.ebo);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indicies.length * sizeof(u32), mesh.indicies.data, GL_STATIC_DRAW);
     }
 
+    i32 attrib = 0;
+
     {   // Vertex data
         glGenBuffers(1, &mesh.vbo);
         glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
         glBufferData(GL_ARRAY_BUFFER, mesh.verticies.length * sizeof(Vector3), mesh.verticies.data, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(attrib);
+
+        attrib += 1;
     }
 
     // Normal data
@@ -152,17 +157,22 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
         glBindBuffer(GL_ARRAY_BUFFER, mesh.nbo);
         glBufferData(GL_ARRAY_BUFFER, mesh.normals.length * sizeof(Vector3), mesh.normals.data, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(attrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(attrib);
+
+        attrib += 1;
     }
 
-    {   // UV data
+    // UV data
+    if (mesh.uvs.length > 0) {
         glGenBuffers(1, &mesh.tbo);
         glBindBuffer(GL_ARRAY_BUFFER, mesh.tbo);
         glBufferData(GL_ARRAY_BUFFER, mesh.uvs.length * sizeof(Vector2), mesh.uvs.data, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(attrib, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(attrib);
+
+        attrib += 1;
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -170,17 +180,17 @@ internal void bind_mesh_buffer_objects(Mesh &mesh) {
     glBindVertexArray(0);
 }
 
-internal Mesh create_mesh_2d_quad() {
+internal Mesh create_mesh_2d_quad(f32 half_size = 0.5f) {
     Mesh quad = {};
 
     allocate_array(quad.verticies, 4);
     allocate_array(quad.uvs,       4);
     allocate_array(quad.indicies,  6);
 
-    quad.verticies.add(make_vector3(-0.5f,  0.5f, 0.0f));
-    quad.verticies.add(make_vector3( 0.5f,  0.5f, 0.0f));
-    quad.verticies.add(make_vector3( 0.5f, -0.5f, 0.0f));
-    quad.verticies.add(make_vector3(-0.5f, -0.5f, 0.0f));
+    quad.verticies.add(make_vector3(-half_size,  half_size, half_size));
+    quad.verticies.add(make_vector3( half_size,  half_size, half_size));
+    quad.verticies.add(make_vector3( half_size, -half_size, half_size));
+    quad.verticies.add(make_vector3(-half_size, -half_size, half_size));
 
     quad.uvs.add(make_vector2(0.0f, 1.0f));
     quad.uvs.add(make_vector2(1.0f, 1.0f));
@@ -197,4 +207,59 @@ internal Mesh create_mesh_2d_quad() {
     bind_mesh_buffer_objects(quad);
 
     return quad;
+}
+
+internal Mesh create_skybox_cube() {
+    Mesh cube = {};
+
+    allocate_array(cube.verticies, 36);
+    allocate_array(cube.indicies, 36);
+
+    cube.verticies.add({ -1.0f,  1.0f, -1.0f });
+    cube.verticies.add({ -1.0f, -1.0f, -1.0f });
+    cube.verticies.add({  1.0f, -1.0f, -1.0f });
+    cube.verticies.add({  1.0f, -1.0f, -1.0f });
+    cube.verticies.add({  1.0f,  1.0f, -1.0f });
+    cube.verticies.add({ -1.0f,  1.0f, -1.0f });
+
+    cube.verticies.add({ -1.0f, -1.0f,  1.0f });
+    cube.verticies.add({ -1.0f, -1.0f, -1.0f });
+    cube.verticies.add({ -1.0f,  1.0f, -1.0f });
+    cube.verticies.add({ -1.0f,  1.0f, -1.0f });
+    cube.verticies.add({ -1.0f,  1.0f,  1.0f });
+    cube.verticies.add({ -1.0f, -1.0f,  1.0f });
+
+    cube.verticies.add({ 1.0f, -1.0f, -1.0f });
+    cube.verticies.add({ 1.0f, -1.0f,  1.0f });
+    cube.verticies.add({ 1.0f,  1.0f,  1.0f });
+    cube.verticies.add({ 1.0f,  1.0f,  1.0f });
+    cube.verticies.add({ 1.0f,  1.0f, -1.0f });
+    cube.verticies.add({ 1.0f, -1.0f, -1.0f });
+
+    cube.verticies.add({ -1.0f, -1.0f,  1.0f });
+    cube.verticies.add({ -1.0f,  1.0f,  1.0f });
+    cube.verticies.add({  1.0f,  1.0f,  1.0f });
+    cube.verticies.add({  1.0f,  1.0f,  1.0f });
+    cube.verticies.add({  1.0f, -1.0f,  1.0f });
+    cube.verticies.add({ -1.0f, -1.0f,  1.0f });
+
+    cube.verticies.add({ -1.0f,  1.0f, -1.0f });
+    cube.verticies.add({  1.0f,  1.0f, -1.0f });
+    cube.verticies.add({  1.0f,  1.0f,  1.0f });
+    cube.verticies.add({  1.0f,  1.0f,  1.0f });
+    cube.verticies.add({ -1.0f,  1.0f,  1.0f });
+    cube.verticies.add({ -1.0f,  1.0f, -1.0f });
+
+    cube.verticies.add({-1.0f, -1.0f, -1.0f });
+    cube.verticies.add({-1.0f, -1.0f,  1.0f });
+    cube.verticies.add({ 1.0f, -1.0f, -1.0f });
+    cube.verticies.add({ 1.0f, -1.0f, -1.0f });
+    cube.verticies.add({-1.0f, -1.0f,  1.0f });
+    cube.verticies.add({ 1.0f, -1.0f,  1.0  });
+
+    for (i32 i = 0; i < cube.indicies.capacity; i++) cube.indicies.add(i);
+
+    bind_mesh_buffer_objects(cube);
+
+    return cube;
 }

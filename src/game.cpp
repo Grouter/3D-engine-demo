@@ -23,7 +23,7 @@ internal void init_game() {
     // Light
     init_light_data(game_state.light_data);
     init_light_buffers(game_state.light_data);
-    game_state.light_data.sun_direction = normalized(make_vector3(-0.1f, -1.0f, -0.2f));
+    game_state.light_data.sun_direction = normalized(make_vector3(-0.4f, -1.0f, -0.2f));
 
     // Spawn rocks
     {
@@ -193,7 +193,7 @@ internal void render() {
                 side.z, up.z, forward.z, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f,
             };
-        }
+    }
 
         game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, game_state.light_data.sun_view);
 
@@ -221,48 +221,97 @@ internal void render() {
     {
         glEnable(GL_DEPTH_TEST);
 
-        glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, game_state.light_data.frame_buffer);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_TEXTURE_2D_ARRAY, game_state.light_data.shadow_maps, 0);
+        glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         set_shader(ShaderResource_Shadow);
 
         flush_draw_calls_shadow();
+    }
 
+    // HDR pass
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, game_state.hdr_framebuffer);
+        glViewport(0, 0, HDR_TARGET_W, HDR_TARGET_H);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Draw 3Ds
+        {
+            set_shader(ShaderResource_Default);
+
+            set_shader_matrix4x4("view", game_state.camera.transform);
+            set_shader_matrix4x4("projection", game_state.camera.perspective);
+            set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_maps);
+            set_shader_vec3("sun_dir", game_state.light_data.sun_direction);
+            set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
+
+            flush_draw_calls();
+        }
+
+        // Skybox
+        {
+            glDepthMask(GL_FALSE);
+            set_shader(ShaderResource_Skybox);
+            Mesh *cube = &game_state.resources.meshes[1];
+            glBindVertexArray(cube->vao);
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, game_state.skybox_cubemap);
+
+            i32 loc = glGetUniformLocation(current_shader->handle, "skybox");
+            if (loc >= 0) {
+                glUniform1i(loc, 0);
+            }
+            else {
+                log_print("Shader set skybox loc error!\n");
+            }
+
+            Matrix4x4 view = game_state.camera.transform;
+            view.table[3][0] = 0.0f;
+            view.table[3][1] = 0.0f;
+            view.table[3][2] = 0.0f;
+            set_shader_matrix4x4("view", view);
+            set_shader_matrix4x4("projection", game_state.camera.perspective);
+
+            glDrawElements(GL_TRIANGLES, (i32)cube->indicies.length, GL_UNSIGNED_INT, 0);
+            glDepthMask(GL_TRUE);
+        }
+
+    }
+
+    // Final pass
+    {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(
             game_state.viewport.left,
             game_state.viewport.bottom,
             game_state.viewport.width,
             game_state.viewport.height
         );
-    }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        set_shader(ShaderResource_HDR);
+        set_shader_sampler("hdr_buffer", 0, game_state.post_color_buffer);
 
-    {
-        glEnable(GL_DEPTH_TEST);
-        set_shader(ShaderResource_Default);
+        Mesh *hdr_quad = &game_state.resources.meshes[MeshResource_HDR_Quad];
+        glBindVertexArray(hdr_quad->vao);
 
-        set_shader_matrix4x4("view", game_state.camera.transform);
-        set_shader_matrix4x4("projection", game_state.camera.perspective);
-        set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_maps);
-        set_shader_vec3("sun_dir", game_state.light_data.sun_direction);
-        set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
+        glDrawElements(GL_TRIANGLES, (i32)hdr_quad->indicies.length, GL_UNSIGNED_INT, 0);
 
-        flush_draw_calls();
-    }
+        // Draw 2Ds
+        {
+            glDisable(GL_DEPTH_TEST);
+            set_shader(ShaderResource_2D);
+            set_shader_matrix4x4("projection", game_state.ortho_proj);
 
-    {
-        glDisable(GL_DEPTH_TEST);
-        set_shader(ShaderResource_2D);
-        set_shader_matrix4x4("projection", game_state.ortho_proj);
+            set_shader_int("diffuse_alpha_mask", 0);
+            flush_2d_shapes_draw_calls();
 
-        set_shader_int("diffuse_alpha_mask", 0);
-        flush_2d_shapes_draw_calls();
-
-        set_shader_int("diffuse_alpha_mask", 1);
-        flush_font_draw_calls();
+            set_shader_int("diffuse_alpha_mask", 1);
+            flush_font_draw_calls();
+            glEnable(GL_DEPTH_TEST);
+        }
     }
 }
