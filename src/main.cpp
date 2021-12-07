@@ -105,6 +105,9 @@ struct GameState {
 
     Matrix4x4 ortho_proj;
 
+    // Skybox
+    u32 skybox_cubemap;
+
     // Light
     LightData light_data;
 

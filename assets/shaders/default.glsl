@@ -26,7 +26,7 @@ void main() {
 
 #ifdef FRAGMENT
 
-const vec3 SUN_COLOR = vec3(1.0, 0.945, 0.788);
+const vec3 SUN_COLOR = vec3(0.349, 0.188, 0.360);
 const float AMBIENT_STRENGTH = 0.2;
 const float SPECULAR = 0.5;
 

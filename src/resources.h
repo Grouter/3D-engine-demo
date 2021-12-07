@@ -5,6 +5,7 @@ enum ShaderResource {
     ShaderResource_Default,
     ShaderResource_2D,
     ShaderResource_Shadow,
+    ShaderResource_Skybox,
 
     ShaderResource_COUNT
 };

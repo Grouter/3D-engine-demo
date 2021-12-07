@@ -23,7 +23,7 @@ internal void init_game() {
     // Light
     init_light_data(game_state.light_data);
     init_light_buffers(game_state.light_data);
-    game_state.light_data.sun_direction = normalized(make_vector3(-0.1f, -1.0f, -0.2f));
+    game_state.light_data.sun_direction = normalized(make_vector3(-0.4f, -1.0f, -0.2f));
 
     // Spawn rocks
     {
@@ -193,7 +193,7 @@ internal void render() {
                 side.z, up.z, forward.z, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f,
             };
-        }
+    }
 
         game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, game_state.light_data.sun_view);
 
@@ -242,7 +242,6 @@ internal void render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     {
-        glEnable(GL_DEPTH_TEST);
         set_shader(ShaderResource_Default);
 
         set_shader_matrix4x4("view", game_state.camera.transform);
@@ -264,5 +263,35 @@ internal void render() {
 
         set_shader_int("diffuse_alpha_mask", 1);
         flush_font_draw_calls();
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    // Skybox
+    {
+        glDepthMask(GL_FALSE);
+        set_shader(ShaderResource_Skybox);
+        Mesh *cube = &game_state.resources.meshes[1];
+        glBindVertexArray(cube->vao);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, game_state.skybox_cubemap);
+
+        i32 loc = glGetUniformLocation(current_shader->handle, "skybox");
+        if (loc >= 0) {
+            glUniform1i(loc, 0);
+        }
+        else {
+            log_print("Shader set skybox loc error!\n");
+        }
+
+        Matrix4x4 view = game_state.camera.transform;
+        view.table[3][0] = 0.0f;
+        view.table[3][1] = 0.0f;
+        view.table[3][2] = 0.0f;
+        set_shader_matrix4x4("view", view);
+        set_shader_matrix4x4("projection", game_state.camera.perspective);
+
+        glDrawElements(GL_TRIANGLES, (i32)cube->indicies.length, GL_UNSIGNED_INT, 0);
+        glDepthMask(GL_TRUE);
     }
 }
