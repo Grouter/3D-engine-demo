@@ -6,11 +6,13 @@ enum ShaderResource {
     ShaderResource_2D,
     ShaderResource_Shadow,
     ShaderResource_Skybox,
+    ShaderResource_HDR,
 
     ShaderResource_COUNT
 };
 
 const u64 MeshResource_Quad = 0;
+const u64 MeshResource_HDR_Quad = 2;
 
 enum FontResource {
     FontResource_Small,

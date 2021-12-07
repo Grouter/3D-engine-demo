@@ -100,6 +100,33 @@ internal void init_renderer() {
 
     allocate_array(_2d_shapes_draw_calls.data, MAX_DRAW_CALLS);
     _allocate_instance_buffer(&_2d_shapes_draw_calls.vao, &_2d_shapes_draw_calls.instance_buffer, MAX_DRAW_CALLS);
+
+    // Allocate HDR
+    {
+        u32 hdr;
+        glGenFramebuffers(1, &hdr);
+        glBindFramebuffer(GL_FRAMEBUFFER, hdr);
+
+        u32 color_buffer;
+        glGenTextures(1, &color_buffer);
+        glBindTexture(GL_TEXTURE_2D, color_buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, HDR_TARGET_W, HDR_TARGET_H, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_buffer, 0);
+
+        u32 depth_buffer;
+        glGenRenderbuffers(1, &depth_buffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depth_buffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, HDR_TARGET_W, HDR_TARGET_H);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buffer);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        game_state.hdr_framebuffer = hdr;
+        game_state.post_color_buffer = color_buffer;
+        game_state.post_depth_buffer = depth_buffer;
+    }
 }
 
 internal void set_shader(ShaderResource shader) {

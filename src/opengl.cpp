@@ -116,9 +116,6 @@ internal HGLRC create_gl_context(HDC window_context) {
         exit(1);
     }
 
-    // Gamma correction
-    glEnable(GL_FRAMEBUFFER_SRGB);
-
     // V-Sync
     wglSwapIntervalEXT(1);
 

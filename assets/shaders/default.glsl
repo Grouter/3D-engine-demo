@@ -87,8 +87,8 @@ void main() {
     vec3 camera_to_frag = normalize(camera_position - f_frag_pos);
 
     // Specular
-    vec3 reflect_dir = reflect(sun_dir, f_normal);
-    float specular_intensity = pow(max(dot(camera_to_frag, reflect_dir), 0.0), 32);
+    vec3 reflect_dir = -reflect(sun_dir, f_normal);
+    float specular_intensity = pow(max(dot(reflect_dir, camera_dir), 0.0), 64);
 #ifdef CEL_SHADING
     specular_intensity = step(0.5, specular_intensity);
     if (specular_intensity >= 0.8) specular_intensity = 1.0;

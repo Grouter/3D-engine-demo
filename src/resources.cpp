@@ -505,11 +505,19 @@ internal void init_resources(Resources &resources) {
         catalog_put(resources.shader_catalog, "skybox.glsl", ShaderResource_Skybox);
     }
 
+    // HDR shader
+    {
+        bool status = load_program("shaders/hdr.glsl", resources.programs[ShaderResource_HDR]);
+        if (!status) exit(1);
+        catalog_put(resources.shader_catalog, "hdr.glsl", ShaderResource_HDR);
+    }
+
     // Meshes
     allocate_array(resources.meshes, 50);
     allocate_resource_catalog(resources.mesh_catalog, 50);
     resources.meshes.add(create_mesh_2d_quad());
     resources.meshes.add(create_skybox_cube());
+    resources.meshes.add(create_mesh_2d_quad(1.0f));
 
     // Textures
     allocate_array(resources.textures, 50);
@@ -602,8 +610,8 @@ internal void init_resources(Resources &resources) {
 internal void unload_meshes() {
     Mesh *it;
 
-    // Stop at index 2 to not remove the first static meshes
-    for (i64 i = game_state.resources.meshes.length - 1; i >= 2; i--) {
+    // Stop at index 3 to not remove the first static meshes
+    for (i64 i = game_state.resources.meshes.length - 1; i >= 3; i--) {
         it = &game_state.resources.meshes[i];
 
         glDeleteBuffers(1, &it->vao);
