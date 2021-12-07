@@ -9,10 +9,12 @@ const u32 SUB_SUB_ROCKS  = 10;
 
 constexpr u32 ROCK_COUNT = ROCKS * SUB_ROCKS * SUB_SUB_ROCKS;
 
-const f32 BIRD_HEIGHTS = 0.0f;
-const f32 BIRD_SPEED = 3.0f;
+const f32 BIRD_HEIGHTS = 50.0f;
+const f32 BIRD_SPEED = 8.0f;
 const f32 BIRD_HOVER_SPEED = 1.5f;
 const f32 BIRD_HOVER_AMPL = 0.2f;
+const f32 BIRD_LIFESPAN = 240.0f;
+const f32 BIRD_SPAWN_TIME = 5.0f;
 
 enum EntityType {
     EntityType_NONE,
@@ -20,9 +22,19 @@ enum EntityType {
     EntityType_BASIC,
     EntityType_BIRD,
     EntityType_FLYING_ROCK,
+    EntityType_SHIP,
+};
+
+union EntityFlags {
+    u32 raw = 0;
+
+    struct {
+        u8 destroy;
+    };
 };
 
 struct Entity {
+    EntityFlags flags;
     EntityType type  = EntityType_BASIC;
 
     BucketLocation data;
@@ -36,10 +48,13 @@ struct Entity {
     Mesh *mesh       = nullptr;
 };
 
+struct ShipData {
+    f32 original_y_position = FLT_MAX;
+};
+
 struct BirdData {
     Vector2 direction;
-    Vector3 fly_target;
-    f32 hover_animation;
+    f32 life;
 };
 
 struct FlyingRockData {
@@ -50,6 +65,7 @@ struct FlyingRockData {
 union EntityData {
     FlyingRockData flying_rock_data;
     BirdData bird_data;
+    ShipData ship_data;
 };
 
 struct FlyingRockTransformHierarchy {

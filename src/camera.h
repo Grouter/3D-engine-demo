@@ -10,6 +10,7 @@ struct Camera {
 
     Vector3 position;
     Vector3 rotation;
+    Vector3 direction;
 
     Matrix4x4 perspective;
     Matrix4x4 transform;

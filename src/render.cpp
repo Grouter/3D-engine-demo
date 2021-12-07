@@ -143,9 +143,34 @@ internal void set_shader_matrix4x4(const char *attr, Matrix4x4 value) {
     }
 }
 
+internal void set_shader_matrix4x4_array(const char *attr, Matrix4x4 *values, u32 count) {
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
+
+    if (loc >= 0) {
+        glUniformMatrix4fv(loc, count, false, (f32 *)values);
+    }
+    else {
+        log_print("Shader set_shader_matrix4x4_array (%s) loc error!\n", attr);
+    }
+}
+
 internal void set_shader_sampler(const char *attr, u32 texture_loc, u32 texture_handle) {
     glActiveTexture(GL_TEXTURE0 + texture_loc);
     glBindTexture(GL_TEXTURE_2D, texture_handle);
+
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
+
+    if (loc >= 0) {
+        glUniform1i(loc, texture_loc);
+    }
+    else {
+        log_print("Shader set smapler (%s) %d loc error!\n", attr, texture_loc);
+    }
+}
+
+internal void set_shader_sampler_array(const char *attr, u32 texture_loc, u32 texture_handle) {
+    glActiveTexture(GL_TEXTURE0 + texture_loc);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texture_handle);
 
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
 
@@ -165,6 +190,17 @@ internal void set_shader_int(const char *name, i32 value) {
     }
     else {
         log_print("Shader set int loc error! (attribute: %s)\n", name);
+    }
+}
+
+internal void set_shader_float_array(const char *attr, f32 *values, u32 count) {
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
+
+    if (loc >= 0) {
+        glUniform1fv(loc, count, values);
+    }
+    else {
+        log_print("Shader set int loc error! (attribute: %s)\n", attr);
     }
 }
 
@@ -237,16 +273,16 @@ internal void render_entity(Entity &entity, Matrix4x4 transform) {
 
     for (u32 i = 0; i < mesh->sub_meshes.length; i++) {
         DrawCallData data;
-        data.flags = 0;
+        data.flags.raw = 0;
 
         // @Todo: set shader to flags
 
-        if (mesh->sub_meshes.data[i].material_index >= game_state.resources.materials.length) {
-            data.flags |= (0 << RenderDataFlagBits::ShaderBits);
+        data.flags.shader = 0;
+
+        if (mesh->sub_meshes.data[i].material_index < game_state.resources.materials.length) {
+            data.flags.material = (u32)mesh->sub_meshes[i].material_index;
         }
-        else {
-            data.flags |= (mesh->sub_meshes.data[i].material_index << RenderDataFlagBits::ShaderBits);
-        }
+        else data.flags.material = 0;
 
         data.info = mesh->sub_meshes.data[i];
         data.mesh = mesh;
@@ -260,8 +296,8 @@ internal int _draw_call_cmp(const void *a, const void *b) {
     DrawCallData *data1 = (DrawCallData *)a;
     DrawCallData *data2 = (DrawCallData *)b;
 
-    if (data1->flags < data2->flags) return -1;
-    if (data1->flags > data2->flags) return  1;
+    if (data1->flags.raw < data2->flags.raw) return -1;
+    if (data1->flags.raw > data2->flags.raw) return  1;
     return 0;
 }
 
@@ -348,8 +384,7 @@ internal void flush_draw_calls() {
 
         // Material switching
         {
-            u64 material_index = (u64)(data->flags >> RenderDataFlagBits::ShaderBits);
-            material_index &= ~(UINT64_MAX << RenderDataFlagBits::MaterialBits);
+            u64 material_index = data->flags.material;
 
             if (active_material_index != material_index) {
                 active_material_index = material_index;

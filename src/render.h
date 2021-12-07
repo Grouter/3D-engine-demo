@@ -10,11 +10,20 @@ enum RenderDataFlagBits : u8 {
     MaterialBits = 16,
 };
 
+union DrawCallFlags {
+    u64 raw;
+
+    struct {
+        u8 shader;
+        u32 material;
+    };
+};
+
 struct DrawCallData {
-    u64         flags;
-    SubMeshInfo info;
-    Mesh        *mesh;
-    Matrix4x4   transform;
+    DrawCallFlags flags;
+    SubMeshInfo   info;
+    Mesh          *mesh;
+    Matrix4x4     transform;
 };
 
 struct DrawCallData2D {

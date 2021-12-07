@@ -9,41 +9,25 @@ restt
 
 ! island
 island.obj
-grey
+green
 
 ! houses_left
 houses_left2.obj
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
-color_palette
 
 ! houses_right
 houses_right.obj
-restt
-default
 
 ! alchym
 alchym.obj
-color_palette
 
 ! ship
 ship.obj
-color_palette
 
 ! docks
 docks.obj
-color_palette
 
 ! lanterns
 lanterns.obj
-color_palette
 
 ! tavern
 tavern.obj
@@ -92,4 +76,10 @@ grey
 
 ! rock7
 rock7.obj
+grey
+
+! bird
+bird.obj
+grey
+grey
 grey

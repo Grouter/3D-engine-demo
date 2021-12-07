@@ -2,6 +2,7 @@ internal void init_game() {
     srand((u32)time(0));
 
     game_state.time_elapsed = 0.0f;
+    game_state.bird_spawn_timer = 0.0f;
 
     game_state.camera = create_camera(VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H, 80.0f);
     game_state.camera.rotation.x = 25.0f;
@@ -21,7 +22,8 @@ internal void init_game() {
 
     // Light
     init_light_data(game_state.light_data);
-    game_state.light_data.sun_direction = normalized(make_vector3(0.0f, -1.0f, -1.0f));
+    init_light_buffers(game_state.light_data);
+    game_state.light_data.sun_direction = normalized(make_vector3(-0.1f, -1.0f, -0.2f));
 
     // Spawn rocks
     {
@@ -49,6 +51,36 @@ internal void tick(f32 dt) {
     camera_animate(game_state.camera, game_state.resources.camera_animation, dt);
     camera_update(game_state.camera);
 
+    game_state.bird_spawn_timer += dt;
+    if (game_state.bird_spawn_timer >= BIRD_SPAWN_TIME) {
+        Entity *bird = create_bird(game_state.entities);
+        BirdData *bird_data = &game_state.entities.entity_data[bird->data].bird_data;
+
+        {
+            Vector2 r_u = rand_unit_v2() * 200.0f;
+            bird->position.x = r_u.x;
+            bird->position.y = BIRD_HEIGHTS + rand_f_range(0.0f, 5.0f);
+            bird->position.z = r_u.y;
+        }
+
+        {
+            Vector3 rand_position;
+            rand_position.x = (f32)(rand() % 50) - 25.0f;
+            rand_position.y = BIRD_HEIGHTS;
+            rand_position.z = (f32)(rand() % 50) - 25.0f;
+
+            Vector3 dir = rand_position - bird->position;
+            normalize(dir);
+
+            bird_data->direction = make_vector2(dir.x, dir.z);
+
+            f32 angle = atan2(dir.x, dir.z) + PI;
+            bird->rotation.y = angle;
+        }
+
+        game_state.bird_spawn_timer -= BIRD_SPAWN_TIME;
+    }
+
     // Update entities
     {
         Entity *it;
@@ -57,29 +89,19 @@ internal void tick(f32 dt) {
             if (it->type == EntityType_BIRD) {
                 BirdData *bird_data = &game_state.entities.entity_data[it->data].bird_data;
 
-                bird_data->hover_animation += dt * BIRD_HOVER_SPEED;
-                it->position.y = BIRD_HEIGHTS + (sinf(bird_data->hover_animation) * BIRD_HOVER_AMPL);
+                bird_data->life += dt;
 
-                // Find new target if current is reached
-                {
-                    f32 d = distance(it->position, bird_data->fly_target);
-                    if (d <= 1.0f) {
-                        bird_data->fly_target.x = (f32)(rand() % 50) - 25.0f;
-                        bird_data->fly_target.z = (f32)(rand() % 50) - 25.0f;
-                    }
+                if (bird_data->life >= BIRD_LIFESPAN) {
+                    it->flags.destroy = 1;
+                    continue;
                 }
 
                 // Move towads target
-                // @Todo: finer rotations
                 {
-                    Vector3 direction = bird_data->fly_target - it->position;
-                    normalize(direction);
-
                     // @Todo: rotate to direction
 
-                    direction *= BIRD_SPEED * dt;
-
-                    it->position += direction;
+                    it->position.x += (bird_data->direction.x * BIRD_SPEED * dt);
+                    it->position.z += (bird_data->direction.y * BIRD_SPEED * dt);
                 }
             }
             else if (it->type == EntityType_FLYING_ROCK) {
@@ -89,13 +111,18 @@ internal void tick(f32 dt) {
 
                 it->position.y += sinf(game_state.time_elapsed * 0.2f) * 0.001f * rock_data->rotation_direction;
             }
-        }}
-    }
+            else if (it->type == EntityType_SHIP) {
+                ShipData *data = &game_state.entities.entity_data[it->data].ship_data;
 
-    // Calculate sun transform for shadow calulations
-    {
-        Matrix4x4 sun_view = from_direction(game_state.light_data.sun_direction);
-        game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, sun_view);
+                if (data->original_y_position == FLT_MAX) {
+                    data->original_y_position = it->position.y;
+                }
+
+                it->position.y = data->original_y_position + sinf(game_state.time_elapsed * 0.1f) * 0.8f;
+                it->rotation.x = sinf(game_state.time_elapsed * 0.2f) * 0.02f;
+                it->rotation.z = sinf(game_state.time_elapsed * 0.2f) * 0.05f;
+            }
+        }}
     }
 
     // Calculate transforms
@@ -141,9 +168,47 @@ internal void tick(f32 dt) {
             }
         }}
     }
+
+    remove_flagged_entities(game_state.entities);
 }
 
 internal void render() {
+    // Do CSM!
+    #ifdef DO_SHADOW_CASCADES
+    {
+        calc_shadowmap_split_distances(game_state.camera, game_state.light_data);
+        calc_cascade_matricies(game_state.camera, game_state.light_data);
+    }
+    #else
+    {
+        // Calculate sun transform for shadow calulations
+        {
+            Vector3 forward = normalized(game_state.light_data.sun_direction);
+            Vector3 side    = normalized(cross(V3_UP, forward));
+            Vector3 up      = normalized(cross(forward, side));
+
+            game_state.light_data.sun_view = {
+                side.x, up.x, forward.x, 0.0f,
+                side.y, up.y, forward.y, 0.0f,
+                side.z, up.z, forward.z, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f,
+            };
+        }
+
+        game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, game_state.light_data.sun_view);
+
+        for (int i = 0; i < SHADOW_CASCADE_COUNT; i++) {
+            game_state.light_data.cascade_mvps[i] = game_state.light_data.sun_mvp;
+        }
+    }
+    #endif
+
+    {
+        glBindBuffer(GL_UNIFORM_BUFFER, game_state.light_data.shadow_uniform_buffer);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, game_state.light_data.cascade_mvps);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
     // Render all entities
     {
         Entity *it;
@@ -152,15 +217,16 @@ internal void render() {
         }}
     }
 
+    // Draw shadow maps
     {
         glEnable(GL_DEPTH_TEST);
 
         glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
         glBindFramebuffer(GL_FRAMEBUFFER, game_state.light_data.frame_buffer);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_TEXTURE_2D_ARRAY, game_state.light_data.shadow_maps, 0);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         set_shader(ShaderResource_Shadow);
-        set_shader_matrix4x4("light", game_state.light_data.sun_mvp);
 
         flush_draw_calls_shadow();
 
@@ -178,11 +244,12 @@ internal void render() {
     {
         glEnable(GL_DEPTH_TEST);
         set_shader(ShaderResource_Default);
+
         set_shader_matrix4x4("view", game_state.camera.transform);
         set_shader_matrix4x4("projection", game_state.camera.perspective);
-        set_shader_vec3("camera_position", game_state.camera.position);
-        set_shader_sampler("shadow_texture", 1, game_state.light_data.shadow_texture);
-        set_shader_matrix4x4("sun", game_state.light_data.sun_mvp);
+        set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_maps);
+        set_shader_vec3("sun_dir", game_state.light_data.sun_direction);
+        set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
 
         flush_draw_calls();
     }

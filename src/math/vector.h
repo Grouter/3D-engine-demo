@@ -56,6 +56,15 @@ inline Vector2 make_vector2(f32 x, f32 y) {
     return result;
 }
 
+inline Vector2 operator* (Vector2 a, f32 b) {
+    Vector2 result;
+
+    result.x = a.x * b;
+    result.y = a.y * b;
+
+    return result;
+}
+
 inline Vector2 rand_unit_v2() {
     f32 a = rand_f_range(0.0f, TWO_PI);
 
@@ -134,6 +143,14 @@ inline Vector3 operator*= (Vector3 &a, f32 b) {
     return a;
 }
 
+inline Vector3 operator/= (Vector3 &a, f32 b) {
+    a.x /= b;
+    a.y /= b;
+    a.z /= b;
+
+    return a;
+}
+
 inline Vector3 operator+ (Vector3 a, Vector3 b) {
     Vector3 result;
 
@@ -187,6 +204,10 @@ inline f32 distance(Vector3 a, Vector3 b) {
     f32 result = length(line);
 
     return result;
+}
+
+inline void dump_vector(Vector3 &v) {
+    log_print("Vector3: %f %f %f\n", v.x, v.y, v.z);
 }
 
 //
