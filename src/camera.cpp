@@ -23,6 +23,7 @@ internal void camera_start_animation(Camera &camera) {
     camera.animation_t = 0.0f;
 }
 
+// @Broken: cannot index to different sized arrays with one key_frame
 internal void camera_animate(Camera &camera, CameraAnimation animation, f32 dt) {
     if (!camera.animation_play) return;
 

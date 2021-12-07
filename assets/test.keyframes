@@ -2,6 +2,8 @@
 # This just circles around the center...
 #
 
+# @Broken: do not leave out position and rotation!!!!!
+
 !
 time: 5.0
 position: 0 0 10

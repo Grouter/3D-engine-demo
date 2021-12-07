@@ -46,6 +46,7 @@ internal CameraAnimation load_camera_animation(const char *path) {
 
     allocate_array(result.positions, result.key_count);
     allocate_array(result.rotations, result.key_count);
+    allocate_array(result.times, result.key_count);
 
     // Rewind the walker back to the start
     walker = file.data;
