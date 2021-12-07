@@ -5,7 +5,7 @@ scale: 1.5, 1.5, 1.5
 
 ! entity
 mesh: "houses_left"
-position: -10.0, 0.0, 3.0
+position: -10.0, 0.4, 3.0
 
 ! entity
 mesh: "houses_right"
@@ -13,7 +13,7 @@ position: 10.0, 0.0, 3.0
 
 ! entity
 mesh: "alchym"
-position: -5.5, 0.0, 22.0
+position: -5.5, -0.5, 22.0
 
 ! entity
 type: 4
@@ -34,4 +34,48 @@ position: 0.0, 0.0, -35.0
 
 ! entity
 mesh: "logs"
-position: -7.0, 0.0, 1.0
+position: -7.0, -0.1, 1.0
+
+! entity
+mesh: "blacksmith"
+position: -10.7, -1.1, -13.8
+
+! entity
+mesh: "furnaces"
+position: -9.0, -1.0, -17.0
+
+! entity
+mesh: "well"
+position: 8.0, 0.0, 8.5
+
+! entity 
+mesh: "carts"
+position: 3.0, 0.0, 21.0
+
+! entity
+mesh: "tables1"
+position: 4.5, 1.5, -32.65
+
+! entity
+mesh: "tables1"
+position: 7.5, 1.5, -32.65
+
+! entity
+mesh: "tables2"
+position: 5.0, 1.5, -37.5
+
+! entity
+mesh: "bar"
+position: 10.5, 1.5, -32.1
+
+! cups
+mesh: "cups"
+position: 0.0, 3, 0.0
+
+! cups
+mesh: "cups"
+position: 10.5, 1.5, -32.1
+
+! cups
+mesh: "cups"
+position: 10.5, 1.5, -32.1

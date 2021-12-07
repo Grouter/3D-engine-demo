@@ -12,7 +12,7 @@ island.obj
 green
 
 ! houses_left
-houses_left.obj
+houses_left2.obj
 
 ! houses_right
 houses_right.obj
@@ -34,6 +34,30 @@ tavern.obj
 
 ! logs
 logs.obj
+
+! blacksmith
+blacksmith.obj
+
+! furnaces
+furnaces.obj
+
+! well
+well.obj
+
+! carts
+carts.obj
+
+! tables1
+tables1.obj
+
+! tables2
+tables2.obj
+
+! bar
+bar.obj
+
+! cups
+cups.obj
 
 ! rock1
 rock1.obj
