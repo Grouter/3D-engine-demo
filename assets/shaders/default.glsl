@@ -1,3 +1,5 @@
+// #define CEL_SHADING
+
 #ifdef VERTEX
 
 in vec3 position;
@@ -80,21 +82,36 @@ float calc_shadow(int layer) {
 }
 
 void main() {
-    vec3 camera_position = vec3(view[3][0], view[3][1], view[3][2]);
+    vec3 camera_position = -1.0 * vec3(view[3][0], view[3][1], view[3][2]);
+    vec3 camera_dir = -1.0 * vec3(view[0][2], view[1][2], view[2][2]);
+    vec3 camera_to_frag = normalize(camera_position - f_frag_pos);
 
     // Specular
-    vec3 view_dir = normalize(camera_position - f_frag_pos);
     vec3 reflect_dir = reflect(sun_dir, f_normal);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
-    vec3 specular = SPECULAR * spec * SUN_COLOR;
+    float specular_intensity = pow(max(dot(camera_to_frag, reflect_dir), 0.0), 32);
+#ifdef CEL_SHADING
+    specular_intensity = step(0.5, specular_intensity);
+    if (specular_intensity >= 0.8) specular_intensity = 1.0;
+    else if (specular_intensity >= 0.6) specular_intensity = 0.6;
+    else if (specular_intensity >= 0.3) specular_intensity = 0.3;
+    else specular_intensity = 0.0;
+#endif
+    vec3 specular = SPECULAR * specular_intensity * SUN_COLOR;
 
     // Ambient
     vec3 ambient = AMBIENT_STRENGTH * SUN_COLOR;
     vec3 sun_dir_n = normalize(sun_dir);
 
     // Diffuse
-    float diffuse_s = max(dot(f_normal, -sun_dir), 0.0);
-    vec3 diffuse = diffuse_s * SUN_COLOR;
+    float diffuse_intensity = max(dot(f_normal, -sun_dir), 0.0);
+#ifdef CEL_SHADING
+    diffuse_intensity = step(0.1, diffuse_intensity);
+    if (diffuse_intensity >= 0.8) diffuse_intensity = 1.0;
+    else if (diffuse_intensity >= 0.6) diffuse_intensity = 0.6;
+    else if (diffuse_intensity >= 0.3) diffuse_intensity = 0.3;
+    else diffuse_intensity = 0.0;
+#endif
+    vec3 diffuse = diffuse_intensity * SUN_COLOR;
 
     // Shadows
     int layer = -1;
