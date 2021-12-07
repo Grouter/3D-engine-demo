@@ -22,7 +22,7 @@ position: 0.0, 0.0, 60.0
 
 ! entity
 mesh: "docks"
-position: 0.0, -6.0, 47.0
+position: 0.0, -5.5, 47.0
 
 ! entity
 mesh: "lanterns"
@@ -48,7 +48,7 @@ position: -9.0, -1.0, -17.0
 mesh: "well"
 position: 8.0, 0.0, 8.5
 
-! entity 
+! entity
 mesh: "carts"
 position: 3.0, 0.0, 21.0
 
