@@ -12,7 +12,7 @@ island.obj
 grey
 
 ! houses_left
-houses_left.obj
+houses_left2.obj
 color_palette
 color_palette
 color_palette
@@ -50,6 +50,21 @@ tavern.obj
 
 ! logs
 logs.obj
+
+! blacksmith
+blacksmith.obj
+
+! furnaces
+furnaces.obj
+
+! well
+well.obj
+
+! carts
+carts.obj
+
+! tables
+tables.obj
 
 ! rock1
 rock1.obj
