@@ -5,6 +5,7 @@ struct CameraAnimation {
     u32 key_count = 0;
     Array<Vector3> positions;
     Array<Vector3> rotations;
+    Array<f32> times;
 };
 
 internal CameraAnimation load_camera_animation(const char *path) {
@@ -55,6 +56,8 @@ internal CameraAnimation load_camera_animation(const char *path) {
         if (*walker == '!') {
             key_index += 1;
 
+            result.times.add(1.0f);
+
             walker += 1;
             continue;
         }
@@ -72,6 +75,12 @@ internal CameraAnimation load_camera_animation(const char *path) {
 
             if (result.rotations.length <= key_index) result.rotations.add(rot);
             else result.rotations[key_index] = rot;
+        }
+        else if (strncmp(walker, "time", 4) == 0) {
+            f32 time;
+            sscanf(walker, "time: %f", &time);
+
+            result.times[key_index] = time;
         }
 
         walker = eat(walker, '\n', true);

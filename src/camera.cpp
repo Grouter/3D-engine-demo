@@ -46,7 +46,7 @@ internal void camera_animate(Camera &camera, CameraAnimation animation, f32 dt) 
     camera.position = lerp(animation.positions[key - 1], animation.positions[key], camera.animation_t);
     camera.rotation = lerp(animation.rotations[key - 1], animation.rotations[key], camera.animation_t);
 
-    camera.animation_t += dt * camera.animation_speed;
+    camera.animation_t += dt * (1.0f / animation.times[key - 1]);
 
     if (camera.animation_t >= 1.0f) {
         camera.animation_t = 0.0f;
