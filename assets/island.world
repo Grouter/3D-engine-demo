@@ -53,5 +53,29 @@ mesh: "carts"
 position: 3.0, 0.0, 21.0
 
 ! entity
-mesh "tables"
-position: 0.0, 0.0, 0.0
+mesh: "tables1"
+position: 4.5, 1.5, -32.65
+
+! entity
+mesh: "tables1"
+position: 7.5, 1.5, -32.65
+
+! entity
+mesh: "tables2"
+position: 5.0, 1.5, -37.5
+
+! entity
+mesh: "bar"
+position: 10.5, 1.5, -32.1
+
+! cups
+mesh: "cups"
+position: 0.0, 3, 0.0
+
+! cups
+mesh: "cups"
+position: 10.5, 1.5, -32.1
+
+! cups
+mesh: "cups"
+position: 10.5, 1.5, -32.1

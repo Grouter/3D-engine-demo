@@ -47,8 +47,17 @@ well.obj
 ! carts
 carts.obj
 
-! tables
-tables.obj
+! tables1
+tables1.obj
+
+! tables2
+tables2.obj
+
+! bar
+bar.obj
+
+! cups
+cups.obj
 
 ! rock1
 rock1.obj
