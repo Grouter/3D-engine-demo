@@ -358,7 +358,7 @@ internal bool invert(const Matrix4x4 &m, Matrix4x4 &output) {
     return true;
 }
 
-inline Matrix4x4 look_at(Vector3 position, Vector3 target) {
+inline Matrix4x4 get_view(Vector3 position, Vector3 target) {
     Vector3 direction = target - position;
 
     Vector3 forward = normalized(direction);
@@ -376,6 +376,21 @@ inline Matrix4x4 look_at(Vector3 position, Vector3 target) {
         side.y, up.y, forward.y, 0.0f,
         side.z, up.z, forward.z, 0.0f,
         result_position.x, result_position.y, result_position.z, 1.0f,
+    };
+}
+
+inline Matrix4x4 look_at(Vector3 position, Vector3 target) {
+    Vector3 direction = target - position;
+
+    Vector3 forward = normalized(direction);
+    Vector3 side    = normalized(cross(V3_UP, forward));
+    Vector3 up      = cross(forward, side);
+
+    return {
+        side.x, side.y, side.z, 0.0f,
+        up.x, up.y, up.z, 0.0f,
+        forward.x, forward.y, forward.z, 0.0f,
+        position.x, position.y, position.z, 1.0f,
     };
 }
 

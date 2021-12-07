@@ -7,11 +7,13 @@ enum ShaderResource {
     ShaderResource_Shadow,
     ShaderResource_Skybox,
     ShaderResource_HDR,
+    ShaderResource_Particles,
 
     ShaderResource_COUNT
 };
 
 const u64 MeshResource_Quad = 0;
+const u64 MeshResource_CubeMap = 1;
 const u64 MeshResource_HDR_Quad = 2;
 
 enum FontResource {

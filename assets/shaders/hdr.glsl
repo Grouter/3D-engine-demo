@@ -20,7 +20,7 @@ in vec2 f_uv;
 uniform sampler2D hdr_buffer;
 
 const float EXPOSURE = 1.2;
-const float GAMMA = 2.1;
+const float GAMMA = 2.2;
 
 out vec4 fragment_color;
 

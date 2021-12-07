@@ -169,6 +169,13 @@ internal void tick(f32 dt) {
         }}
     }
 
+#if 0
+    draw_particle(make_vector3(0.0f, 5.0f, 0.0f), V2_ONE, get_texture("restt2.png"));
+    draw_particle(make_vector3(0.0f, 12.0f, 0.0f), V2_ONE, game_state.resources.textures[0]);
+    draw_particle(make_vector3(0.0f, 14.0f, 0.0f), V2_ONE, game_state.resources.textures[0]);
+    draw_particle(make_vector3(0.0f, 16.0f, 0.0f), V2_ONE, game_state.resources.textures[0]);
+#endif
+
     remove_flagged_entities(game_state.entities);
 }
 
@@ -254,7 +261,7 @@ internal void render() {
         {
             glDepthMask(GL_FALSE);
             set_shader(ShaderResource_Skybox);
-            Mesh *cube = &game_state.resources.meshes[1];
+            Mesh *cube = &game_state.resources.meshes[MeshResource_CubeMap];
             glBindVertexArray(cube->vao);
 
             glActiveTexture(GL_TEXTURE0);
@@ -279,6 +286,16 @@ internal void render() {
             glDepthMask(GL_TRUE);
         }
 
+        // Draw particles
+        {
+            glDepthMask(GL_FALSE);
+            set_shader(ShaderResource_Particles);
+            set_shader_matrix4x4("view", game_state.camera.transform);
+            set_shader_matrix4x4("projection", game_state.camera.perspective);
+
+            flush_draw_calls_particles();
+            glDepthMask(GL_TRUE);
+        }
     }
 
     // Final pass

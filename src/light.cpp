@@ -59,7 +59,7 @@ internal void calc_cascade_matricies(Camera &camera, LightData &light_data) {
         for (i32 j = 0; j < 8; j++) center += corners[j];
         center /= 8.0f;
 
-        Matrix4x4 light_view = look_at(center, center + light_data.sun_direction);
+        Matrix4x4 light_view = get_view(center, center + light_data.sun_direction);
 
         f32 radius = -FLT_MAX;
         for (i32 j = 0; j < 8; j++) {

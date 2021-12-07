@@ -512,6 +512,13 @@ internal void init_resources(Resources &resources) {
         catalog_put(resources.shader_catalog, "hdr.glsl", ShaderResource_HDR);
     }
 
+    // Particles shader
+    {
+        bool status = load_program("shaders/particles.glsl", resources.programs[ShaderResource_Particles]);
+        if (!status) exit(1);
+        catalog_put(resources.shader_catalog, "particles.glsl", ShaderResource_Particles);
+    }
+
     // Meshes
     allocate_array(resources.meshes, 50);
     allocate_resource_catalog(resources.mesh_catalog, 50);

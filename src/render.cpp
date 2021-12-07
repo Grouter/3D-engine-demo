@@ -86,6 +86,90 @@ internal void _allocate_instance_buffer(u32 *vao, u32 *instance_buffer, u64 size
     glBindVertexArray(0);
 }
 
+internal void _allocate_instance_buffer_particle(u32 *vao, u32 *instance_buffer, u64 size) {
+    Mesh *quad = &game_state.resources.meshes[MeshResource_Quad];
+
+    glGenVertexArrays(1, vao);
+    glBindVertexArray(*vao);
+
+    {   // Index data
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quad->ebo);
+    }
+
+    {   // Vertex data
+        glBindBuffer(GL_ARRAY_BUFFER, quad->vbo);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    }
+
+    {   // UV data
+        glBindBuffer(GL_ARRAY_BUFFER, quad->tbo);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    }
+
+    // Instance data
+    {
+        glGenBuffers(1, instance_buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, *instance_buffer);
+
+        glBufferData(GL_ARRAY_BUFFER, size * sizeof(DrawCallDataParticle), nullptr, GL_STATIC_DRAW);
+
+        i32 vector4_size = sizeof(Vector4);
+        i32 stride = sizeof(DrawCallDataParticle);
+        i32 attr_index = 2;
+        u64 offset = 0;
+
+        // TEXTURE
+        offset += sizeof(i32); // The shader data will ignore this but offset must be set
+
+        // UV OFFSET
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 2, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += sizeof(Vector2);
+        attr_index += 1;
+
+        // UV SCALE
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 2, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += sizeof(Vector2);
+        attr_index += 1;
+
+        // MATRIX 0
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 4, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += vector4_size;
+        attr_index += 1;
+
+        // MATRIX 1
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 4, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += vector4_size;
+        attr_index += 1;
+
+        // MATRIX 2
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 4, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += vector4_size;
+        attr_index += 1;
+
+        // MATRIX 3
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 4, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += vector4_size;
+        attr_index += 1;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
 internal void _allocate_font_draw_call_buffer(DrawCallBuffer2D &buffer, u64 size) {
     allocate_array(buffer.data, size);
     _allocate_instance_buffer(&buffer.vao, &buffer.instance_buffer, size);
@@ -100,6 +184,9 @@ internal void init_renderer() {
 
     allocate_array(_2d_shapes_draw_calls.data, MAX_DRAW_CALLS);
     _allocate_instance_buffer(&_2d_shapes_draw_calls.vao, &_2d_shapes_draw_calls.instance_buffer, MAX_DRAW_CALLS);
+
+    allocate_array(_particle_draw_calls.data, MAX_PARTICLE_DRAW_CALLS);
+    _allocate_instance_buffer_particle(&_particle_draw_calls.vao, &_particle_draw_calls.instance_buffer, MAX_PARTICLE_DRAW_CALLS);
 
     // Allocate HDR
     {
@@ -319,12 +406,37 @@ internal void render_entity(Entity &entity, Matrix4x4 transform) {
     }
 }
 
+internal void draw_particle(Vector3 position, Vector2 size, u32 texture) {
+    DrawCallDataParticle draw_call = {};
+    {
+        draw_call.texture = texture;
+
+        draw_call.transform = look_at(position, game_state.camera.position);
+        scale(draw_call.transform, size.x, size.y, 1.0f);
+    }
+
+    if (_particle_draw_calls.data.is_full()) {
+        log_print("Exceeding particles draw calls capacity!!!\n");
+    }
+
+    _particle_draw_calls.data.add(draw_call);
+}
+
 internal int _draw_call_cmp(const void *a, const void *b) {
     DrawCallData *data1 = (DrawCallData *)a;
     DrawCallData *data2 = (DrawCallData *)b;
 
     if (data1->flags.raw < data2->flags.raw) return -1;
     if (data1->flags.raw > data2->flags.raw) return  1;
+    return 0;
+}
+
+internal int _draw_particle_call_cmp(const void *a, const void *b) {
+    DrawCallDataParticle *data1 = (DrawCallDataParticle *)a;
+    DrawCallDataParticle *data2 = (DrawCallDataParticle *)b;
+
+    if (data1->texture < data2->texture) return -1;
+    if (data1->texture > data2->texture) return  1;
     return 0;
 }
 
@@ -388,6 +500,43 @@ internal void flush_draw_calls_shadow() {
         u64 offset = data->info.first_index * sizeof(u32);
         glDrawElements(GL_TRIANGLES, (i32)data->info.index_count, GL_UNSIGNED_INT, (void *)offset);
     }
+}
+
+internal void flush_draw_calls_particles() {
+    DrawCallBufferParticles &draw_calls = _particle_draw_calls;
+
+    if (draw_calls.data.length == 0) return;
+
+    qsort(_particle_draw_calls.data.data, _particle_draw_calls.data.length, sizeof(DrawCallDataParticle), _draw_particle_call_cmp);
+
+    glNamedBufferSubData(draw_calls.instance_buffer, 0, draw_calls.data.length * sizeof(DrawCallDataParticle), draw_calls.data.data);
+
+    glBindVertexArray(draw_calls.vao);
+
+    u32 active_texture = UINT32_MAX;
+
+    u32 start = 0;
+    u32 end = 0;
+
+    while (1) {
+        if (active_texture != draw_calls.data[start].texture) {
+            active_texture = draw_calls.data[start].texture;
+            set_shader_sampler("diffuse_texture", 0, active_texture);
+        }
+
+        while (end < draw_calls.data.length && draw_calls.data[start].texture == draw_calls.data[end].texture) {
+            end += 1;
+        }
+
+        u32 instances = end - start;
+        glDrawElementsInstancedBaseInstance(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, instances, (i32)start);
+
+        start = end;
+
+        if (end >= draw_calls.data.length) break;
+    }
+
+    draw_calls.data.clear();
 }
 
 internal void flush_draw_calls() {
