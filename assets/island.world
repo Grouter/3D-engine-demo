@@ -77,6 +77,54 @@ mesh: "cups"
 position: 12.4, 2.43, -36.0
 
 #
+# HILL & WINDMILL LEFT
+#
+
+! entity
+mesh: "hill"
+position: -26.0, -0.87, -8.0
+scale: 0.8, 0.8, 0.8
+
+! entity
+mesh: "windmill"
+position: -26.0, 1.5, -8.0
+rotation: 0.0, 0.5, 0.0
+
+! entity
+mesh: "rock2"
+position: -28.0, 0.0, -5.0
+rotation: 0.0, 0.5, 0.0
+
+! entity
+mesh: "rock1"
+position: -28.0, -1.5, -1.0
+rotation: 0.0, 0.0, 0.0
+
+#
+# HILL & WINDMILL RIGHT
+#
+
+! entity
+mesh: "hill"
+position: 24.0, -0.87, 10.0
+scale: 0.7, 1.5, 0.8
+
+! entity
+mesh: "windmill"
+position: 24.0, 3.4, 10.0
+rotation: 0.0, 0.2, 0.0
+
+! entity
+mesh: "rock1"
+position: 24.0, -1.3, 18.0
+rotation: 0.0, 0.0, 0.0
+
+! entity
+mesh: "rock2"
+position: 27.0, -1.3, 18.0
+rotation: 0.0, 0.0, 0.0
+
+#
 # TREES
 #
 
@@ -200,7 +248,7 @@ position: 20.0, -0.1, 0.0
 ! entity
 type: 5
 mesh: "tree2"
-position: 21.0, -0.1, 10.0
+position: 21.0, -0.1, 18.0
 rotation: 0.0, 1.0, 0.0
 
 ! entity
@@ -238,7 +286,3 @@ type: 5
 mesh: "tree3"
 position: 11.0, -0.2, -27.0
 rotation: 0.0, 0.0, 0.0
-
-#
-# TREES END
-#
