@@ -11,3 +11,7 @@ color: 0.462, 0.788, 0.196, 1.0
 ! color_palette
 color: 1.0, 1.0, 1.0, 1.0
 texture: "color_palette.png"
+
+! transparent_test
+color: 1.0, 1.0, 1.0, 1.0
+texture: "trans.png"
