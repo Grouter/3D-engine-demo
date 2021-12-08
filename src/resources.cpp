@@ -517,6 +517,13 @@ internal void init_resources(Resources &resources) {
         if (!status) exit(1);
     }
 
+    // Grass shader
+    {
+        char *shader_inputs[1] = { "#define GRASS_SHADER\n" };
+        bool status = load_program("shaders/default.glsl", resources.programs[ShaderResource_Grass], false, 1, shader_inputs);
+        if (!status) exit(1);
+    }
+
     // Meshes
     allocate_array(resources.meshes, 50);
     allocate_resource_catalog(resources.mesh_catalog, 50);

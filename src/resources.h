@@ -9,6 +9,7 @@ enum ShaderResource {
     ShaderResource_HDR,
     ShaderResource_Particles,
     ShaderResource_Trees,
+    ShaderResource_Grass,
 
     ShaderResource_COUNT
 };

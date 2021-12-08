@@ -27,6 +27,10 @@ void main() {
     if (pos.y >= 0.5) pos.x = position.x + sin(time) * 0.02 * pos.y;
 #endif
 
+#ifdef GRASS_SHADER
+    if (pos.y >= 0.2) pos.x = position.x + sin(time) * 0.08 * pos.y;
+#endif
+
     gl_Position = projection * view * model * pos;
 }
 
@@ -152,6 +156,11 @@ void main() {
 #endif
 
     fragment_color = vec4(result, 1.0) * texture_sample;
+
+#ifdef GRASS_SHADER
+    if (fragment_color.a < 1.0) discard;
+#endif
+
 }
 
 #endif

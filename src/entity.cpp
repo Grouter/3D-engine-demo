@@ -144,6 +144,14 @@ internal Entity* create_tree(EntityStorage &storage) {
     return tree;
 }
 
+internal Entity* create_grass(EntityStorage &storage) {
+    Entity *grass = create_base_entity(storage, EntityType_GRASS);
+
+    grass->program = &game_state.resources.programs[ShaderResource_Grass];
+
+    return grass;
+}
+
 internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type) {
     Entity *result;
 
@@ -167,6 +175,10 @@ internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type
 
         case EntityType_TREE : {
             result = create_tree(storage);
+        } break;
+
+        case EntityType_GRASS : {
+            result = create_grass(storage);
         } break;
 
         default : {
