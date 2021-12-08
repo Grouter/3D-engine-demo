@@ -42,7 +42,7 @@ void main() {
     mapped_uv.x = f_uv_offset.x + (f_uv.x * f_uv_scale.x);
     mapped_uv.y = f_uv_offset.y + (f_uv.y * f_uv_scale.y);
 
-    fragment_color = texture2D(diffuse_texture, mapped_uv);
+    fragment_color = texture(diffuse_texture, mapped_uv);
 }
 
 #endif
