@@ -35,7 +35,7 @@ internal bool parse_and_check_rvalue(char *buffer, RValue &value) {
 
     {
         char *walker = buffer;
-        while (*walker != '\0' && *walker != '\n') {
+        while (*walker != '\0' && *walker != '\n' && *walker != '\r') {
             walker = eat_spaces(walker);
 
             // It is a string!
