@@ -314,8 +314,17 @@ internal void set_shader_float_array(const char *attr, f32 *values, u32 count) {
         glUniform1fv(loc, count, values);
     }
     else {
-        log_print("Shader set int loc error! (attribute: %s)\n", attr);
+        log_print("Shader set_shader_float_array loc error! (attribute: %s)\n", attr);
     }
+}
+
+internal void set_shader_float(const char *attr, f32 value) {
+    i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform1f(loc, value);
+
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_float loc error! (attribute: %s)\n", attr);
+#endif
 }
 
 // Position = bottom left of the rendered text bounding box

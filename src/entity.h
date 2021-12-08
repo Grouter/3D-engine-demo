@@ -82,5 +82,6 @@ struct EntityStorage {
 };
 
 internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type);
+internal void remove_flagged_entities(EntityStorage &storage);
 
 #endif

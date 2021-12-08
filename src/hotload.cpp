@@ -183,8 +183,15 @@ internal void process_hotload_queue(Resources &resources) {
     if (_hotload_resource_queue[HotloadResource_WORLD]) {
         log_print("Reloading world file!\n");
 
-        game_state.entities.base_entities.clear();
-        game_state.entities.entity_data.clear();
+        Entity *it;
+        BucketLocation loc;
+        bucket_array_foreach_w_loc(game_state.entities.base_entities, it, loc) {
+            if (it->type == EntityType_FLYING_ROCK) continue;
+
+            it->flags.destroy = true;
+        }}
+
+        remove_flagged_entities(game_state.entities);
 
         load_world_file(game_state.entities);
 
