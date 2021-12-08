@@ -5,21 +5,21 @@ internal void init_particles() {
     for (u32 i = 0; i < PARTICLE_AMMOUNT; i++) {
         particles.add(Particle());
     }
-        
+
 }
 
 internal void draw_particles() {
-    
+
     Particle *particle;
     array_foreach(particles, particle) {
 
         if (particle->life > 0.0f) {
             draw_particle(particle->position, {0.1f, 0.1f}, get_texture("trans.png"));
         }
-    }   
+    }
 }
 
-internal u32 first_free_particle() {    
+internal u32 first_free_particle() {
 
     for (u32 i = last_used; i < PARTICLE_AMMOUNT; i++) {
         if (particles[i].life <= 0.0f) {
@@ -34,7 +34,7 @@ internal u32 first_free_particle() {
             return i;
         }
     }
-    
+
     last_used = 0;
     return 0;
 }
@@ -68,7 +68,7 @@ internal void update_particle(f32 delta_time, Vector3 root_pos, u32 new_particle
     for (u32 i = 0; i < PARTICLE_AMMOUNT; i++) {
         Particle &p = particles[i];
         p.life -= delta_time;
-        
+
         if (p.life > 0.0f) {
             p.position -= p.velocity * delta_time;
             p.color.a  -= delta_time * 2.5f;

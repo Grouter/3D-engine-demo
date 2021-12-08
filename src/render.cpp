@@ -123,6 +123,13 @@ internal void _allocate_instance_buffer_particle(u32 *vao, u32 *instance_buffer,
         // TEXTURE
         offset += sizeof(i32); // The shader data will ignore this but offset must be set
 
+        // COLOR
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 4, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += vector4_size;
+        attr_index += 1;
+
         // UV OFFSET
         glEnableVertexAttribArray(attr_index);
         glVertexAttribPointer(attr_index, 2, GL_FLOAT, GL_FALSE, stride, (void *)offset);
@@ -415,10 +422,11 @@ internal void render_entity(Entity &entity, Matrix4x4 transform) {
     }
 }
 
-internal void draw_particle(Vector3 position, Vector2 size, u32 texture) {
+internal void draw_particle(Vector3 position, Vector2 size, u32 texture, Color color = Color_WHITE) {
     DrawCallDataParticle draw_call = {};
     {
         draw_call.texture = texture;
+        draw_call.color = color_to_v4(color);
 
         draw_call.transform = look_at(position, game_state.camera.position);
         scale(draw_call.transform, size.x, size.y, 1.0f);

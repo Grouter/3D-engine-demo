@@ -29,6 +29,7 @@ struct DrawCallData2D {
 
 struct DrawCallDataParticle {
     u32 texture;
+    Vector4   color     = V4_ONE;
     Vector2   uv_offset = {};
     Vector2   uv_scale  = V2_ONE;
     Matrix4x4 transform;
