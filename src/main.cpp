@@ -87,6 +87,7 @@ const u32 TARGET_ASPECT_H = 9;
 #include "console.h"
 #include "game.h"
 #include "commands.h"
+#include "particle.h"
 
 struct Viewport {
     i32 left, bottom;
@@ -143,9 +144,11 @@ global Program *current_shader;
 #include "text_input.cpp"
 #include "entity.cpp"
 #include "console.cpp"
+#include "particle.cpp"
 #include "game.cpp"
 #include "input.cpp"
 #include "commands.cpp"
+
 
 LRESULT CALLBACK window_callback(HWND window, UINT message, WPARAM w_param, LPARAM l_param) {
     LRESULT result = 1;
@@ -313,6 +316,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
     init_commands();
     init_console();
     init_hotload();
+
+    init_particles();
 
     std::thread hotload_thread(hotload_watcher);
 

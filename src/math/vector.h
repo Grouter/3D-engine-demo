@@ -161,10 +161,28 @@ inline Vector3 operator+ (Vector3 a, Vector3 b) {
     return result;
 }
 
+inline Vector3 operator+ (Vector3 a, f32 b) {
+    Vector3 result;
+
+    result.x = a.x + b;
+    result.y = a.y + b;
+    result.z = a.z + b;
+
+    return result;
+}
+
 inline Vector3 operator+= (Vector3 &a, Vector3 b) {
     a.x += b.x;
     a.y += b.y;
     a.z += b.z;
+
+    return a;
+}
+
+inline Vector3 operator-= (Vector3 &a, Vector3 b) {
+    a.x -= b.x;
+    a.y -= b.y;
+    a.z -= b.z;
 
     return a;
 }
