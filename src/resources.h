@@ -8,13 +8,16 @@ enum ShaderResource {
     ShaderResource_Skybox,
     ShaderResource_HDR,
     ShaderResource_Particles,
+    ShaderResource_Trees,
 
     ShaderResource_COUNT
 };
 
-const u64 MeshResource_Quad = 0;
-const u64 MeshResource_CubeMap = 1;
-const u64 MeshResource_HDR_Quad = 2;
+enum MeshResource {
+    MeshResource_Quad,
+    MeshResource_CubeMap,
+    MeshResource_HDR_Quad,
+};
 
 enum FontResource {
     FontResource_Small,
@@ -25,7 +28,6 @@ enum FontResource {
 };
 
 struct Resources {
-    ResourceCatalog shader_catalog;
     ResourceCatalog mesh_catalog;
     ResourceCatalog texture_catalog;
     ResourceCatalog material_catalog;

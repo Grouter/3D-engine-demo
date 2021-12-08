@@ -23,6 +23,7 @@ enum EntityType {
     EntityType_BIRD,
     EntityType_FLYING_ROCK,
     EntityType_SHIP,
+    EntityType_TREE,
 };
 
 union EntityFlags {

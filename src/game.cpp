@@ -248,14 +248,6 @@ internal void render() {
 
         // Draw 3Ds
         {
-            set_shader(ShaderResource_Default);
-
-            set_shader_matrix4x4("view", game_state.camera.transform);
-            set_shader_matrix4x4("projection", game_state.camera.perspective);
-            set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_maps);
-            set_shader_vec3("sun_dir", game_state.light_data.sun_direction);
-            set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
-
             flush_draw_calls();
         }
 

@@ -32,6 +32,7 @@ internal Entity* create_base_entity(EntityStorage &storage, EntityType type = En
     BucketLocation location = storage.base_entities.get_new(&entity);
 
     *entity = {};
+    entity->program = &game_state.resources.programs[ShaderResource_Default];
     entity->type = type;
 
     return entity;
@@ -135,6 +136,14 @@ internal Entity* create_ship(EntityStorage &storage) {
     return root;
 }
 
+internal Entity* create_tree(EntityStorage &storage) {
+    Entity *tree = create_base_entity(storage, EntityType_TREE);
+
+    tree->program = &game_state.resources.programs[ShaderResource_Trees];
+
+    return tree;
+}
+
 internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type) {
     Entity *result;
 
@@ -154,6 +163,10 @@ internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type
 
         case EntityType_SHIP : {
             result = create_ship(storage);
+        } break;
+
+        case EntityType_TREE : {
+            result = create_tree(storage);
         } break;
 
         default : {

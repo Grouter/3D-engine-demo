@@ -401,13 +401,21 @@ internal void render_entity(Entity &entity, Matrix4x4 transform) {
         return;
     }
 
+    if (!entity.program) {
+        log_print("!!! Trying to render an entity with a NULL program\n");
+        return;
+    }
+
     for (u32 i = 0; i < mesh->sub_meshes.length; i++) {
         DrawCallData data;
         data.flags.raw = 0;
 
-        // @Todo: set shader to flags
+        data.flags.shader = (u32)(entity.program - game_state.resources.programs);
 
-        data.flags.shader = 0;
+        if (data.flags.shader != 0) {
+            int a = 0;
+            a += 1;
+        }
 
         if (mesh->sub_meshes.data[i].material_index < game_state.resources.materials.length) {
             data.flags.material = (u32)mesh->sub_meshes[i].material_index;
@@ -566,9 +574,23 @@ internal void flush_draw_calls() {
     u64 active_material_index = UINT64_MAX;
 
     u32 active_texture = UINT32_MAX;
+    u32 active_shader = UINT32_MAX;
 
     DrawCallData *data;
     array_foreach(_draw_calls, data) {
+        if (active_shader != data->flags.shader) {
+            active_shader = data->flags.shader;
+            set_shader((ShaderResource)active_shader);
+
+            set_shader_matrix4x4("view", game_state.camera.transform);
+            set_shader_matrix4x4("projection", game_state.camera.perspective);
+            set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_maps);
+            set_shader_vec3("sun_dir", game_state.light_data.sun_direction);
+            set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
+            set_shader_float("time", game_state.time_elapsed);
+            set_shader_vec4("material_color", V4_ONE);
+        }
+
         // VAO switching
         if (active_vao != data->mesh->vao) {
             active_vao = data->mesh->vao;

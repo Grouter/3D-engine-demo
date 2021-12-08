@@ -8,7 +8,7 @@ union DrawCallFlags {
     u64 raw;
 
     struct {
-        u8 shader;
+        u32 shader;
         u32 material;
     };
 };
