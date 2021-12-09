@@ -1,5 +1,5 @@
 internal void init_game() {
-    srand((u32)time(0));
+    srand(42069);
 
     game_state.time_elapsed = 0.0f;
     game_state.bird_spawn_timer = 0.0f;

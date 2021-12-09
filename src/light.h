@@ -8,7 +8,7 @@ const u32 SHADOW_CASCADE_COUNT = 3;
 const u32 SHADOW_SIZE = 2048;
 #else
 const u32 SHADOW_CASCADE_COUNT = 1;
-const u32 SHADOW_SIZE = 4096;
+const u32 SHADOW_SIZE = 8192;
 #endif
 
 const f32 SHADOW_SPLIT_LAMBDA = 0.8f;
@@ -49,7 +49,7 @@ internal void init_light_data(LightData &data) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    data.sun_projection = ortho(-50.0f, 50.0, -70.0f, 70.0f, 70.0f, -70.0f);
+    data.sun_projection = ortho(-100.0f, 20.0, -100.0f, 100.0f, 100.0f, -100.0f);
 }
 
 #endif // LIGHT_H
