@@ -16,13 +16,6 @@ struct Particle {
     byte type;
 };
 
-/*
-enum ParticleType {
-    ParticleType_Fire,
-    ParticleType_Smoke,
-};
-*/
-
 global Array<Particle> particles;
 global u32 last_used = 0;
 
