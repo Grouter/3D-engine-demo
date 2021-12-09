@@ -12,9 +12,20 @@ internal void draw_particles() {
 
     Particle *particle;
     array_foreach(particles, particle) {
-
+        
         if (particle->life > 0.0f) {
-            draw_particle(particle->position, {0.1f, 0.1f}, get_texture("trans.png"));
+
+            char *texture = {};
+            switch (particle->type) {
+
+                case 0:
+                    texture = "fire_particle.png";
+                    break;
+                case 1:
+                    texture = "smoke_particle.png";
+                    break;
+            }
+            draw_particle(particle->position, particle->size, get_texture(texture), particle->color);
         }
     }
 }
@@ -23,6 +34,7 @@ internal u32 first_free_particle() {
 
     for (u32 i = last_used; i < PARTICLE_AMMOUNT; i++) {
         if (particles[i].life <= 0.0f) {
+            particles[i].type = particles[i].type ? 0 : 1;
             last_used = i;
             return i;
         }
@@ -30,48 +42,100 @@ internal u32 first_free_particle() {
 
     for (u32 i = 0; i < last_used; i++) {
         if (particles[i].life <= 0.0f) {
+            particles[i].type = particles[i].type ? 0 : 1;
             last_used = i;
             return i;
         }
     }
 
     last_used = 0;
+    particles[0].type = particles[0].type ? 0 : 1;
     return 0;
 }
 
 internal void respawn_particle(Particle &particle, Vector3 root_pos) {
-    f32 rand_x = rand_f_range(-0.5f, 0.5f);
-    f32 rand_y = rand_f_range(-0.5f, 0.5f);
-    f32 rand_z = rand_f_range(-0.5f, 0.5f);
+    
+    switch (particle.type) {
 
-    u8 rand_color = (rand() % 256);
+        // Fire
+        case 0 : {
 
-    f32 rand_velo = rand_f_range(-1.0f, 1.0f);
+            f32 rand_x = rand_f_range(-SPAWN_OFFSET, SPAWN_OFFSET);
+            f32 rand_z = rand_f_range(-SPAWN_OFFSET, SPAWN_OFFSET);
 
-    //particle.position = root_pos + random;
-    particle.position.x = root_pos.x + rand_x;
-    particle.position.y = root_pos.y + rand_y;
-    particle.position.z = root_pos.z + rand_z;
+            u8 rand_color = (rand() % 256);
 
-    particle.color    = make_color(rand_color, rand_color, rand_color, 255);
-    particle.life     = 1.0f;
-    particle.velocity = {rand_velo, -1.0f, rand_velo};
+            // Spwaning only in front-facing triangle
+            {
+                if (rand_x < 0 && rand_z < 0) {
+                    rand_x *= -1;
+                }
+                if (rand_x < 0 && rand_z <= SPAWN_OFFSET - (SPAWN_OFFSET - abs(rand_x))) {
+                    rand_x *= -1;
+                }
+                if (rand_z < 0 && rand_x <= SPAWN_OFFSET - (SPAWN_OFFSET - abs(rand_z))) {
+                    rand_z *= -1;
+                }
+            }
+            
+            particle.position.x = root_pos.x + rand_x;
+            particle.position.y = root_pos.y;
+            particle.position.z = root_pos.z + rand_z;
+
+            Vector3 target = {root_pos.x, root_pos.y + 1.0f, root_pos.z};
+            Vector3 velocity_vector = target - particle.position;
+            normalize(velocity_vector);
+
+            particle.color    = make_color(rand_color, rand_color, rand_color, 255);
+            particle.life     = 1.0f;
+            particle.size     = {0.3f, 0.3f};
+            particle.velocity = velocity_vector;
+
+        } break;
+
+        // Smoke
+        case 1 : {
+            f32 rand_x = rand_f_range(-SPAWN_OFFSET , SPAWN_OFFSET);
+            f32 rand_y = rand_f_range(-SPAWN_OFFSET / 2, SPAWN_OFFSET / 2);
+            f32 rand_z = rand_f_range(-SPAWN_OFFSET, SPAWN_OFFSET);
+            
+            u8 rand_color = (rand() % 256);
+
+            particle.position.x = root_pos.x + rand_x;
+            particle.position.y = root_pos.y + rand_y;
+            particle.position.z = root_pos.z + rand_z;
+
+            particle.color    = make_color(rand_color, rand_color, rand_color, 255);
+            particle.life     = 1.0f;
+            particle.velocity = {0.0f, 1.0f, 0.0f};
+            particle.size     = {0.1f, 0.1f};
+
+        } break;
+    }
 }
 
 internal void update_particle(f32 delta_time, Vector3 root_pos, u32 new_particles) {
-
     for (u32 i = 0; i < new_particles; i++) {
         u32 free_particle = first_free_particle();
         respawn_particle(particles[free_particle], root_pos);
     }
 
-    for (u32 i = 0; i < PARTICLE_AMMOUNT; i++) {
-        Particle &p = particles[i];
-        p.life -= delta_time;
+    Particle *particle;
+    array_foreach(particles, particle) {
+        particle->life -= delta_time;
 
-        if (p.life > 0.0f) {
-            p.position -= p.velocity * delta_time;
-            p.color.a  -= delta_time * 2.5f;
+        f32 rand_chance = rand_f_range(0.0f, 100.0f);
+
+        if (particle->life > 0.0f) {
+            particle->position += particle->velocity * delta_time;
+
+            // Fade doesnt work when casted to u8
+            particle->color.a -= delta_time * 7;
+        }       
+        else if (rand_chance > 50.0f && particle->life <= 0.0f && particle->type == 0) {
+            particle->life     = 1.0f;
+            particle->type     = 1;
+            particle->position = {root_pos.x, root_pos.y + 2.3f, root_pos.z};
         }
     }
 }

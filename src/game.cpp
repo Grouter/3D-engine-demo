@@ -169,14 +169,11 @@ internal void tick(f32 dt) {
         }}
     }
 
-#if 1
-    update_particle(dt, {0.0f, 1.0f, 0.0f}, 10);
-    draw_particles();
-    //draw_particle(make_vector3(0.0f, 5.0f, 0.0f), V2_ONE, get_texture("restt2.png"));
-    //draw_particle(make_vector3(0.0f, 12.0f, 0.0f), V2_ONE, game_state.resources.textures[0]);
-    //draw_particle(make_vector3(0.0f, 14.0f, 0.0f), V2_ONE, game_state.resources.textures[0]);
-    //draw_particle(make_vector3(0.0f, 16.0f, 0.0f), V2_ONE, game_state.resources.textures[0]);
-#endif
+    // Handle particles
+    {
+        update_particle(dt, ROOT_POSITION, NEW_PARTICLES);
+        draw_particles();
+    }
 
     remove_flagged_entities(game_state.entities);
 }
