@@ -12,6 +12,10 @@ color: 0.462, 0.788, 0.196, 1.0
 color: 1.0, 1.0, 1.0, 1.0
 texture: "color_palette.png"
 
-! transparent_test
+! fire
 color: 1.0, 1.0, 1.0, 1.0
-texture: "trans.png"
+texture: "fire_particle.png"
+
+! smoke
+color: 1.0, 1.0, 1.0, 1.0
+texture: "smoke_particle.png"

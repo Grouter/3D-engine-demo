@@ -2,7 +2,7 @@
 #define RENDER_H
 
 #define MAX_DRAW_CALLS 1024
-#define MAX_PARTICLE_DRAW_CALLS 1024
+#define MAX_PARTICLE_DRAW_CALLS 2048
 
 union DrawCallFlags {
     u64 raw;
