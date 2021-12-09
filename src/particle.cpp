@@ -108,7 +108,7 @@ internal void respawn_particle(Particle &particle, Vector3 root_pos) {
             particle.color    = make_color(rand_color, rand_color, rand_color, 255);
             particle.life     = 1.0f;
             particle.velocity = {0.0f, 1.0f, 0.0f};
-            particle.size     = {0.2f, 0.2f};
+            particle.size     = {0.3f, 0.3f};
 
         } break;
     }
@@ -130,12 +130,13 @@ internal void update_particle(f32 delta_time, Vector3 root_pos, u32 new_particle
             particle->position += particle->velocity * delta_time;
 
             // Fade doesnt work when casted to u8
-            particle->color.a -= delta_time * 7;
+            particle->color.a -= particle->life * 0.7;
         }       
         else if (rand_chance > 50.0f && particle->life <= 0.0f && particle->type == 0) {
             particle->life     = 2.0f;
             particle->type     = 1;
-            particle->position = {root_pos.x + 0.2f, root_pos.y + 2.4f, root_pos.z + 0.2f};
+            particle->size     = {0.3f, 0.3f};
+            particle->position = {root_pos.x + 0.16f, root_pos.y + 2.2f, root_pos.z + 0.17f};
         }
     }
 }
