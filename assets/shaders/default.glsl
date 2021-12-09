@@ -10,6 +10,8 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model; // @Temporary
 
+uniform float time;
+
 out vec3 f_frag_pos;
 out vec3 f_normal;
 out vec2 f_uv;
@@ -19,7 +21,17 @@ void main() {
     f_normal = normal;
     f_uv = uv;
 
-    gl_Position = projection * view * model * vec4(position, 1.0);
+    vec4 pos = vec4(position, 1.0);
+
+#ifdef TREE_SHADER
+    if (pos.y >= 0.5) pos.x = position.x + sin(time) * 0.02 * pos.y;
+#endif
+
+#ifdef GRASS_SHADER
+    if (pos.y >= 0.2) pos.x = position.x + sin(time) * 0.08 * pos.y;
+#endif
+
+    gl_Position = projection * view * model * pos;
 }
 
 #endif
@@ -144,6 +156,11 @@ void main() {
 #endif
 
     fragment_color = vec4(result, 1.0) * texture_sample;
+
+#ifdef GRASS_SHADER
+    if (fragment_color.a < 1.0) discard;
+#endif
+
 }
 
 #endif

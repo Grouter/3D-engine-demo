@@ -130,31 +130,29 @@ internal void process_hotload_queue(Resources &resources) {
     for (i64 i = _hotload_shader_queue.length - 1; i >= 0; i--) {
         char *shader_name = _hotload_shader_queue.data[i].shader_name;
 
-        std::string path = "shaders/";
-        path.append(shader_name);
+        char path[64];
+        snprintf(path, 64, "shaders/%s", shader_name);
 
-        u64 shader_index = catalog_get(resources.shader_catalog, shader_name);
+        u64 shader_hash = _catalog_hash(path);
 
-        if (shader_index == UINT64_MAX) {
-            log_print("Hotloaded invalid shader: %s\n", path.c_str());
-            continue;
-        }
+        for (u32 j = 0; j < ShaderResource_COUNT; j++) {
+            if (resources.programs[j].source_file_hash == shader_hash) {
+                Program &program = resources.programs[j];
 
-        // @Todo: first try to compile the new shader and only if it succeeds, replace the old one!
+                log_print("Reloding shader: %s (old handle: %u)\n", shader_name, program.handle);
 
-        log_print("Reloding shader: %s (old handle: %u)\n", shader_name, resources.programs[shader_index].handle);
+                Program reloaded_shader = {};
+                bool success = load_program(path, reloaded_shader, program.has_geometry, (u32)program.defines.length, program.defines.data);
 
-        Program reloaded_shader = {};
+                if (success) {
+                    glUseProgram(0);
 
-        bool success = load_program(path.c_str(), reloaded_shader);
+                    glDeleteProgram(program.handle);
+                    program.handle = reloaded_shader.handle;
 
-        if (success) {
-            glUseProgram(0);
-
-            glDeleteProgram(resources.programs[shader_index].handle);
-            resources.programs[shader_index] = reloaded_shader;
-
-            log_print("New handle %u\n", resources.programs[shader_index].handle);
+                    free_array(reloaded_shader.defines);
+                }
+            }
         }
 
         _hotload_shader_queue.remove_last();

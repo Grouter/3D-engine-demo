@@ -12,6 +12,11 @@
 
 struct Program {
     u32 handle;
+
+    // Used for lookups
+    bool has_geometry = false;
+    Array<char *> defines = {};
+    u64 source_file_hash;
 };
 
 struct Material {

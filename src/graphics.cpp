@@ -1,4 +1,4 @@
-internal bool load_program(const char *path, Program &shader, bool geometry = false) {
+internal bool load_program(const char *path, Program &shader, bool geometry = false, u32 define_count = 0, char **defines = nullptr) {
     Array<char> shader_source;
 
     bool success = read_whole_file(path, shader_source);
@@ -14,23 +14,29 @@ internal bool load_program(const char *path, Program &shader, bool geometry = fa
     u32 fragment_handle;
     u32 geometry_handle = UINT32_MAX;
 
+    Array<char *> shader_inputs;
+    allocate_array(shader_inputs, 16);
+
+    shader_inputs.add("#version 420\n");
+    for (u32 i = 0; i < define_count; i++) shader_inputs.add(defines[i]);
+
     {   // Compile the vertex part
         vertex_handle = glCreateShader(GL_VERTEX_SHADER);
 
-        char *vertex_strings[3] = {
-            "#version 420\n",
-            "#define VERTEX\n",
-            shader_source.data
-        };
+        shader_inputs.add("#define VERTEX\n");
+        shader_inputs.add(shader_source.data);
 
-        glShaderSource(vertex_handle, 3, vertex_strings, NULL);
+        glShaderSource(vertex_handle, (i32)shader_inputs.length, shader_inputs.data, NULL);
         glCompileShader(vertex_handle);
+
+        shader_inputs.length -= 2;
 
         SHADER_COMPILATION_CHECK(vertex_handle, compile_status, compile_log, 512, "Vertex");
 
         if (!compile_status) {
             glDeleteShader(vertex_handle);
             free_array(shader_source);
+            free_array(shader_inputs);
             return false;
         }
     }
@@ -41,21 +47,21 @@ internal bool load_program(const char *path, Program &shader, bool geometry = fa
     {   // Compile the fragment part
         fragment_handle = glCreateShader(GL_FRAGMENT_SHADER);
 
-        char *fragment_strings[4] = {
-            "#version 420\n",
-            "#define FRAGMENT\n",
-            cascade_split_define,
-            shader_source.data
-        };
+        shader_inputs.add("#define FRAGMENT\n");
+        shader_inputs.add(cascade_split_define);
+        shader_inputs.add(shader_source.data);
 
-        glShaderSource(fragment_handle, 4, fragment_strings, NULL);
+        glShaderSource(fragment_handle, (i32)shader_inputs.length, shader_inputs.data, NULL);
         glCompileShader(fragment_handle);
+
+        shader_inputs.length -= 3;
 
         SHADER_COMPILATION_CHECK(fragment_handle, compile_status, compile_log, 512, "Fragment");
 
         if (!compile_status) {
             glDeleteShader(fragment_handle);
             free_array(shader_source);
+            free_array(shader_inputs);
             return false;
         }
     }
@@ -63,21 +69,21 @@ internal bool load_program(const char *path, Program &shader, bool geometry = fa
     if (geometry) {
         geometry_handle = glCreateShader(GL_GEOMETRY_SHADER);
 
-        char *geometry_strings[4] = {
-            "#version 420\n",
-            "#define GEOMETRY\n",
-            cascade_split_define,
-            shader_source.data
-        };
+        shader_inputs.add("#define GEOMETRY\n");
+        shader_inputs.add(cascade_split_define);
+        shader_inputs.add(shader_source.data);
 
-        glShaderSource(geometry_handle, 4, geometry_strings, NULL);
+        glShaderSource(geometry_handle, (i32)shader_inputs.length, shader_inputs.data, NULL);
         glCompileShader(geometry_handle);
+
+        shader_inputs.length -= 3;
 
         SHADER_COMPILATION_CHECK(geometry_handle, compile_status, compile_log, 512, "Geometry");
 
         if (!compile_status) {
             glDeleteShader(geometry_handle);
             free_array(shader_source);
+            free_array(shader_inputs);
             return false;
         }
     }
@@ -108,6 +114,7 @@ internal bool load_program(const char *path, Program &shader, bool geometry = fa
             glDeleteProgram(shader.handle);
 
             free_array(shader_source);
+            free_array(shader_inputs);
 
             return false;
         }
@@ -120,6 +127,16 @@ internal bool load_program(const char *path, Program &shader, bool geometry = fa
     glDeleteShader(fragment_handle);
 
     free_array(shader_source);
+    free_array(shader_inputs);
+
+    if (define_count > 0 && shader.defines.length == 0) {
+        allocate_array(shader.defines, define_count);
+
+        for (u32 i = 0; i < define_count; i++) shader.defines.add(defines[i]);
+    }
+
+    shader.has_geometry = geometry;
+    shader.source_file_hash = _catalog_hash(path);
 
     log_print("Loaded shader: %s (handle: %d)\n", path, shader.handle);
 

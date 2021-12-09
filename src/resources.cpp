@@ -437,7 +437,6 @@ internal bool load_world_file(EntityStorage &storage) {
             }
 
             Entity *new_entity = create_entity_from_type(storage, type_of_new_entity);
-            new_entity->program = &game_state.resources.programs[0];
 
             if (!new_entity) {
                 log_print("Invalid entity type in world save file\n");
@@ -475,48 +474,54 @@ internal bool load_world_file(EntityStorage &storage) {
 }
 
 internal void init_resources(Resources &resources) {
-    allocate_resource_catalog(resources.shader_catalog, ShaderResource_COUNT);
-
     // Default shader
     {
         bool status = load_program("shaders/default.glsl", resources.programs[ShaderResource_Default]);
         if (!status) exit(1);
-        catalog_put(resources.shader_catalog, "default.glsl", ShaderResource_Default);
     }
 
     // Font shader
     {
         bool status = load_program("shaders/2d.glsl", resources.programs[ShaderResource_2D]);
         if (!status) exit(1);
-        catalog_put(resources.shader_catalog, "2d.glsl", ShaderResource_2D);
     }
 
     // Shadow shader
     {
         bool status = load_program("shaders/shadow.glsl", resources.programs[ShaderResource_Shadow], true);
         if (!status) exit(1);
-        catalog_put(resources.shader_catalog, "shadow.glsl", ShaderResource_Shadow);
     }
 
     // Skybox shader
     {
         bool status = load_program("shaders/skybox.glsl", resources.programs[ShaderResource_Skybox]);
         if (!status) exit(1);
-        catalog_put(resources.shader_catalog, "skybox.glsl", ShaderResource_Skybox);
     }
 
     // HDR shader
     {
         bool status = load_program("shaders/hdr.glsl", resources.programs[ShaderResource_HDR]);
         if (!status) exit(1);
-        catalog_put(resources.shader_catalog, "hdr.glsl", ShaderResource_HDR);
     }
 
     // Particles shader
     {
         bool status = load_program("shaders/particles.glsl", resources.programs[ShaderResource_Particles]);
         if (!status) exit(1);
-        catalog_put(resources.shader_catalog, "particles.glsl", ShaderResource_Particles);
+    }
+
+    // Tree shader
+    {
+        char *shader_inputs[1] = { "#define TREE_SHADER\n" };
+        bool status = load_program("shaders/default.glsl", resources.programs[ShaderResource_Trees], false, 1, shader_inputs);
+        if (!status) exit(1);
+    }
+
+    // Grass shader
+    {
+        char *shader_inputs[1] = { "#define GRASS_SHADER\n" };
+        bool status = load_program("shaders/default.glsl", resources.programs[ShaderResource_Grass], false, 1, shader_inputs);
+        if (!status) exit(1);
     }
 
     // Meshes

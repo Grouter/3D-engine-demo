@@ -12,10 +12,13 @@ island.obj
 green
 
 ! houses_left
-houses_left2.obj
+houses_left3.obj
 
 ! houses_right
 houses_right.obj
+
+! sawmill
+sawmill.obj
 
 ! alchym
 alchym.obj
@@ -28,6 +31,9 @@ docks.obj
 
 ! lanterns
 lanterns.obj
+
+! lamp
+lamp.obj
 
 ! tavern
 tavern.obj
@@ -44,8 +50,8 @@ furnaces.obj
 ! well
 well.obj
 
-! carts
-carts.obj
+! cart
+cart.obj
 
 ! tables1
 tables1.obj
@@ -98,3 +104,17 @@ tree1.obj
 
 ! tree2
 tree2.obj
+
+! tree3
+tree3.obj
+
+! hill
+hill.obj
+green
+
+! windmill
+windmill.obj
+
+! grass
+grass.obj
+grass

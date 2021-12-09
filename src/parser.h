@@ -35,7 +35,7 @@ internal bool parse_and_check_rvalue(char *buffer, RValue &value) {
 
     {
         char *walker = buffer;
-        while (*walker && *walker != '\n') {
+        while (*walker != '\0' && *walker != '\n' && *walker != '\r') {
             walker = eat_spaces(walker);
 
             // It is a string!
@@ -144,6 +144,7 @@ internal char* parse_file_entry(Array<VariableBinding> &bindings, char** entry_t
         if (*buffer == '\0') {
             return buffer;
         }
+
 
         VariableBinding *b = bindings.allocate();
 
