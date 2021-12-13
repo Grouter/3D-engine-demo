@@ -2,6 +2,8 @@ inline void allocate_entity_storage(EntityStorage &storage) {
     allocate_bucket_array<Entity>(storage.base_entities, 10);
     allocate_bucket_array<EntityData>(storage.entity_data, 10);
 
+    allocate_array(storage.grass_data, 1024);
+
     allocate_array(storage.flying_rock_transforms.local, ROCK_COUNT);
     allocate_array(storage.flying_rock_transforms.lookups, ROCK_COUNT);
     allocate_array(storage.flying_rock_transforms.results, ROCK_COUNT);
@@ -53,6 +55,7 @@ internal Entity* create_bird(EntityStorage &storage) {
     Entity *bird_entity = create_base_entity(storage, EntityType_BIRD);
 
     bird_entity->mesh = get_mesh("bird");
+    bird_entity->scale = make_vector3(0.5f);
 
     create_entity_data(storage, *bird_entity);
 
@@ -144,14 +147,6 @@ internal Entity* create_tree(EntityStorage &storage) {
     return tree;
 }
 
-internal Entity* create_grass(EntityStorage &storage) {
-    Entity *grass = create_base_entity(storage, EntityType_GRASS);
-
-    grass->program = &game_state.resources.programs[ShaderResource_Grass];
-
-    return grass;
-}
-
 internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type) {
     Entity *result;
 
@@ -175,10 +170,6 @@ internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type
 
         case EntityType_TREE : {
             result = create_tree(storage);
-        } break;
-
-        case EntityType_GRASS : {
-            result = create_grass(storage);
         } break;
 
         default : {

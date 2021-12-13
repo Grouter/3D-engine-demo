@@ -2,22 +2,13 @@
 
 #ifdef VERTEX
 
-// Vertex data
 in vec3 position;
 in vec3 normal;
 in vec2 uv;
 
-#ifdef GRASS_SHADER
-// Instance data
-in mat4 model;
-
-uniform mat4 projection;
-uniform mat4 view;
-#else
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model; // @Temporary
-#endif
 
 uniform float time;
 
@@ -155,7 +146,7 @@ void main() {
 
     // Results
 #ifdef GRASS_SHADER
-    vec3 result = (ambient + (1.0 - shadow) * clamp(diffuse, 0.07, 0.1)) * material_color.rgb;
+    vec3 result = (ambient + (1.0 - shadow) * clamp(diffuse, 0.1, 0.2)) * material_color.rgb;
 #else
     vec3 result = (ambient + (1.0 - shadow) * (diffuse + specular)) * material_color.rgb;
 #endif

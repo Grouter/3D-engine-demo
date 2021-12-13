@@ -43,6 +43,63 @@ internal void init_game() {
             current_a += a_part;
         }
     }
+
+    // Plant grass
+    {
+        stbi_set_flip_vertically_on_load(true);
+
+        i32 texture_width, texture_height, nr_channels;
+        u8 *pixels = stbi_load("textures/grass_plant_mask.png", &texture_width, &texture_height, &nr_channels, 0);
+
+        // How big of an area (around the world center) should be mapped to the spawn mask texture
+        Vector2 spawn_area = make_vector2(115.0f, 115.0f);
+
+        f32 spawn_increment = 2.0f;
+
+        Vector2 spawn_offset = make_vector2(-2.0f, -1.0f);
+        Vector2 spawn = {};
+
+        for (spawn.x = 0.0f ;spawn.x < spawn_area.x; spawn.x += spawn_increment) {
+            for (spawn.y = 0.0f; spawn.y < spawn_area.y; spawn.y += spawn_increment) {
+                // Convert to classic UVs
+                Vector2 unit_coordinates;
+                unit_coordinates.x = spawn.x / spawn_area.x;
+                unit_coordinates.y = spawn.y / spawn_area.y;
+
+                // Clamp to range <0, 1>
+                unit_coordinates.x = 1.0f - max(0.0f, min(1.0f, unit_coordinates.x));
+                unit_coordinates.y = max(0.0f, min(1.0f, unit_coordinates.y));
+
+                i32 texture_x = (i32)(unit_coordinates.x * texture_width);
+                i32 texture_y = (i32)(unit_coordinates.y * texture_height);
+
+                i32 pixel_index = texture_y * texture_width + texture_x;
+
+                // *4 because RGBA values are stored
+                u8 value = pixels[pixel_index * 4];
+
+                if (value != 0) {
+                    Matrix4x4 grass = identity();
+                    translate(
+                        grass,
+                        (spawn.x - spawn_area.x * 0.5f) + spawn_offset.x,
+                        -0.2f,
+                        (spawn.y - spawn_area.y * 0.5f) + spawn_offset.y
+                    );
+                    rotate(grass, 0.0f, rand_f_range(0.0f, TWO_PI), 0.0f);
+
+                    game_state.entities.grass_data.add(grass);
+
+                    if (game_state.entities.grass_data.is_full()) break;
+                }
+            }
+
+            if (game_state.entities.grass_data.is_full()) break;
+        }
+
+        log_print("Spawned: %d grass patches\n", game_state.entities.grass_data.length);
+        stbi_image_free(pixels);
+    }
 }
 
 internal void tick(f32 dt) {
@@ -221,6 +278,11 @@ internal void render() {
         bucket_array_foreach(game_state.entities.base_entities, it) {
             render_entity(*it, it->transform);
         }}
+
+        Matrix4x4 *grass;
+        array_foreach(game_state.entities.grass_data, grass) {
+            _draw_calls_grass.data.add(*grass);
+        }
     }
 
     // Draw shadow maps
@@ -246,6 +308,7 @@ internal void render() {
         // Draw 3Ds
         {
             flush_draw_calls();
+            flush_draw_calls_grass();
         }
 
         // Skybox

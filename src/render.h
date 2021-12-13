@@ -3,6 +3,7 @@
 
 #define MAX_DRAW_CALLS 1024
 #define MAX_PARTICLE_DRAW_CALLS 2048
+#define MAX_GRASS_DRAW_CALLS 1024
 
 union DrawCallFlags {
     u64 raw;
@@ -47,9 +48,16 @@ struct DrawCallBufferParticles {
     Array<DrawCallDataParticle> data;
 };
 
+struct DrawCallBufferGrass {
+    u32 vao;
+    u32 instance_buffer;
+    Array<Matrix4x4> data;
+};
+
 global DrawCallBuffer2D _font_draw_calls[FontResource_COUNT];
 global DrawCallBuffer2D _2d_shapes_draw_calls;
 global DrawCallBufferParticles _particle_draw_calls;
 global Array<DrawCallData> _draw_calls;
+global DrawCallBufferGrass _draw_calls_grass;
 
 #endif
