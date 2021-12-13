@@ -314,46 +314,38 @@ internal void set_shader(ShaderResource shader) {
 
 internal void set_shader_vec3(const char *attr, Vector3 value) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform3f(loc, value.x, value.y, value.z);
 
-    if (loc >= 0) {
-        glUniform3f(loc, value.x, value.y, value.z);
-    }
-    else {
-        log_print("Shader set_shader_vec3 (%s) loc error!\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_vec3 (%s) loc error!\n", attr);
+#endif
 }
 
 internal void set_shader_vec4(const char *attr, Vector4 value) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform4f(loc, value.x, value.y, value.z, value.w);
 
-    if (loc >= 0) {
-        glUniform4f(loc, value.x, value.y, value.z, value.w);
-    }
-    else {
-        log_print("Shader set_shader_vec4 (%s) loc error!\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_vec4 (%s) loc error!\n", attr);
+#endif
 }
 
 internal void set_shader_matrix4x4(const char *attr, Matrix4x4 value) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniformMatrix4fv(loc, 1, false, value.raw);
 
-    if (loc >= 0) {
-        glUniformMatrix4fv(loc, 1, false, value.raw);
-    }
-    else {
-        log_print("Shader set_shader_matrix4x4 (%s) loc error!\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_matrix4x4 (%s) loc error!\n", attr);
+#endif
 }
 
 internal void set_shader_matrix4x4_array(const char *attr, Matrix4x4 *values, u32 count) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniformMatrix4fv(loc, count, false, (f32 *)values);
 
-    if (loc >= 0) {
-        glUniformMatrix4fv(loc, count, false, (f32 *)values);
-    }
-    else {
-        log_print("Shader set_shader_matrix4x4_array (%s) loc error!\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_matrix4x4_array (%s) loc error!\n", attr);
+#endif
 }
 
 internal void set_shader_sampler(const char *attr, u32 texture_loc, u32 texture_handle) {
@@ -361,13 +353,11 @@ internal void set_shader_sampler(const char *attr, u32 texture_loc, u32 texture_
     glBindTexture(GL_TEXTURE_2D, texture_handle);
 
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform1i(loc, texture_loc);
 
-    if (loc >= 0) {
-        glUniform1i(loc, texture_loc);
-    }
-    else {
-        log_print("Shader set smapler (%s) %d loc error!\n", attr, texture_loc);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set smapler (%s) %d loc error!\n", attr, texture_loc);
+#endif
 }
 
 internal void set_shader_sampler_array(const char *attr, u32 texture_loc, u32 texture_handle) {
@@ -375,35 +365,29 @@ internal void set_shader_sampler_array(const char *attr, u32 texture_loc, u32 te
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_handle);
 
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform1i(loc, texture_loc);
 
-    if (loc >= 0) {
-        glUniform1i(loc, texture_loc);
-    }
-    else {
-        log_print("Shader set smapler (%s) %d loc error!\n", attr, texture_loc);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set smapler array (%s) %d loc error!\n", attr, texture_loc);
+#endif
 }
 
 internal void set_shader_int(const char *name, i32 value) {
     i32 loc = glGetUniformLocation(current_shader->handle, name);
+    glUniform1i(loc, value);
 
-    if (loc >= 0) {
-        glUniform1i(loc, value);
-    }
-    else {
-        log_print("Shader set int loc error! (attribute: %s)\n", name);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set int loc error! (attribute: %s)\n", name);
+#endif
 }
 
 internal void set_shader_float_array(const char *attr, f32 *values, u32 count) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform1fv(loc, count, values);
 
-    if (loc >= 0) {
-        glUniform1fv(loc, count, values);
-    }
-    else {
-        log_print("Shader set_shader_float_array loc error! (attribute: %s)\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_float_array loc error! (attribute: %s)\n", attr);
+#endif
 }
 
 internal void set_shader_float(const char *attr, f32 value) {
@@ -657,6 +641,7 @@ internal void flush_draw_calls_grass() {
     set_shader_vec3("sun_dir", game_state.light_data.sun_direction);
     set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
     set_shader_float("time", game_state.time_elapsed);
+    set_shader_int("unlit", 0);
 
     Material *material = &game_state.resources.materials[get_material_index("grass")];
 
@@ -700,6 +685,8 @@ internal void flush_draw_calls() {
             set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
             set_shader_float("time", game_state.time_elapsed);
             set_shader_vec4("material_color", V4_ONE);
+            set_shader_int("point_light_count", (i32)game_state.light_data.point_lights.length);
+            set_shader_int("unlit", 0);
         }
 
         // VAO switching
@@ -717,6 +704,7 @@ internal void flush_draw_calls() {
                 material = &game_state.resources.materials[material_index];
 
                 set_shader_vec4("material_color", material->color);
+                set_shader_int("unlit", material->unlit);
 
                 if (active_texture != material->texture) {
                     glActiveTexture(GL_TEXTURE0);

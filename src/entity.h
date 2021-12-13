@@ -26,6 +26,7 @@ enum EntityType {
     EntityType_FLYING_ROCK,
     EntityType_SHIP,
     EntityType_TREE,
+    EntityType_LAMP,
 };
 
 union EntityFlags {
@@ -51,6 +52,10 @@ struct Entity {
     Mesh *mesh       = nullptr;
 };
 
+struct LampData {
+    u32 point_light_index;
+};
+
 struct ShipData {
     f32 original_y_position = FLT_MAX;
 };
@@ -69,6 +74,7 @@ union EntityData {
     FlyingRockData flying_rock_data;
     BirdData bird_data;
     ShipData ship_data;
+    LampData lamp_data;
 };
 
 struct FlyingRockTransformHierarchy {

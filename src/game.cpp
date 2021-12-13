@@ -18,12 +18,14 @@ internal void init_game() {
     load_material_file();
     load_mesh_file();
     allocate_entity_storage(game_state.entities);
-    load_world_file(game_state.entities);
 
     // Light
     init_light_data(game_state.light_data);
     init_light_buffers(game_state.light_data);
     game_state.light_data.sun_direction = normalized(make_vector3(-0.4f, -1.0f, -0.2f));
+
+    // Load world
+    load_world_file(game_state.entities);
 
     // Spawn rocks
     {
@@ -220,6 +222,18 @@ internal void tick(f32 dt) {
                     it->transform = result;
                 }
             }
+            else if (it->type == EntityType_LAMP) {
+                it->transform = to_transform(it->position, it->rotation, it->scale);
+
+                LampData *data = &game_state.entities.entity_data[it->data].lamp_data;
+
+                if (game_state.light_data.point_lights.length <= data->point_light_index) continue;
+
+                // Side because lamp mesh is rotated wrong!
+                Vector3 light_pos = it->position + (get_side_vector(it->transform) * -0.8f);
+                light_pos.y += 1.5f;
+                game_state.light_data.point_lights[data->point_light_index].position = light_pos;
+            }
             else {
                 it->transform = to_transform(it->position, it->rotation, it->scale);
             }
@@ -237,12 +251,12 @@ internal void tick(f32 dt) {
 
 internal void render() {
     // Do CSM!
-    #ifdef DO_SHADOW_CASCADES
+#ifdef DO_SHADOW_CASCADES
     {
         calc_shadowmap_split_distances(game_state.camera, game_state.light_data);
         calc_cascade_matricies(game_state.camera, game_state.light_data);
     }
-    #else
+#else
     {
         // Calculate sun transform for shadow calulations
         {
@@ -264,11 +278,19 @@ internal void render() {
             game_state.light_data.cascade_mvps[i] = game_state.light_data.sun_mvp;
         }
     }
-    #endif
+#endif
 
+    // Upload sun projections
     {
         glBindBuffer(GL_UNIFORM_BUFFER, game_state.light_data.shadow_uniform_buffer);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, game_state.light_data.cascade_mvps);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    // Upload point light data
+    {
+        glBindBuffer(GL_UNIFORM_BUFFER, game_state.light_data.point_lights_uniform_buffer);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PointLight) * MAX_POINT_LIGHTS, game_state.light_data.point_lights.data);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 

@@ -83,70 +83,84 @@ position: 12.4, 2.43, -36.0
 #
 
 ! entity
+type: 6
 mesh: "lamp"
 position: 3.0, -0.2, 27.0
 
 ! entity
+type: 6
 mesh: "lamp"
 position: -3.5, -0.2, 27.0
 rotation: 0.0, 3.14, 0.0
 
 
 ! entity
+type: 6
 mesh: "lamp"
 position: 3.0, -0.2, 18.0
 
 ! entity
+type: 6
 mesh: "lamp"
 position: -3.5, -0.2, 18.0
 rotation: 0.0, 3.14, 0.0
 
 
 ! entity
+type: 6
 mesh: "lamp"
 position: 3.0, -0.2, 9.0
 
 ! entity
+type: 6
 mesh: "lamp"
 position: -3.5, -0.2, 9.0
 rotation: 0.0, 3.14, 0.0
 
 
 ! entity
+type: 6
 mesh: "lamp"
 position: 3.0, -0.2, 0.0
 
 ! entity
+type: 6
 mesh: "lamp"
 position: -3.5, -0.2, 0.0
 rotation: 0.0, 3.14, 0.0
 
 
 ! entity
+type: 6
 mesh: "lamp"
 position: 3.0, -0.2, -9.0
 
 ! entity
+type: 6
 mesh: "lamp"
 position: -3.5, -0.2, -9.0
 rotation: 0.0, 3.14, 0.0
 
 
 ! entity
+type: 6
 mesh: "lamp"
 position: 3.0, -0.2, -18.0
 
 ! entity
+type: 6
 mesh: "lamp"
 position: -3.5, -0.2, -18.0
 rotation: 0.0, 3.14, 0.0
 
 
 ! entity
+type: 6
 mesh: "lamp"
 position: 3.0, -0.2, -27.0
 
 ! entity
+type: 6
 mesh: "lamp"
 position: -3.5, -0.2, -27.0
 rotation: 0.0, 3.14, 0.0

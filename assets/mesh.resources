@@ -34,6 +34,8 @@ lanterns.obj
 
 ! lamp
 lamp.obj
+lamp_yellow
+grey
 
 ! tavern
 tavern.obj

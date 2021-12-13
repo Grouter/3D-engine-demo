@@ -17,6 +17,7 @@ internal void remove_flagged_entities(EntityStorage &storage) {
         if (!e->flags.destroy) continue;
 
         switch (e->type) {
+            case EntityType_LAMP :
             case EntityType_BIRD :
             case EntityType_SHIP :
             case EntityType_FLYING_ROCK : {
@@ -147,6 +148,22 @@ internal Entity* create_tree(EntityStorage &storage) {
     return tree;
 }
 
+internal Entity* create_lamp(EntityStorage &storage) {
+    Entity *lamp = create_base_entity(storage, EntityType_LAMP);
+
+    LampData *data = &create_entity_data(storage, *lamp)->lamp_data;
+    *data = {};
+    data->point_light_index = (u32)game_state.light_data.point_lights.length;
+
+    PointLight light = {};
+    light.color = make_vector3(0.890f, 0.729f, 0.0f);
+    light.intensity = 0.4f;
+
+    game_state.light_data.point_lights.add(light);
+
+    return lamp;
+}
+
 internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type) {
     Entity *result;
 
@@ -170,6 +187,10 @@ internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type
 
         case EntityType_TREE : {
             result = create_tree(storage);
+        } break;
+
+        case EntityType_LAMP: {
+            result = create_lamp(storage);
         } break;
 
         default : {

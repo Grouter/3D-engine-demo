@@ -191,6 +191,8 @@ internal void process_hotload_queue(Resources &resources) {
 
         remove_flagged_entities(game_state.entities);
 
+        game_state.light_data.point_lights.clear();
+
         load_world_file(game_state.entities);
 
         _hotload_resource_queue[HotloadResource_WORLD] = false;

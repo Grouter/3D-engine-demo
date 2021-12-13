@@ -1,6 +1,8 @@
 #if !defined(RENDER_H)
 #define RENDER_H
 
+// #define UNIFORM_DEBUG
+
 #define MAX_DRAW_CALLS 1024
 #define MAX_PARTICLE_DRAW_CALLS 2048
 #define MAX_GRASS_DRAW_CALLS 1024

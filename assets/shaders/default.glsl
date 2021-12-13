@@ -55,6 +55,7 @@ in vec3 f_frag_pos;
 in vec3 f_normal;
 in vec2 f_uv;
 
+uniform bool unlit;
 uniform mat4 view;
 uniform vec3 sun_dir;
 uniform vec4 material_color;
@@ -66,6 +67,19 @@ layout(std140, binding = 0) uniform LightMatricies {
     mat4 lights[CASCADE_COUNT];
 };
 uniform float cascade_distances[CASCADE_COUNT];
+
+struct PointLight {
+    vec4 position;
+    vec3 color;
+    float intensity;
+};
+
+#ifdef MAX_POINT_LIGHTS
+layout(std140, binding = 1) uniform PointLights {
+    PointLight point_lights[MAX_POINT_LIGHTS];
+};
+uniform int point_light_count;
+#endif
 
 out vec4 fragment_color;
 
@@ -101,6 +115,31 @@ float calc_shadow(int layer) {
 #endif
     return result;
 }
+
+#ifdef MAX_POINT_LIGHTS
+vec3 calc_point_light(int index, vec3 camera_dir) {
+    vec3 light_dir = normalize(point_lights[index].position.xyz - f_frag_pos);
+
+    // Diffuse
+    float diffuse_intensity = max(dot(f_normal, light_dir), 0.0);
+
+    // Specular
+    vec3 reflect_dir = -reflect(light_dir, f_normal);
+    float specular_intensity = pow(max(dot(camera_dir, reflect_dir), 0.0), 32);
+
+    // Attenuation
+    float dst = length(point_lights[index].position.xyz - f_frag_pos);
+    float attenuation = 1.0 / (1.0 + 0.14 * dst + 0.07 * (dst * dst));
+
+    attenuation *= point_lights[index].intensity;
+
+    vec3 ambient = vec3(AMBIENT_STRENGTH * attenuation);
+    vec3 diffuse = point_lights[index].color * attenuation * diffuse_intensity;
+    vec3 specular = vec3(SPECULAR * attenuation * specular_intensity);
+
+    return (ambient + diffuse + specular);
+}
+#endif
 
 void main() {
     vec3 camera_position = -1.0 * vec3(view[3][0], view[3][1], view[3][2]);
@@ -151,13 +190,27 @@ void main() {
         if (layer == -1) layer = CASCADE_COUNT - 1;
     }
 
-    float shadow = calc_shadow(layer);
+    float shadow;
+    if (unlit) shadow = 0.0;
+    else shadow = calc_shadow(layer);
 
     // Results
 #ifdef GRASS_SHADER
     vec3 result = (ambient + (1.0 - shadow) * clamp(diffuse, 0.07, 0.1)) * material_color.rgb;
 #else
-    vec3 result = (ambient + (1.0 - shadow) * (diffuse + specular)) * material_color.rgb;
+    vec3 result;
+    if (unlit) {
+        result = material_color.rgb;
+    }
+    else {
+        result = (ambient + (1.0 - shadow) * (diffuse + specular)) * material_color.rgb;
+    }
+#endif
+
+#ifdef MAX_POINT_LIGHTS
+    for (int i = 0; i < point_light_count; i++) {
+        result += calc_point_light(i, camera_dir);
+    }
 #endif
 
     vec4 texture_sample = texture(diffuse_texture, f_uv);
