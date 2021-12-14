@@ -641,6 +641,7 @@ internal void flush_draw_calls_grass() {
     set_shader_vec3("sun_dir", game_state.light_data.sun_direction);
     set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
     set_shader_float("time", game_state.time_elapsed);
+    set_shader_int("point_light_count", (i32)game_state.light_data.point_lights.length);
     set_shader_int("unlit", 0);
 
     Material *material = &game_state.resources.materials[get_material_index("grass")];

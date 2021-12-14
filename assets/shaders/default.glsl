@@ -137,7 +137,13 @@ vec3 calc_point_light(int index, vec3 camera_dir) {
     attenuation *= point_lights[index].intensity;
 
     vec3 ambient = vec3(AMBIENT_STRENGTH * attenuation);
+
+#ifdef GRASS_SHADER
+    vec3 diffuse = point_lights[index].color * attenuation * 0.2;
+#else
     vec3 diffuse = point_lights[index].color * attenuation * diffuse_intensity;
+#endif
+
     vec3 specular = vec3(SPECULAR * attenuation * specular_intensity);
 
     return (ambient + diffuse + specular);
@@ -199,7 +205,7 @@ void main() {
 
     // Results
 #ifdef GRASS_SHADER
-    diffuse = mix(diffuse, SUN_COLOR, f_mesh_y + 0.6);
+    diffuse = mix(SUN_COLOR, diffuse, f_mesh_y);
     vec3 result = (ambient + (1.0 - shadow) * diffuse) * material_color.rgb;
 #else
     vec3 result;

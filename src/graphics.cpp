@@ -132,7 +132,7 @@ internal bool load_program(const char *path, Program &shader, bool geometry = fa
     if (define_count > 0 && shader.defines.length == 0) {
         allocate_array(shader.defines, define_count);
 
-        for (u32 i = 0; i < define_count; i++) shader.defines.add(defines[i]);
+        for (u32 i = 0; i < define_count; i++) shader.defines.add(copy_string(defines[i]));
     }
 
     shader.has_geometry = geometry;
