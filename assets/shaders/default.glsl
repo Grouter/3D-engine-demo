@@ -50,7 +50,7 @@ void main() {
 #ifdef FRAGMENT
 
 const vec3 SUN_COLOR = vec3(0.349, 0.188, 0.360);
-const float AMBIENT_STRENGTH = 0.2;
+const float AMBIENT_STRENGTH = 0.1;
 const float SPECULAR = 0.1;
 
 in float f_mesh_y;
