@@ -20,7 +20,7 @@ in vec2 f_uv;
 uniform sampler2D hdr_buffer;
 uniform sampler2D bloom_buffer;
 
-const float BLOOM_AMOUNT = 1.0;
+const float BLOOM_AMOUNT = 0.75;
 const float EXPOSURE = 1.2;
 const float GAMMA = 2.2;
 
