@@ -56,7 +56,7 @@ internal Entity* create_bird(EntityStorage &storage) {
     Entity *bird_entity = create_base_entity(storage, EntityType_BIRD);
 
     bird_entity->mesh = get_mesh("bird");
-    bird_entity->scale = make_vector3(0.5f);
+    bird_entity->scale = make_vector3(0.3f);
 
     create_entity_data(storage, *bird_entity);
 
@@ -80,7 +80,7 @@ internal Entity* create_flying_rock(EntityStorage &storage, i32 level = 0) {
         }
     }
 
-    root->program = &game_state.resources.programs[0];
+    root->program = &game_state.resources.programs[ShaderResource_Default];
 
     FlyingRockData *data = &create_entity_data(storage, *root)->flying_rock_data;
 
