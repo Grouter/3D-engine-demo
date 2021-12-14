@@ -234,8 +234,8 @@ void main() {
     fragment_color = vec4(result, 1.0) * texture_sample;
 
     // Do bloom filter
-    float brightness = dot(fragment_color.rgb, vec3(0.2126, 0.7152, 0.0722));
-    if(brightness > 1.0) bloom_color = vec4(fragment_color.rgb, 1.0);
+    float brightness = max(fragment_color.r, max(fragment_color.g, fragment_color.b));
+    if(brightness > 0.7) bloom_color = vec4(fragment_color.rgb, 1.0);
     else bloom_color = vec4(0.0, 0.0, 0.0, 1.0);
 
 #ifdef GRASS_SHADER
