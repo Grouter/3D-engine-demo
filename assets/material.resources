@@ -21,7 +21,7 @@ color: 1.0, 1.0, 1.0, 1.0
 texture: "smoke_particle.png"
 
 ! grass
-color: 0.462, 0.788, 0.196, 1.0
+color: 0.368, 0.631, 0.152, 1.0
 texture: "grass.png"
 
 ! lamp_yellow

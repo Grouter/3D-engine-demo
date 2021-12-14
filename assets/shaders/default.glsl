@@ -21,11 +21,13 @@ uniform mat4 model; // @Temporary
 
 uniform float time;
 
+out float f_mesh_y;
 out vec3 f_frag_pos;
 out vec3 f_normal;
 out vec2 f_uv;
 
 void main() {
+    f_mesh_y = position.y;
     f_frag_pos = vec3(model * vec4(position, 1.0));
     f_normal = normal;
     f_uv = uv;
@@ -51,6 +53,7 @@ const vec3 SUN_COLOR = vec3(0.349, 0.188, 0.360);
 const float AMBIENT_STRENGTH = 0.2;
 const float SPECULAR = 0.5;
 
+in float f_mesh_y;
 in vec3 f_frag_pos;
 in vec3 f_normal;
 in vec2 f_uv;
@@ -196,7 +199,8 @@ void main() {
 
     // Results
 #ifdef GRASS_SHADER
-    vec3 result = (ambient + (1.0 - shadow) * clamp(diffuse, 0.07, 0.1)) * material_color.rgb;
+    diffuse = mix(diffuse, SUN_COLOR, f_mesh_y + 0.6);
+    vec3 result = (ambient + (1.0 - shadow) * diffuse) * material_color.rgb;
 #else
     vec3 result;
     if (unlit) {
