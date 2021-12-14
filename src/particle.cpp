@@ -110,7 +110,7 @@ internal void update_particle(f32 delta_time, Vector3 root_pos) {
     }
 
     // Update existing particles
-    for (i32 i = particles.length - 1; i >= 0; i--) {
+    for (i32 i = (i32)particles.length - 1; i >= 0; i--) {
         Particle &particle = particles[i];
         particle.life -= delta_time;
 
@@ -120,7 +120,7 @@ internal void update_particle(f32 delta_time, Vector3 root_pos) {
 
         // Fire
         if (particle.type == 0) {
-            f32 size = lerp(0.6, 0.3f, 1.0f - particle.life);
+            f32 size = lerp(0.6f, 0.3f, 1.0f - particle.life);
             particle.size = make_vector2(size, size);
 
             particle.position += particle.velocity * delta_time;
