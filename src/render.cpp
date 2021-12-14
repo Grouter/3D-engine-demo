@@ -290,17 +290,61 @@ internal void init_renderer() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_buffer, 0);
 
+        u32 brightness_buffer;
+        glGenTextures(1, &brightness_buffer);
+        glBindTexture(GL_TEXTURE_2D, brightness_buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, HDR_TARGET_W, HDR_TARGET_H, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, brightness_buffer, 0);
+
         u32 depth_buffer;
         glGenRenderbuffers(1, &depth_buffer);
         glBindRenderbuffer(GL_RENDERBUFFER, depth_buffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, HDR_TARGET_W, HDR_TARGET_H);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_buffer);
 
+        u32 target_buffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, target_buffers);
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         game_state.hdr_framebuffer = hdr;
         game_state.post_color_buffer = color_buffer;
         game_state.post_depth_buffer = depth_buffer;
+        game_state.post_brightness_buffer = brightness_buffer;
+    }
+
+    // Allocate for bloom stuff
+    {
+        // Downscale
+        glGenFramebuffers(1, &game_state.downscale_framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, game_state.downscale_framebuffer);
+
+        glGenTextures(1, &game_state.downscale_color_buffer);
+        glBindTexture(GL_TEXTURE_2D, game_state.downscale_color_buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, HDR_TARGET_W / 4, HDR_TARGET_H / 4, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, game_state.downscale_color_buffer, 0);
+
+        // Blur
+        glGenFramebuffers(2, game_state.blur_framebuffers);
+        glGenTextures(2, game_state.blur_color_buffers);
+
+        for (u32 i = 0; i < 2; i++) {
+            glBindFramebuffer(GL_FRAMEBUFFER, game_state.blur_framebuffers[i]);
+
+            glBindTexture(GL_TEXTURE_2D, game_state.blur_color_buffers[i]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, HDR_TARGET_W, HDR_TARGET_H, 0, GL_RGBA, GL_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, game_state.blur_color_buffers[i], 0);
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 }
 

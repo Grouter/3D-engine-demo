@@ -114,7 +114,14 @@ struct GameState {
     // HDR
     u32 hdr_framebuffer;
     u32 post_color_buffer;
+    u32 post_brightness_buffer;
     u32 post_depth_buffer;
+
+    // Bloom
+    u32 downscale_framebuffer;
+    u32 downscale_color_buffer;
+    u32 blur_framebuffers[2];
+    u32 blur_color_buffers[2];
 
     // Light
     LightData light_data;
@@ -350,7 +357,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
 
         tick(delta_time);
 
-        glClearColor(0.45f, 0.82f, 0.94f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         draw_console(delta_time);

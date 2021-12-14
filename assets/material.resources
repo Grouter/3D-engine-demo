@@ -27,5 +27,5 @@ texture: "grass.png"
 # We can do more than 1.0 on colors, since we are in the
 # great realm of HDR
 ! lamp_yellow
-color: 5.0, 5.0, 0.0, 1.0
+color: 2.0, 2.0, 0.0, 1.0
 unlit: 1

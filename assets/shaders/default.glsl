@@ -84,7 +84,8 @@ layout(std140, binding = 1) uniform PointLights {
 uniform int point_light_count;
 #endif
 
-out vec4 fragment_color;
+layout (location = 0) out vec4 fragment_color;
+layout (location = 1) out vec4 bloom_color;
 
 float calc_shadow(int layer) {
     vec4 light_frag_pos = lights[layer] * vec4(f_frag_pos, 1.0);
@@ -231,6 +232,11 @@ void main() {
 #endif
 
     fragment_color = vec4(result, 1.0) * texture_sample;
+
+    // Do bloom filter
+    float brightness = dot(fragment_color.rgb, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.0) bloom_color = vec4(fragment_color.rgb, 1.0);
+    else bloom_color = vec4(0.0, 0.0, 0.0, 1.0);
 
 #ifdef GRASS_SHADER
     if (fragment_color.a < 1.0) discard;

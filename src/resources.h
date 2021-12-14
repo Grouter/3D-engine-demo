@@ -10,6 +10,8 @@ enum ShaderResource {
     ShaderResource_Particles,
     ShaderResource_Trees,
     ShaderResource_Grass,
+    ShaderResource_Downscale,
+    ShaderResource_Blur,
 
     ShaderResource_COUNT
 };

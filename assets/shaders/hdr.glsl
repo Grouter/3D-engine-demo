@@ -18,7 +18,9 @@ void main() {
 in vec2 f_uv;
 
 uniform sampler2D hdr_buffer;
+uniform sampler2D bloom_buffer;
 
+const float BLOOM_AMOUNT = 1.0;
 const float EXPOSURE = 1.2;
 const float GAMMA = 2.2;
 
@@ -38,6 +40,9 @@ vec3 tone_map(vec3 x) {
 
 void main() {
     vec3 hdr_color = texture(hdr_buffer, f_uv).rgb;
+    vec3 bloom_color = texture(bloom_buffer, f_uv).rgb;
+
+    hdr_color += bloom_color * BLOOM_AMOUNT;
 
 #if 0
     vec3 result = vec3(1.0) - exp(-hdr_color * EXPOSURE);

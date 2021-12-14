@@ -371,6 +371,53 @@ internal void render() {
         }
     }
 
+    // Bloom pass
+    {
+        // Downscale
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, game_state.downscale_framebuffer);
+            glViewport(0, 0, HDR_TARGET_W / 4, HDR_TARGET_H / 4);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            set_shader(ShaderResource_Downscale);
+            set_shader_sampler("target_texture", 0, game_state.post_brightness_buffer);
+
+            Mesh *hdr_quad = &game_state.resources.meshes[MeshResource_HDR_Quad];
+            glBindVertexArray(hdr_quad->vao);
+            glDrawElements(GL_TRIANGLES, (i32)hdr_quad->indicies.length, GL_UNSIGNED_INT, 0);
+        }
+
+        // Blur (Gaussian vertical and horizontal)
+        {
+            set_shader(ShaderResource_Blur);
+            i32 blur_passes = 4;
+            int direction = 0;
+
+            Mesh *hdr_quad = &game_state.resources.meshes[MeshResource_HDR_Quad];
+            glBindVertexArray(hdr_quad->vao);
+
+            // First pass is copied from the original color buffer
+            glBindFramebuffer(GL_FRAMEBUFFER, game_state.blur_framebuffers[direction]);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glViewport(0, 0, HDR_TARGET_W, HDR_TARGET_H);
+
+            set_shader_sampler("target_texture", 0, game_state.downscale_color_buffer);
+            set_shader_int("direction", direction);
+            glDrawElements(GL_TRIANGLES, (i32)hdr_quad->indicies.length, GL_UNSIGNED_INT, 0);
+            direction = !direction;
+
+            for (i32 i = 1; i < blur_passes; i++) {
+                glBindFramebuffer(GL_FRAMEBUFFER, game_state.blur_framebuffers[direction]);
+                glClear(GL_COLOR_BUFFER_BIT);
+                set_shader_sampler("target_texture", 0, game_state.blur_color_buffers[!direction]);
+                set_shader_int("direction", direction);
+                glDrawElements(GL_TRIANGLES, (i32)hdr_quad->indicies.length, GL_UNSIGNED_INT, 0);
+
+                direction = !direction;
+            }
+        }
+    }
+
     // Final pass
     {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -384,24 +431,24 @@ internal void render() {
 
         set_shader(ShaderResource_HDR);
         set_shader_sampler("hdr_buffer", 0, game_state.post_color_buffer);
+        set_shader_sampler("bloom_buffer", 1, game_state.blur_color_buffers[1]);
 
         Mesh *hdr_quad = &game_state.resources.meshes[MeshResource_HDR_Quad];
         glBindVertexArray(hdr_quad->vao);
-
         glDrawElements(GL_TRIANGLES, (i32)hdr_quad->indicies.length, GL_UNSIGNED_INT, 0);
+    }
 
-        // Draw 2Ds
-        {
-            glDisable(GL_DEPTH_TEST);
-            set_shader(ShaderResource_2D);
-            set_shader_matrix4x4("projection", game_state.ortho_proj);
+    // Draw 2Ds
+    {
+        glDisable(GL_DEPTH_TEST);
+        set_shader(ShaderResource_2D);
+        set_shader_matrix4x4("projection", game_state.ortho_proj);
 
-            set_shader_int("diffuse_alpha_mask", 0);
-            flush_2d_shapes_draw_calls();
+        set_shader_int("diffuse_alpha_mask", 0);
+        flush_2d_shapes_draw_calls();
 
-            set_shader_int("diffuse_alpha_mask", 1);
-            flush_font_draw_calls();
-            glEnable(GL_DEPTH_TEST);
-        }
+        set_shader_int("diffuse_alpha_mask", 1);
+        flush_font_draw_calls();
+        glEnable(GL_DEPTH_TEST);
     }
 }

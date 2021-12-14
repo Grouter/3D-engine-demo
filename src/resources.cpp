@@ -532,6 +532,20 @@ internal void init_resources(Resources &resources) {
         if (!status) exit(1);
     }
 
+    // Downscale shader
+    {
+        char *shader_inputs[1] = { "#define DOWNSCALE\n" };
+        bool status = load_program("shaders/bloom.glsl", resources.programs[ShaderResource_Downscale], false, 1, shader_inputs);
+        if (!status) exit(1);
+    }
+
+    // Blur shader
+    {
+        char *shader_inputs[1] = { "#define BLUR\n" };
+        bool status = load_program("shaders/bloom.glsl", resources.programs[ShaderResource_Blur], false, 1, shader_inputs);
+        if (!status) exit(1);
+    }
+
     // Meshes
     allocate_array(resources.meshes, 50);
     allocate_resource_catalog(resources.mesh_catalog, 50);
