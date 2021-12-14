@@ -375,3 +375,128 @@ type: 5
 mesh: "tree3"
 position: 11.0, -0.2, -27.0
 rotation: 0.0, 0.0, 0.0
+
+#
+# BUSHES
+#
+
+! entity
+type: 5
+mesh: "bush2"
+position: -11.0, -0.1, 40.0
+rotation: 0.0, 2.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: -11.0, -0.1, 41.0
+rotation: 0.0, 0.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: 11.0, -0.1, 32.0
+rotation: 0.0, 2.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: 11.0, -0.1, 35.0
+rotation: 0.0, 0.0, 0.0
+
+! entity
+type: 5
+mesh: "bush3"
+position: -2.3, -0.1, 32.0
+rotation: 0.0, 0.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: -11.0, -0.1, -29.0
+rotation: 0.0, 2.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: -11.5, -0.1, -30.7
+rotation: 0.0, 0.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: 13.0, -0.1, -29.0
+rotation: 0.0, 2.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: 11.5, -0.1, -30.0
+rotation: 0.0, 1.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: 3.0, -0.1, -8.4
+rotation: 0.0, 0.5, 0.0
+
+#
+# LEFT HOUSES BUSHES
+#
+
+! entity
+type: 5
+mesh: "bush2"
+position: -7.5, -0.1, 15.5
+rotation: 0.0, 0.0, 0.0
+
+#
+# RIGHT HOUSES BUSHES
+#
+
+! entity
+type: 5
+mesh: "bush2"
+position: 6.0, -0.1, 19.5
+rotation: 0.0, 0.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: 6.0, -0.1, 24.0
+rotation: 0.0, 1.0, 0.0
+
+! entity
+type: 5
+mesh: "bush3"
+position: 6.5, -0.1, 0.0
+rotation: 0.0, 1.0, 0.0
+scale: 1.5, 1.5, 1.5
+
+#
+# BUSH TAVERN ENTRANCE
+#
+
+! entity
+type: 5
+mesh: "bush2"
+position: 2.3, -0.1, -30.5
+rotation: 0.0, 1.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: 2.5, -0.1, -29.5
+rotation: 0.0, 1.5, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: -2.3, -0.1, -30.5
+rotation: 0.0, 0.0, 0.0
+
+! entity
+type: 5
+mesh: "bush2"
+position: -2.5, -0.1, -29.5
+rotation: 0.0, 1.5, 0.0

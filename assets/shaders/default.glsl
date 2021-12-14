@@ -29,7 +29,7 @@ out vec2 f_uv;
 void main() {
     f_mesh_y = position.y;
     f_frag_pos = vec3(model * vec4(position, 1.0));
-    f_normal = normal;
+    f_normal = normalize(mat3(transpose(inverse(model))) * normal);
     f_uv = uv;
 
     vec4 pos = vec4(position, 1.0);
@@ -51,7 +51,7 @@ void main() {
 
 const vec3 SUN_COLOR = vec3(0.349, 0.188, 0.360);
 const float AMBIENT_STRENGTH = 0.2;
-const float SPECULAR = 0.5;
+const float SPECULAR = 0.1;
 
 in float f_mesh_y;
 in vec3 f_frag_pos;
@@ -128,7 +128,7 @@ vec3 calc_point_light(int index, vec3 camera_dir) {
 
     // Specular
     vec3 reflect_dir = reflect(-light_dir, f_normal);
-    float specular_intensity = pow(max(dot(camera_dir, reflect_dir), 0.0), 64);
+    float specular_intensity = pow(max(dot(camera_dir, reflect_dir), 0.0), 2);
 
     // Attenuation
     float dst = length(point_lights[index].position.xyz - f_frag_pos);
@@ -143,9 +143,8 @@ vec3 calc_point_light(int index, vec3 camera_dir) {
     vec3 specular = vec3(0.0);
 #else
     vec3 diffuse = point_lights[index].color * attenuation * diffuse_intensity;
-    vec3 specular = vec3(SPECULAR * attenuation * specular_intensity);
+    vec3 specular = vec3(SPECULAR * attenuation * specular_intensity * 0.01);
 #endif
-
 
     return (ambient + diffuse + specular);
 }
@@ -153,12 +152,12 @@ vec3 calc_point_light(int index, vec3 camera_dir) {
 
 void main() {
     vec3 camera_position = -1.0 * vec3(view[3][0], view[3][1], view[3][2]);
-    vec3 camera_dir = -1.0 * vec3(view[0][2], view[1][2], view[2][2]);
-    vec3 camera_to_frag = normalize(camera_position - f_frag_pos);
+    vec3 camera_dir = -1.0 * normalize(vec3(view[0][2], view[1][2], view[2][2]));
+    vec3 sun_dir_n = normalize(sun_dir);
 
     // Specular
-    vec3 reflect_dir = reflect(-sun_dir, f_normal);
-    float specular_intensity = pow(max(dot(reflect_dir, camera_dir), 0.0), 64);
+    vec3 reflect_dir = reflect(-sun_dir_n, f_normal);
+    float specular_intensity = pow(max(dot(reflect_dir, camera_dir), 0.0), 2);
 #ifdef CEL_SHADING
     specular_intensity = step(0.5, specular_intensity);
     if (specular_intensity >= 0.8) specular_intensity = 1.0;
@@ -170,10 +169,9 @@ void main() {
 
     // Ambient
     vec3 ambient = AMBIENT_STRENGTH * SUN_COLOR;
-    vec3 sun_dir_n = normalize(sun_dir);
 
     // Diffuse
-    float diffuse_intensity = max(dot(f_normal, -sun_dir), 0.0);
+    float diffuse_intensity = max(dot(f_normal, -sun_dir_n), 0.0);
 #ifdef CEL_SHADING
     diffuse_intensity = step(0.1, diffuse_intensity);
     if (diffuse_intensity >= 0.8) diffuse_intensity = 1.0;
@@ -206,7 +204,7 @@ void main() {
 
     // Results
 #ifdef GRASS_SHADER
-    diffuse = mix(SUN_COLOR, diffuse, f_mesh_y + 0.09);
+    diffuse = mix(SUN_COLOR, diffuse, f_mesh_y);
     vec3 result = (ambient + (1.0 - shadow) * diffuse) * material_color.rgb;
 #else
     vec3 result;
