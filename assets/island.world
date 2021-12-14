@@ -366,14 +366,14 @@ rotation: 0.0, 0.0, 0.0
 # GRASS
 #
 
-# ! entity
-# type: 6
-# mesh: "grass"
-# position: -10.0, -0.4, 7.0
-# scale: 1.5, 1.0, 1.5
+! entity
+type: 6
+mesh: "grass"
+position: -10.0, -0.4, 7.0
+scale: 1.5, 1.0, 1.5
 
-# ! entity
-# type: 6
-# mesh: "grass"
-# position: -15.0, -0.4, 7.0
-# scale: 1.5, 1.0, 1.5
+! entity
+type: 6
+mesh: "grass"
+position: -15.0, -0.4, 7.0
+scale: 1.5, 1.0, 1.5
