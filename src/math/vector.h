@@ -73,6 +73,26 @@ inline Vector2 rand_unit_v2() {
     return result;
 }
 
+inline Vector2 lerp(Vector2 a, Vector2 b, f32 t) {
+    Vector2 result;
+
+    result.x = lerp(a.x, b.x, t);
+    result.y = lerp(a.y, b.y, t);
+
+    return result;
+}
+
+inline Vector2 bezier_point(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, f32 t) {
+    Vector2 g0 = lerp(p0, p1, t);
+    Vector2 g1 = lerp(p1, p2, t);
+    Vector2 g2 = lerp(p2, p3, t);
+
+    Vector2 b0 = lerp(g0, g1, t);
+    Vector2 b1 = lerp(g1, g2, t);
+    
+    return lerp(b0, b1, t);
+}
+
 //
 // :Vector3
 //
@@ -236,6 +256,17 @@ inline f32 distance(Vector3 a, Vector3 b) {
 
 inline void dump_vector(Vector3 &v) {
     log_print("Vector3: %f %f %f\n", v.x, v.y, v.z);
+}
+
+inline Vector3 bezier_point(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, f32 t) {
+    Vector3 g0 = lerp(p0, p1, t);
+    Vector3 g1 = lerp(p1, p2, t);
+    Vector3 g2 = lerp(p2, p3, t);
+
+    Vector3 b0 = lerp(g0, g1, t);
+    Vector3 b1 = lerp(g1, g2, t);
+
+    return lerp(b0, b1, t);
 }
 
 //

@@ -241,10 +241,7 @@ internal void tick(f32 dt) {
     }
 
     // Handle particles
-    {
-        update_particle(dt, ROOT_POSITION, NEW_PARTICLES);
-        draw_particles();
-    }
+    update_particle(dt, ROOT_POSITION);
 
     remove_flagged_entities(game_state.entities);
 }
@@ -270,7 +267,7 @@ internal void render() {
                 side.z, up.z, forward.z, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f,
             };
-    }
+        }
 
         game_state.light_data.sun_mvp = multiply(game_state.light_data.sun_projection, game_state.light_data.sun_view);
 
