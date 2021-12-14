@@ -51,7 +51,7 @@ void main() {
 
 const vec3 SUN_COLOR = vec3(0.349, 0.188, 0.360);
 const float AMBIENT_STRENGTH = 0.1;
-const float SPECULAR = 0.1;
+const float SPECULAR = 0.2;
 
 in float f_mesh_y;
 in vec3 f_frag_pos;
@@ -129,7 +129,7 @@ vec3 calc_point_light(int index, vec3 camera_dir) {
 
     // Specular
     vec3 reflect_dir = reflect(-light_dir, f_normal);
-    float specular_intensity = pow(max(dot(camera_dir, reflect_dir), 0.0), 2);
+    float specular_intensity = pow(max(dot(camera_dir, reflect_dir), 0.0), 4);
 
     // Attenuation
     float dst = length(point_lights[index].position.xyz - f_frag_pos);
@@ -158,7 +158,7 @@ void main() {
 
     // Specular
     vec3 reflect_dir = reflect(-sun_dir_n, f_normal);
-    float specular_intensity = pow(max(dot(reflect_dir, camera_dir), 0.0), 2);
+    float specular_intensity = pow(max(dot(reflect_dir, camera_dir), 0.0), 16);
 #ifdef CEL_SHADING
     specular_intensity = step(0.5, specular_intensity);
     if (specular_intensity >= 0.8) specular_intensity = 1.0;

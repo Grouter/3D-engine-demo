@@ -48,6 +48,9 @@ internal CameraAnimation load_camera_animation(const char *path) {
     allocate_array(result.rotations, result.key_count);
     allocate_array(result.times, result.key_count);
 
+    Vector3 position = {};
+    Vector3 rotation = {};
+
     // Rewind the walker back to the start
     walker = file.data;
 
@@ -57,6 +60,8 @@ internal CameraAnimation load_camera_animation(const char *path) {
         if (*walker == '!') {
             key_index += 1;
 
+            result.positions.add(position);
+            result.rotations.add(rotation);
             result.times.add(1.0f);
 
             walker += 1;
@@ -64,18 +69,12 @@ internal CameraAnimation load_camera_animation(const char *path) {
         }
 
         if (strncmp(walker, "position", 8) == 0) {
-            Vector3 pos;
-            sscanf(walker, "position: %f %f %f", &pos.x, &pos.y, &pos.z);
-
-            if (result.positions.length <= key_index) result.positions.add(pos);
-            else result.positions[key_index] = pos;
+            sscanf(walker, "position: %f %f %f", &position.x, &position.y, &position.z);
+            result.positions[key_index] = position;
         }
         else if (strncmp(walker, "rotation", 8) == 0) {
-            Vector3 rot;
-            sscanf(walker, "rotation: %f %f %f", &rot.x, &rot.y, &rot.z);
-
-            if (result.rotations.length <= key_index) result.rotations.add(rot);
-            else result.rotations[key_index] = rot;
+            sscanf(walker, "rotation: %f %f %f", &rotation.x, &rotation.y, &rotation.z);
+            result.rotations[key_index] = rotation;
         }
         else if (strncmp(walker, "time", 4) == 0) {
             f32 time;

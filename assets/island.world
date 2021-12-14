@@ -9,7 +9,7 @@ position: -10.0, -0.3, 3.0
 
 ! entity
 mesh: "houses_right"
-position: 10.0, 0.0, 3.0
+position: 10.0, -0.21, 3.0
 
 ! entity
 mesh: "sawmill"
@@ -38,7 +38,7 @@ position: -7.0, 0.0, 1.0
 
 ! entity
 mesh: "blacksmith"
-position: -10.7, -0.25, -13.05
+position: -10.7, -0.2, -13.11
 
 ! entity
 mesh: "furnaces"
