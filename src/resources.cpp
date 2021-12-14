@@ -381,6 +381,9 @@ internal bool load_material_file(const char *override_name = nullptr) {
 
                 material.texture = texture;
             }
+            else if (strcmp(it->name, "unlit") == 0) {
+                material.unlit = it->value.integer_value;
+            }
         }
 
         // Save material
@@ -474,9 +477,14 @@ internal bool load_world_file(EntityStorage &storage) {
 }
 
 internal void init_resources(Resources &resources) {
+    char point_lights_define[32];
+    snprintf(point_lights_define, 32, "#define MAX_POINT_LIGHTS %d\n", MAX_POINT_LIGHTS);
+
     // Default shader
     {
-        bool status = load_program("shaders/default.glsl", resources.programs[ShaderResource_Default]);
+        char *shader_inputs[1] = { point_lights_define };
+
+        bool status = load_program("shaders/default.glsl", resources.programs[ShaderResource_Default], false, 1, shader_inputs);
         if (!status) exit(1);
     }
 
@@ -519,8 +527,8 @@ internal void init_resources(Resources &resources) {
 
     // Grass shader
     {
-        char *shader_inputs[1] = { "#define GRASS_SHADER\n" };
-        bool status = load_program("shaders/default.glsl", resources.programs[ShaderResource_Grass], false, 1, shader_inputs);
+        char *shader_inputs[2] = { "#define GRASS_SHADER\n", point_lights_define };
+        bool status = load_program("shaders/default.glsl", resources.programs[ShaderResource_Grass], false, 2, shader_inputs);
         if (!status) exit(1);
     }
 

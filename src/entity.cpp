@@ -2,6 +2,8 @@ inline void allocate_entity_storage(EntityStorage &storage) {
     allocate_bucket_array<Entity>(storage.base_entities, 10);
     allocate_bucket_array<EntityData>(storage.entity_data, 10);
 
+    allocate_array(storage.grass_data, 1024);
+
     allocate_array(storage.flying_rock_transforms.local, ROCK_COUNT);
     allocate_array(storage.flying_rock_transforms.lookups, ROCK_COUNT);
     allocate_array(storage.flying_rock_transforms.results, ROCK_COUNT);
@@ -15,6 +17,7 @@ internal void remove_flagged_entities(EntityStorage &storage) {
         if (!e->flags.destroy) continue;
 
         switch (e->type) {
+            case EntityType_LAMP :
             case EntityType_BIRD :
             case EntityType_SHIP :
             case EntityType_FLYING_ROCK : {
@@ -53,6 +56,7 @@ internal Entity* create_bird(EntityStorage &storage) {
     Entity *bird_entity = create_base_entity(storage, EntityType_BIRD);
 
     bird_entity->mesh = get_mesh("bird");
+    bird_entity->scale = make_vector3(0.3f);
 
     create_entity_data(storage, *bird_entity);
 
@@ -76,7 +80,7 @@ internal Entity* create_flying_rock(EntityStorage &storage, i32 level = 0) {
         }
     }
 
-    root->program = &game_state.resources.programs[0];
+    root->program = &game_state.resources.programs[ShaderResource_Default];
 
     FlyingRockData *data = &create_entity_data(storage, *root)->flying_rock_data;
 
@@ -144,12 +148,20 @@ internal Entity* create_tree(EntityStorage &storage) {
     return tree;
 }
 
-internal Entity* create_grass(EntityStorage &storage) {
-    Entity *grass = create_base_entity(storage, EntityType_GRASS);
+internal Entity* create_lamp(EntityStorage &storage) {
+    Entity *lamp = create_base_entity(storage, EntityType_LAMP);
 
-    grass->program = &game_state.resources.programs[ShaderResource_Grass];
+    LampData *data = &create_entity_data(storage, *lamp)->lamp_data;
+    *data = {};
+    data->point_light_index = (u32)game_state.light_data.point_lights.length;
 
-    return grass;
+    PointLight light = {};
+    light.color = make_vector3(0.890f, 0.729f, 0.0f);
+    light.intensity = 0.4f;
+
+    game_state.light_data.point_lights.add(light);
+
+    return lamp;
 }
 
 internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type) {
@@ -177,8 +189,8 @@ internal Entity* create_entity_from_type(EntityStorage &storage, EntityType type
             result = create_tree(storage);
         } break;
 
-        case EntityType_GRASS : {
-            result = create_grass(storage);
+        case EntityType_LAMP: {
+            result = create_lamp(storage);
         } break;
 
         default : {

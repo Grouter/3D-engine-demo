@@ -18,12 +18,14 @@ internal void init_game() {
     load_material_file();
     load_mesh_file();
     allocate_entity_storage(game_state.entities);
-    load_world_file(game_state.entities);
 
     // Light
     init_light_data(game_state.light_data);
     init_light_buffers(game_state.light_data);
     game_state.light_data.sun_direction = normalized(make_vector3(-0.4f, -1.0f, -0.2f));
+
+    // Load world
+    load_world_file(game_state.entities);
 
     // Spawn rocks
     {
@@ -42,6 +44,63 @@ internal void init_game() {
 
             current_a += a_part;
         }
+    }
+
+    // Plant grass
+    {
+        stbi_set_flip_vertically_on_load(true);
+
+        i32 texture_width, texture_height, nr_channels;
+        u8 *pixels = stbi_load("textures/grass_plant_mask.png", &texture_width, &texture_height, &nr_channels, 0);
+
+        // How big of an area (around the world center) should be mapped to the spawn mask texture
+        Vector2 spawn_area = make_vector2(115.0f, 115.0f);
+
+        f32 spawn_increment = 2.0f;
+
+        Vector2 spawn_offset = make_vector2(-2.0f, -1.0f);
+        Vector2 spawn = {};
+
+        for (spawn.x = 0.0f ;spawn.x < spawn_area.x; spawn.x += spawn_increment) {
+            for (spawn.y = 0.0f; spawn.y < spawn_area.y; spawn.y += spawn_increment) {
+                // Convert to classic UVs
+                Vector2 unit_coordinates;
+                unit_coordinates.x = spawn.x / spawn_area.x;
+                unit_coordinates.y = spawn.y / spawn_area.y;
+
+                // Clamp to range <0, 1>
+                unit_coordinates.x = 1.0f - max(0.0f, min(1.0f, unit_coordinates.x));
+                unit_coordinates.y = max(0.0f, min(1.0f, unit_coordinates.y));
+
+                i32 texture_x = (i32)(unit_coordinates.x * texture_width);
+                i32 texture_y = (i32)(unit_coordinates.y * texture_height);
+
+                i32 pixel_index = texture_y * texture_width + texture_x;
+
+                // *4 because RGBA values are stored
+                u8 value = pixels[pixel_index * 4];
+
+                if (value != 0) {
+                    Matrix4x4 grass = identity();
+                    translate(
+                        grass,
+                        (spawn.x - spawn_area.x * 0.5f) + spawn_offset.x,
+                        -0.2f,
+                        (spawn.y - spawn_area.y * 0.5f) + spawn_offset.y
+                    );
+                    rotate(grass, 0.0f, rand_f_range(0.0f, TWO_PI), 0.0f);
+
+                    game_state.entities.grass_data.add(grass);
+
+                    if (game_state.entities.grass_data.is_full()) break;
+                }
+            }
+
+            if (game_state.entities.grass_data.is_full()) break;
+        }
+
+        log_print("Spawned: %d grass patches\n", game_state.entities.grass_data.length);
+        stbi_image_free(pixels);
     }
 }
 
@@ -163,6 +222,18 @@ internal void tick(f32 dt) {
                     it->transform = result;
                 }
             }
+            else if (it->type == EntityType_LAMP) {
+                it->transform = to_transform(it->position, it->rotation, it->scale);
+
+                LampData *data = &game_state.entities.entity_data[it->data].lamp_data;
+
+                if (game_state.light_data.point_lights.length <= data->point_light_index) continue;
+
+                // Side because lamp mesh is rotated wrong!
+                Vector3 light_pos = it->position + (get_side_vector(it->transform) * -0.8f);
+                light_pos.y += 1.5f;
+                game_state.light_data.point_lights[data->point_light_index].position = light_pos;
+            }
             else {
                 it->transform = to_transform(it->position, it->rotation, it->scale);
             }
@@ -177,12 +248,12 @@ internal void tick(f32 dt) {
 
 internal void render() {
     // Do CSM!
-    #ifdef DO_SHADOW_CASCADES
+#ifdef DO_SHADOW_CASCADES
     {
         calc_shadowmap_split_distances(game_state.camera, game_state.light_data);
         calc_cascade_matricies(game_state.camera, game_state.light_data);
     }
-    #else
+#else
     {
         // Calculate sun transform for shadow calulations
         {
@@ -204,11 +275,19 @@ internal void render() {
             game_state.light_data.cascade_mvps[i] = game_state.light_data.sun_mvp;
         }
     }
-    #endif
+#endif
 
+    // Upload sun projections
     {
         glBindBuffer(GL_UNIFORM_BUFFER, game_state.light_data.shadow_uniform_buffer);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, game_state.light_data.cascade_mvps);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    // Upload point light data
+    {
+        glBindBuffer(GL_UNIFORM_BUFFER, game_state.light_data.point_lights_uniform_buffer);
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(PointLight) * MAX_POINT_LIGHTS, game_state.light_data.point_lights.data);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
@@ -218,6 +297,11 @@ internal void render() {
         bucket_array_foreach(game_state.entities.base_entities, it) {
             render_entity(*it, it->transform);
         }}
+
+        Matrix4x4 *grass;
+        array_foreach(game_state.entities.grass_data, grass) {
+            _draw_calls_grass.data.add(*grass);
+        }
     }
 
     // Draw shadow maps
@@ -243,6 +327,7 @@ internal void render() {
         // Draw 3Ds
         {
             flush_draw_calls();
+            flush_draw_calls_grass();
         }
 
         // Skybox

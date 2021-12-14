@@ -1,14 +1,31 @@
 internal void init_light_buffers(LightData &data) {
-    u32 shader_handle = game_state.resources.programs[ShaderResource_Shadow].handle;
+    // Shadows
+    {
+        u32 shader_handle = game_state.resources.programs[ShaderResource_Shadow].handle;
 
-    u32 lights_buffer_index = glGetUniformBlockIndex(shader_handle, "LightMatricies");
+        u32 buffer_index = glGetUniformBlockIndex(shader_handle, "LightMatricies");
 
-    glGenBuffers(1, &data.shadow_uniform_buffer);
-    glBindBuffer(GL_UNIFORM_BUFFER, data.shadow_uniform_buffer);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, nullptr, GL_DYNAMIC_DRAW);
-    glUniformBlockBinding(shader_handle, lights_buffer_index, 0);
-    glBindBufferRange(GL_UNIFORM_BUFFER, 0, data.shadow_uniform_buffer, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        glGenBuffers(1, &data.shadow_uniform_buffer);
+        glBindBuffer(GL_UNIFORM_BUFFER, data.shadow_uniform_buffer);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT, nullptr, GL_DYNAMIC_DRAW);
+        glUniformBlockBinding(shader_handle, buffer_index, 0);
+        glBindBufferRange(GL_UNIFORM_BUFFER, 0, data.shadow_uniform_buffer, 0, sizeof(Matrix4x4) * SHADOW_CASCADE_COUNT);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
+
+    // Point lights
+    {
+        u32 shader_handle = game_state.resources.programs[ShaderResource_Default].handle;
+
+        u32 buffer_index = glGetUniformBlockIndex(shader_handle, "PointLights");
+
+        glGenBuffers(1, &data.point_lights_uniform_buffer);
+        glBindBuffer(GL_UNIFORM_BUFFER, data.point_lights_uniform_buffer);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(PointLight) * MAX_POINT_LIGHTS, nullptr, GL_DYNAMIC_DRAW);
+        glUniformBlockBinding(shader_handle, buffer_index, 1);
+        glBindBufferRange(GL_UNIFORM_BUFFER, 1, data.point_lights_uniform_buffer, 0, sizeof(PointLight) * MAX_POINT_LIGHTS);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    }
 }
 
 internal void calc_shadowmap_split_distances(Camera &camera, LightData &light_data) {

@@ -2,32 +2,21 @@
 
 #ifdef VERTEX
 
-// Vertex data
 in vec3 position;
 in vec3 normal;
 in vec2 uv;
 
-#ifdef GRASS_SHADER
-// Instance data
-in mat4 model;
-
-uniform mat4 projection;
-uniform mat4 view;
-#else
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model; // @Temporary
-#endif
 
 uniform float time;
 
-out float f_mesh_y;
 out vec3 f_frag_pos;
 out vec3 f_normal;
 out vec2 f_uv;
 
 void main() {
-    f_mesh_y = position.y;
     f_frag_pos = vec3(model * vec4(position, 1.0));
     f_normal = normal;
     f_uv = uv;
@@ -53,12 +42,10 @@ const vec3 SUN_COLOR = vec3(0.349, 0.188, 0.360);
 const float AMBIENT_STRENGTH = 0.2;
 const float SPECULAR = 0.5;
 
-in float f_mesh_y;
 in vec3 f_frag_pos;
 in vec3 f_normal;
 in vec2 f_uv;
 
-uniform bool unlit;
 uniform mat4 view;
 uniform vec3 sun_dir;
 uniform vec4 material_color;
@@ -70,19 +57,6 @@ layout(std140, binding = 0) uniform LightMatricies {
     mat4 lights[CASCADE_COUNT];
 };
 uniform float cascade_distances[CASCADE_COUNT];
-
-struct PointLight {
-    vec4 position;
-    vec3 color;
-    float intensity;
-};
-
-#ifdef MAX_POINT_LIGHTS
-layout(std140, binding = 1) uniform PointLights {
-    PointLight point_lights[MAX_POINT_LIGHTS];
-};
-uniform int point_light_count;
-#endif
 
 out vec4 fragment_color;
 
@@ -119,45 +93,13 @@ float calc_shadow(int layer) {
     return result;
 }
 
-#ifdef MAX_POINT_LIGHTS
-vec3 calc_point_light(int index, vec3 camera_dir) {
-    vec3 light_dir = normalize(point_lights[index].position.xyz - f_frag_pos);
-
-    // Diffuse
-    float diffuse_intensity = max(dot(f_normal, light_dir), 0.0);
-
-    // Specular
-    vec3 reflect_dir = reflect(-light_dir, f_normal);
-    float specular_intensity = pow(max(dot(camera_dir, reflect_dir), 0.0), 64);
-
-    // Attenuation
-    float dst = length(point_lights[index].position.xyz - f_frag_pos);
-    float attenuation = 1.0 / (1.0 + 0.14 * dst + 0.07 * (dst * dst));
-
-    attenuation *= point_lights[index].intensity;
-
-    vec3 ambient = vec3(AMBIENT_STRENGTH * attenuation);
-
-#ifdef GRASS_SHADER
-    vec3 diffuse = point_lights[index].color * attenuation * 0.2;
-    vec3 specular = vec3(0.0);
-#else
-    vec3 diffuse = point_lights[index].color * attenuation * diffuse_intensity;
-    vec3 specular = vec3(SPECULAR * attenuation * specular_intensity);
-#endif
-
-
-    return (ambient + diffuse + specular);
-}
-#endif
-
 void main() {
     vec3 camera_position = -1.0 * vec3(view[3][0], view[3][1], view[3][2]);
     vec3 camera_dir = -1.0 * vec3(view[0][2], view[1][2], view[2][2]);
     vec3 camera_to_frag = normalize(camera_position - f_frag_pos);
 
     // Specular
-    vec3 reflect_dir = reflect(-sun_dir, f_normal);
+    vec3 reflect_dir = -reflect(sun_dir, f_normal);
     float specular_intensity = pow(max(dot(reflect_dir, camera_dir), 0.0), 64);
 #ifdef CEL_SHADING
     specular_intensity = step(0.5, specular_intensity);
@@ -200,28 +142,13 @@ void main() {
         if (layer == -1) layer = CASCADE_COUNT - 1;
     }
 
-    float shadow;
-    if (unlit) shadow = 0.0;
-    else shadow = calc_shadow(layer);
+    float shadow = calc_shadow(layer);
 
     // Results
 #ifdef GRASS_SHADER
-    diffuse = mix(SUN_COLOR, diffuse, f_mesh_y + 0.09);
-    vec3 result = (ambient + (1.0 - shadow) * diffuse) * material_color.rgb;
+    vec3 result = (ambient + (1.0 - shadow) * clamp(diffuse, 0.1, 0.2)) * material_color.rgb;
 #else
-    vec3 result;
-    if (unlit) {
-        result = material_color.rgb;
-    }
-    else {
-        result = (ambient + (1.0 - shadow) * (diffuse + specular)) * material_color.rgb;
-    }
-#endif
-
-#ifdef MAX_POINT_LIGHTS
-    for (int i = 0; i < point_light_count; i++) {
-        result += calc_point_light(i, camera_dir);
-    }
+    vec3 result = (ambient + (1.0 - shadow) * (diffuse + specular)) * material_color.rgb;
 #endif
 
     vec4 texture_sample = texture(diffuse_texture, f_uv);

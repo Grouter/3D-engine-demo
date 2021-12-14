@@ -23,3 +23,9 @@ texture: "smoke_particle.png"
 ! grass
 color: 0.462, 0.788, 0.196, 1.0
 texture: "grass.png"
+
+# We can do more than 1.0 on colors, since we are in the
+# great realm of HDR
+! lamp_yellow
+color: 5.0, 5.0, 0.0, 1.0
+unlit: 1

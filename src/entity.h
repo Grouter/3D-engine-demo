@@ -9,6 +9,8 @@ const u32 SUB_SUB_ROCKS  = 10;
 
 constexpr u32 ROCK_COUNT = ROCKS * SUB_ROCKS * SUB_SUB_ROCKS;
 
+const u32 MAX_GRASS = 1024;
+
 const f32 BIRD_HEIGHTS = 50.0f;
 const f32 BIRD_SPEED = 8.0f;
 const f32 BIRD_HOVER_SPEED = 1.5f;
@@ -24,7 +26,7 @@ enum EntityType {
     EntityType_FLYING_ROCK,
     EntityType_SHIP,
     EntityType_TREE,
-    EntityType_GRASS,
+    EntityType_LAMP,
 };
 
 union EntityFlags {
@@ -50,6 +52,10 @@ struct Entity {
     Mesh *mesh       = nullptr;
 };
 
+struct LampData {
+    u32 point_light_index;
+};
+
 struct ShipData {
     f32 original_y_position = FLT_MAX;
 };
@@ -68,6 +74,7 @@ union EntityData {
     FlyingRockData flying_rock_data;
     BirdData bird_data;
     ShipData ship_data;
+    LampData lamp_data;
 };
 
 struct FlyingRockTransformHierarchy {
@@ -79,6 +86,8 @@ struct FlyingRockTransformHierarchy {
 struct EntityStorage {
     BucketArray<Entity> base_entities;
     BucketArray<EntityData> entity_data;
+
+    Array<Matrix4x4> grass_data;
 
     FlyingRockTransformHierarchy flying_rock_transforms;
 };

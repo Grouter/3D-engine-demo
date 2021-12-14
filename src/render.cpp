@@ -177,21 +177,102 @@ internal void _allocate_instance_buffer_particle(u32 *vao, u32 *instance_buffer,
     glBindVertexArray(0);
 }
 
+internal void _allocate_instance_buffer_grass(u32 *vao, u32 *instance_buffer, u64 size) {
+    Mesh *mesh = get_mesh("grass");
+
+    glGenVertexArrays(1, vao);
+    glBindVertexArray(*vao);
+
+    {   // Index data
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
+    }
+
+    {   // Vertex data
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    }
+
+    {   // UV data
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->nbo);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    }
+
+    {   // UV data
+        glBindBuffer(GL_ARRAY_BUFFER, mesh->tbo);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    }
+
+    // Instance data
+    {
+        glGenBuffers(1, instance_buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, *instance_buffer);
+
+        glBufferData(GL_ARRAY_BUFFER, size * sizeof(Matrix4x4), nullptr, GL_STATIC_DRAW);
+
+        i32 vector4_size = sizeof(Vector4);
+        i32 stride = sizeof(Matrix4x4);
+        i32 attr_index = 3;
+        u64 offset = 0;
+
+        // MATRIX 0
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 4, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += vector4_size;
+        attr_index += 1;
+
+        // MATRIX 1
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 4, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += vector4_size;
+        attr_index += 1;
+
+        // MATRIX 2
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 4, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += vector4_size;
+        attr_index += 1;
+
+        // MATRIX 3
+        glEnableVertexAttribArray(attr_index);
+        glVertexAttribPointer(attr_index, 4, GL_FLOAT, GL_FALSE, stride, (void *)offset);
+        glVertexAttribDivisor(attr_index, 1);
+        offset += vector4_size;
+        attr_index += 1;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
 internal void _allocate_font_draw_call_buffer(DrawCallBuffer2D &buffer, u64 size) {
     allocate_array(buffer.data, size);
     _allocate_instance_buffer(&buffer.vao, &buffer.instance_buffer, size);
 }
 
 internal void init_renderer() {
+    // Basic 3D
     allocate_array(_draw_calls, MAX_DRAW_CALLS);
 
+    // Grass
+    allocate_array(_draw_calls_grass.data, MAX_GRASS_DRAW_CALLS);
+    _allocate_instance_buffer_grass(&_draw_calls_grass.vao, &_draw_calls_grass.instance_buffer, MAX_GRASS_DRAW_CALLS);
+
+    // Fonts
     _allocate_font_draw_call_buffer(_font_draw_calls[FontResource_Small],  MAX_DRAW_CALLS);
     _allocate_font_draw_call_buffer(_font_draw_calls[FontResource_Medium], MAX_DRAW_CALLS);
     _allocate_font_draw_call_buffer(_font_draw_calls[FontResource_Big],    MAX_DRAW_CALLS);
 
+    // 2D
     allocate_array(_2d_shapes_draw_calls.data, MAX_DRAW_CALLS);
     _allocate_instance_buffer(&_2d_shapes_draw_calls.vao, &_2d_shapes_draw_calls.instance_buffer, MAX_DRAW_CALLS);
 
+    // Particles
     allocate_array(_particle_draw_calls.data, MAX_PARTICLE_DRAW_CALLS);
     _allocate_instance_buffer_particle(&_particle_draw_calls.vao, &_particle_draw_calls.instance_buffer, MAX_PARTICLE_DRAW_CALLS);
 
@@ -233,46 +314,38 @@ internal void set_shader(ShaderResource shader) {
 
 internal void set_shader_vec3(const char *attr, Vector3 value) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform3f(loc, value.x, value.y, value.z);
 
-    if (loc >= 0) {
-        glUniform3f(loc, value.x, value.y, value.z);
-    }
-    else {
-        log_print("Shader set_shader_vec3 (%s) loc error!\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_vec3 (%s) loc error!\n", attr);
+#endif
 }
 
 internal void set_shader_vec4(const char *attr, Vector4 value) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform4f(loc, value.x, value.y, value.z, value.w);
 
-    if (loc >= 0) {
-        glUniform4f(loc, value.x, value.y, value.z, value.w);
-    }
-    else {
-        log_print("Shader set_shader_vec4 (%s) loc error!\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_vec4 (%s) loc error!\n", attr);
+#endif
 }
 
 internal void set_shader_matrix4x4(const char *attr, Matrix4x4 value) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniformMatrix4fv(loc, 1, false, value.raw);
 
-    if (loc >= 0) {
-        glUniformMatrix4fv(loc, 1, false, value.raw);
-    }
-    else {
-        log_print("Shader set_shader_matrix4x4 (%s) loc error!\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_matrix4x4 (%s) loc error!\n", attr);
+#endif
 }
 
 internal void set_shader_matrix4x4_array(const char *attr, Matrix4x4 *values, u32 count) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniformMatrix4fv(loc, count, false, (f32 *)values);
 
-    if (loc >= 0) {
-        glUniformMatrix4fv(loc, count, false, (f32 *)values);
-    }
-    else {
-        log_print("Shader set_shader_matrix4x4_array (%s) loc error!\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_matrix4x4_array (%s) loc error!\n", attr);
+#endif
 }
 
 internal void set_shader_sampler(const char *attr, u32 texture_loc, u32 texture_handle) {
@@ -280,13 +353,11 @@ internal void set_shader_sampler(const char *attr, u32 texture_loc, u32 texture_
     glBindTexture(GL_TEXTURE_2D, texture_handle);
 
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform1i(loc, texture_loc);
 
-    if (loc >= 0) {
-        glUniform1i(loc, texture_loc);
-    }
-    else {
-        log_print("Shader set smapler (%s) %d loc error!\n", attr, texture_loc);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set smapler (%s) %d loc error!\n", attr, texture_loc);
+#endif
 }
 
 internal void set_shader_sampler_array(const char *attr, u32 texture_loc, u32 texture_handle) {
@@ -294,35 +365,29 @@ internal void set_shader_sampler_array(const char *attr, u32 texture_loc, u32 te
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture_handle);
 
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform1i(loc, texture_loc);
 
-    if (loc >= 0) {
-        glUniform1i(loc, texture_loc);
-    }
-    else {
-        log_print("Shader set smapler (%s) %d loc error!\n", attr, texture_loc);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set smapler array (%s) %d loc error!\n", attr, texture_loc);
+#endif
 }
 
 internal void set_shader_int(const char *name, i32 value) {
     i32 loc = glGetUniformLocation(current_shader->handle, name);
+    glUniform1i(loc, value);
 
-    if (loc >= 0) {
-        glUniform1i(loc, value);
-    }
-    else {
-        log_print("Shader set int loc error! (attribute: %s)\n", name);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set int loc error! (attribute: %s)\n", name);
+#endif
 }
 
 internal void set_shader_float_array(const char *attr, f32 *values, u32 count) {
     i32 loc = glGetUniformLocation(current_shader->handle, attr);
+    glUniform1fv(loc, count, values);
 
-    if (loc >= 0) {
-        glUniform1fv(loc, count, values);
-    }
-    else {
-        log_print("Shader set_shader_float_array loc error! (attribute: %s)\n", attr);
-    }
+#ifdef UNIFORM_DEBUG
+    if (loc < 0) log_print("Shader set_shader_float_array loc error! (attribute: %s)\n", attr);
+#endif
 }
 
 internal void set_shader_float(const char *attr, f32 value) {
@@ -564,6 +629,38 @@ internal void flush_draw_calls_particles() {
     draw_calls.data.clear();
 }
 
+internal void flush_draw_calls_grass() {
+    DrawCallBufferGrass &draw_calls = _draw_calls_grass;
+
+    if (draw_calls.data.length == 0) return;
+
+    set_shader(ShaderResource_Grass);
+    set_shader_matrix4x4("view", game_state.camera.transform);
+    set_shader_matrix4x4("projection", game_state.camera.perspective);
+    set_shader_sampler_array("shadow_textures", 1, game_state.light_data.shadow_maps);
+    set_shader_vec3("sun_dir", game_state.light_data.sun_direction);
+    set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
+    set_shader_float("time", game_state.time_elapsed);
+    set_shader_int("point_light_count", (i32)game_state.light_data.point_lights.length);
+    set_shader_int("unlit", 0);
+
+    Material *material = &game_state.resources.materials[get_material_index("grass")];
+
+    set_shader_vec4("material_color", material->color);
+    glActiveTexture(GL_TEXTURE0);
+    set_shader_sampler("diffuse_texture", 0, material->texture);
+
+    glNamedBufferSubData(draw_calls.instance_buffer, 0, draw_calls.data.length * sizeof(Matrix4x4), draw_calls.data.data);
+
+    glBindVertexArray(draw_calls.vao);
+
+    Mesh *mesh = get_mesh("grass");
+
+    glDrawElementsInstancedBaseInstance(GL_TRIANGLES, (i32)mesh->indicies.length, GL_UNSIGNED_INT, nullptr, (i32)draw_calls.data.length, 0);
+
+    draw_calls.data.clear();
+}
+
 internal void flush_draw_calls() {
     // This will batch the draw calls
     qsort(_draw_calls.data, _draw_calls.length, sizeof(DrawCallData), _draw_call_cmp);
@@ -589,6 +686,8 @@ internal void flush_draw_calls() {
             set_shader_float_array("cascade_distances", (game_state.light_data.cascade_splits + 1), SHADOW_CASCADE_COUNT);
             set_shader_float("time", game_state.time_elapsed);
             set_shader_vec4("material_color", V4_ONE);
+            set_shader_int("point_light_count", (i32)game_state.light_data.point_lights.length);
+            set_shader_int("unlit", 0);
         }
 
         // VAO switching
@@ -606,6 +705,7 @@ internal void flush_draw_calls() {
                 material = &game_state.resources.materials[material_index];
 
                 set_shader_vec4("material_color", material->color);
+                set_shader_int("unlit", material->unlit);
 
                 if (active_texture != material->texture) {
                     glActiveTexture(GL_TEXTURE0);

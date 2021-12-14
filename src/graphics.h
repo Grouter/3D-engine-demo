@@ -21,6 +21,7 @@ struct Program {
 
 struct Material {
     u32 texture;
+    bool32 unlit = false;
     Vector4 color = V4_ONE;
 };
 
