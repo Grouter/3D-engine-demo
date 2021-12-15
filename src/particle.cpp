@@ -16,6 +16,9 @@ internal void draw_particles() {
                 case 1:
                     texture = "smoke_particle.png";
                     break;
+                case 2:
+                    texture = "fire_particle.png";
+                    break;
                 default :
                     log_print("Particle undefined!\n");
                     texture = "restt2.png";
@@ -84,13 +87,39 @@ internal Particle spawn_smoke_particle(Vector3 root_pos) {
     return particle;
 }
 
+internal Particle spawn_flame_particle() {
+    Particle particle;
+
+    u8 rand_color  = (rand() % 256);
+    u8 rand_spawn = u8(floor(rand_f_range(0.0f, 3.9f)));
+
+    particle.position = FLAME_ROOT_POSITION;
+
+    switch (rand_spawn) {
+        case 0 : particle.position.z -= .39f; break;
+        case 1 : particle.position.z += .39f; break;
+        case 2 : particle.position.x -= .39f; break;
+        case 3 : particle.position.x += .39f; break;
+        default : break;
+    }
+
+    particle.color        = make_color(rand_color, rand_color, rand_color, 64);
+    particle.life         = 4.0f;
+    particle.max_lifetime = particle.life;
+    particle.type         = 2;
+    particle.size         = make_vector2(0.05f, 0.1f);
+
+    return particle;
+}
+
 internal void update_particle(f32 delta_time, Vector3 root_pos) {
-    fire_spawnrate_timer += delta_time;
+    fire_spawnrate_timer  += delta_time;
     smoke_spawnrate_timer += delta_time;
+    flame_spawnrate_timer += delta_time;
 
     // Add new particles
     if (smoke_spawnrate_timer >= SMOKE_SPAWNRATE) {
-        for (u32 i = 0; i < 25; i++) {
+        for (u32 i = 0; i < 20; i++) {
             if (particles.is_full()) break;
 
             Particle particle = spawn_smoke_particle(root_pos);
@@ -100,13 +129,21 @@ internal void update_particle(f32 delta_time, Vector3 root_pos) {
     }
 
     if (fire_spawnrate_timer >= FIRE_SPAWNRATE) {
-        for (u32 i = 0; i < 20; i++) {
+        for (u32 i = 0; i < 25; i++) {
             if (particles.is_full()) break;
 
             Particle particle = spawn_fire_particle(root_pos);
             particles.add(particle);
         }
         fire_spawnrate_timer -= FIRE_SPAWNRATE;
+    }
+
+    if (flame_spawnrate_timer >= FIRE_SPAWNRATE) {
+        if (!particles.is_full()) {
+            Particle particle = spawn_flame_particle();
+            particles.add(particle);
+        }
+        flame_spawnrate_timer -= FIRE_SPAWNRATE;
     }
 
     // Update existing particles
@@ -148,8 +185,18 @@ internal void update_particle(f32 delta_time, Vector3 root_pos) {
             f32 size = lerp(0.3f, 0.8f, 1 - (particle.life / particle.max_lifetime));
             particle.size = make_vector2(size, size);
 
-            particle.position += particle.velocity * delta_time;
+            if (particle.life < particle.max_lifetime / 2) {
+                particle.position += (particle.velocity + WIND) * delta_time;
+            }
+            else {
+                particle.position += particle.velocity * delta_time;
+            }
             particle.color.a  = u8(lerp(64.0f, 0.0f, 1 - (particle.life / particle.max_lifetime)));
+        }
+        // Flame
+        else if (particle.type == 2) {
+            particle.size.y = rand_f_range(0.05f, 0.15f);
+            particle.color.a = u8(rand_f_range(100.0f, 255.0f));
         }
     }
     draw_particles();
