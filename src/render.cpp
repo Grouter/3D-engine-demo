@@ -328,6 +328,8 @@ internal void init_renderer() {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, HDR_TARGET_W / 4, HDR_TARGET_H / 4, 0, GL_RGBA, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, game_state.downscale_color_buffer, 0);
 
         // Blur
@@ -341,6 +343,8 @@ internal void init_renderer() {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, HDR_TARGET_W, HDR_TARGET_H, 0, GL_RGBA, GL_FLOAT, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, game_state.blur_color_buffers[i], 0);
         }
 
@@ -527,7 +531,7 @@ internal void render_entity(Entity &entity, Matrix4x4 transform) {
             data.flags.material = 0;
 
             if (i == 0 && !lamp_data->is_on) {
-                data.flags.material = get_material_index("lamp_off");
+                data.flags.material = (u32)get_material_index("lamp_off");
             }
             else {
                 if (mesh->sub_meshes.data[i].material_index < game_state.resources.materials.length) {

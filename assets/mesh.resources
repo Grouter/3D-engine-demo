@@ -122,6 +122,12 @@ tree2.obj
 ! tree3
 tree3.obj
 
+! dead_tree1
+dead_tree1.obj
+
+! dead_tree2
+dead_tree2.obj
+
 ! bush1
 bush1.obj
 

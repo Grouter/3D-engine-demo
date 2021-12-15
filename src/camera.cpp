@@ -125,8 +125,6 @@ internal void camera_handle_input(Camera &camera, f32 dt) {
 
     // Movement
     if (!console_open) {
-        camera.velocity *= CAMERA_DRAG;
-
         Vector3 forward = get_forward_vector(camera.transform);
         Vector3 side    = get_side_vector(camera.transform);
         Vector3 input   = {};
@@ -150,12 +148,22 @@ internal void camera_handle_input(Camera &camera, f32 dt) {
 
         offset *= dt;
 
+#ifdef CINEMATIC
+        camera.velocity *= CAMERA_DRAG;
         camera.velocity += offset;
 
-        if (key_is_pressed(VK_SHIFT)) limit(camera.velocity, CAMERA_MAX_SPEED * 10.0f);
+        if (key_is_pressed(VK_SHIFT)) limit(camera.velocity, CAMERA_MAX_SPEED * 100.0f);
         else limit(camera.velocity, CAMERA_MAX_SPEED);
 
         camera.position += (side * camera.velocity.x);
         camera.position += (forward * camera.velocity.y);
+#else
+        offset *= 100.0f;
+
+        if (key_is_pressed(VK_SHIFT)) offset *= 10.0f;
+
+        camera.position += (side * offset.x);
+        camera.position += (forward * offset.y);
+#endif
     }
 }

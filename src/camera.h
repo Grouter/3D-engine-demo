@@ -1,9 +1,9 @@
 #if !defined(CAMERA_H)
 #define CAMERA_H
 
-const f32 CAMERA_SENS = 2.0f;
+const f32 CAMERA_SENS = 1.0f;
 
-const f32 CAMERA_SPEED = 0.2f;
+const f32 CAMERA_SPEED = 0.05f;
 const f32 CAMERA_DRAG = 0.98f;
 const f32 CAMERA_MAX_SPEED = 0.008f;
 

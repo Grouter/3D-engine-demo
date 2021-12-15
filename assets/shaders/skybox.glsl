@@ -31,7 +31,11 @@ void main() {
     uv.x *= -1.0;
 
     fragment_color = texture(skybox, uv);
-    bloom_color = vec4(0.0, 0.0, 0.0, 1.0);
+
+    float brightness = max(fragment_color.r, max(fragment_color.g, fragment_color.b));
+    if(brightness > 0.3) bloom_color = vec4(fragment_color.rgb * 0.2, 1.0);
+    else bloom_color = vec4(0.0, 0.0, 0.0, 1.0);
+    // bloom_color = vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 #endif

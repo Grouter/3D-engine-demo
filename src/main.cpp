@@ -368,8 +368,10 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR command_l
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         draw_console(delta_time);
-        draw_debug_info(delta_time);
 
+#ifndef CINEMATIC
+        draw_debug_info(delta_time);
+#endif
         render();
 
         glFlush();

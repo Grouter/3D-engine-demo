@@ -443,6 +443,28 @@ position: 11.0, -0.2, -27.0
 rotation: 0.0, 0.0, 0.0
 
 #
+# TREES OF DEATH
+#
+
+! entity
+mesh: "dead_tree1"
+position: 0.0, -0.2, -40.0
+rotation: 0.0, 0.0, 0.0
+
+! entity
+type: 5
+mesh: "dead_tree2"
+position: 1.0, -0.2, -42.0
+rotation: 0.0, 1.0, 0.0
+
+! entity
+type: 5
+mesh: "dead_tree2"
+position: -1.2, -0.2, -42.0
+rotation: 0.0, 2.0, 0.0
+scale: 1.0, 0.8, 1.0
+
+#
 # BUSHES
 #
 
