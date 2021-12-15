@@ -5,11 +5,11 @@ internal void init_game() {
     game_state.bird_spawn_timer = 0.0f;
 
     game_state.camera = create_camera(VIRTUAL_WINDOW_W, VIRTUAL_WINDOW_H, 80.0f);
-    game_state.camera.rotation.x = 25.0f;
+    game_state.camera.rotation.x = 0.0f;
     game_state.camera.rotation.y = 90.0f;
 
-    game_state.camera.position.y = 10.0f;
-    game_state.camera.position.z = 10.0f;
+    game_state.camera.position.y = 1.3f;
+    game_state.camera.position.z = 45.0f;
 
     game_state.ortho_proj = ortho(-1.0f, 1.0f, VIRTUAL_WINDOW_W_2D, VIRTUAL_WINDOW_H_2D);
 
@@ -181,6 +181,16 @@ internal void tick(f32 dt) {
                 it->rotation.x = sinf(game_state.time_elapsed * 0.2f) * 0.02f;
                 it->rotation.z = sinf(game_state.time_elapsed * 0.2f) * 0.05f;
             }
+#ifdef CINEMATIC
+            else if (it->type == EntityType_LAMP) {
+                LampData *data = &game_state.entities.entity_data[it->data].lamp_data;
+
+                data->is_on = game_state.camera.position.z > it->position.z;
+
+                PointLight *light = &game_state.light_data.point_lights[data->point_light_index];
+                light->intensity = data->is_on ? 0.4f : 0.0f;
+            }
+#endif
         }}
     }
 
@@ -238,6 +248,37 @@ internal void tick(f32 dt) {
                 it->transform = to_transform(it->position, it->rotation, it->scale);
             }
         }}
+    }
+
+    if (game_state.fade_direction != 0.0f) {
+        game_state.fade_timer += dt;
+
+        game_state.fade_timer = min(game_state.fade_timer, game_state.fade_duration);
+
+        f32 screen_width = game_state.viewport.width * game_state.pixels_to_units_2d;
+        f32 screen_height = game_state.viewport.height * game_state.pixels_to_units_2d;
+
+        Vector3 position = make_vector3(
+            screen_width * 0.5f,
+            screen_height * 0.5f,
+            0.5f
+        );
+
+        Color color = Color_BLACK;
+
+        if (game_state.fade_direction < 0.0f) {
+            color.a = (u8)lerp(0, 255, game_state.fade_timer / game_state.fade_duration);
+        }
+        else {
+            color.a = (u8)lerp(255, 0, game_state.fade_timer / game_state.fade_duration);
+        }
+
+        draw_rect(position, make_vector2((f32)screen_width, (f32)screen_height), color);
+
+        if (game_state.fade_timer >= game_state.fade_duration) {
+            game_state.fade_direction = 0.0f;
+            game_state.fade_timer = 0.0f;
+        }
     }
 
     // Handle particles

@@ -515,28 +515,53 @@ internal void render_entity(Entity &entity, Matrix4x4 transform) {
         return;
     }
 
-    for (u32 i = 0; i < mesh->sub_meshes.length; i++) {
-        DrawCallData data;
-        data.flags.raw = 0;
+    if (entity.type == EntityType_LAMP) {
+        LampData *lamp_data = &game_state.entities.entity_data[entity.data].lamp_data;
 
-        data.flags.shader = (u32)(entity.program - game_state.resources.programs);
+        for (u32 i = 0; i < mesh->sub_meshes.length; i++) {
+            DrawCallData data;
+            data.flags.raw = 0;
 
-        if (data.flags.shader != 0) {
-            int a = 0;
-            a += 1;
+            data.flags.shader = (u32)(entity.program - game_state.resources.programs);
+
+            data.flags.material = 0;
+
+            if (i == 0 && !lamp_data->is_on) {
+                data.flags.material = get_material_index("lamp_off");
+            }
+            else {
+                if (mesh->sub_meshes.data[i].material_index < game_state.resources.materials.length) {
+                    data.flags.material = (u32)mesh->sub_meshes[i].material_index;
+                }
+            }
+
+            data.info = mesh->sub_meshes.data[i];
+            data.mesh = mesh;
+            data.transform = transform;
+
+            _draw_calls.add(data);
         }
-
-        if (mesh->sub_meshes.data[i].material_index < game_state.resources.materials.length) {
-            data.flags.material = (u32)mesh->sub_meshes[i].material_index;
-        }
-        else data.flags.material = 0;
-
-        data.info = mesh->sub_meshes.data[i];
-        data.mesh = mesh;
-        data.transform = transform;
-
-        _draw_calls.add(data);
     }
+    else {
+        for (u32 i = 0; i < mesh->sub_meshes.length; i++) {
+            DrawCallData data;
+            data.flags.raw = 0;
+
+            data.flags.shader = (u32)(entity.program - game_state.resources.programs);
+
+            if (mesh->sub_meshes.data[i].material_index < game_state.resources.materials.length) {
+                data.flags.material = (u32)mesh->sub_meshes[i].material_index;
+            }
+            else data.flags.material = 0;
+
+            data.info = mesh->sub_meshes.data[i];
+            data.mesh = mesh;
+            data.transform = transform;
+
+            _draw_calls.add(data);
+        }
+    }
+
 }
 
 internal void draw_particle(Vector3 position, Vector2 size, u32 texture, Color color = Color_WHITE) {

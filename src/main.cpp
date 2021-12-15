@@ -1,5 +1,7 @@
 //#define RELEASE_MODE
 
+// #define CINEMATIC
+
 #if defined(RELEASE_MODE)
     #define NDEBUG
 #else
@@ -110,6 +112,11 @@ struct GameState {
     Matrix4x4 ortho_proj;
 
     u32 skybox_cubemap;
+
+    // Fade effect
+    f32 fade_direction = 0.0f;
+    f32 fade_timer = 0.0;
+    f32 fade_duration = 8.0f;
 
     // HDR
     u32 hdr_framebuffer;

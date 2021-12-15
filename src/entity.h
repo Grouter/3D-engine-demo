@@ -54,6 +54,7 @@ struct Entity {
 
 struct LampData {
     u32 point_light_index;
+    bool32 is_on = true;
 };
 
 struct ShipData {

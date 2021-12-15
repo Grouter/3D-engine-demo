@@ -25,6 +25,14 @@ internal void handle_key_down(u8 scan_code, u16 virtual_code, bool alt_down) {
         load_camera_animation("test.keyframes", game_state.resources.camera_animation);
         camera_start_animation(game_state.camera);
     }
+    else if (virtual_code == VK_F7) {
+        game_state.fade_direction = -1.0f;
+        game_state.fade_timer = 0.0f;
+    }
+    else if (virtual_code == VK_F8) {
+        game_state.fade_direction = 1.0f;
+        game_state.fade_timer = 0.0f;
+    }
 }
 
 internal void handle_key_up(u8 scan_code, u16 virtual_code, bool alt_down) {

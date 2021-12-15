@@ -1,10 +1,14 @@
 #if !defined(CAMERA_H)
 #define CAMERA_H
 
-const f32 CAMERA_SENS = 5.0f;
+const f32 CAMERA_SENS = 2.0f;
+
 const f32 CAMERA_SPEED = 0.2f;
-const f32 CAMERA_DRAG = 0.9f;
-const f32 CAMERA_MAX_SPEED = 5.0f;
+const f32 CAMERA_DRAG = 0.98f;
+const f32 CAMERA_MAX_SPEED = 0.008f;
+
+const f32 CAMERA_ANGULAR_DRAG = 0.98f;
+const f32 CAMERA_MAX_ANGULAR_SPEED = 20.0f;
 
 struct Camera {
     f32 fov;
@@ -14,6 +18,7 @@ struct Camera {
     Vector3 position;
     Vector3 velocity;
     Vector3 rotation;
+    Vector3 rotation_velocity;
     Vector3 direction;
 
     Matrix4x4 perspective;

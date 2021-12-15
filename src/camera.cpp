@@ -86,13 +86,27 @@ internal void camera_update(Camera &camera) {
     };
 }
 
-// @Speed: creating new vectors everytime
 internal void camera_handle_input(Camera &camera, f32 dt) {
     // Rotation
     if (input_state.mouse_locked) {
+#ifdef CINEMATIC
+        camera.rotation_velocity *= CAMERA_ANGULAR_DRAG;
+        if (length(camera.rotation_velocity) < 0.1f) camera.rotation_velocity *= 0.0f;
+
+        // @Broken: this is not window size independent!!!!!!!!!!!!!
+        camera.rotation_velocity.yaw   += (f32)input_state.mouse_dx * CAMERA_SENS;
+        camera.rotation_velocity.pitch += (f32)input_state.mouse_dy * CAMERA_SENS;
+
+        if (key_is_pressed(VK_CONTROL)) limit(camera.rotation_velocity, CAMERA_MAX_ANGULAR_SPEED * 3.0f);
+        else limit(camera.rotation_velocity, CAMERA_MAX_ANGULAR_SPEED);
+
+        camera.rotation.yaw   += camera.rotation_velocity.yaw * dt;
+        camera.rotation.pitch += camera.rotation_velocity.pitch * dt;
+#else
         // @Broken: this is not windows size independent!!!!!!!!!!!!!
-        camera.rotation.yaw   += (f32)input_state.mouse_dx * CAMERA_SENS * dt;
-        camera.rotation.pitch += (f32)input_state.mouse_dy * CAMERA_SENS * dt;
+        camera.rotation.yaw   += (f32)input_state.mouse_dx * CAMERA_SENS * 0.04f;
+        camera.rotation.pitch += (f32)input_state.mouse_dy * CAMERA_SENS * 0.04f;
+#endif
 
         if (camera.rotation.yaw >= 360.0f) {
             camera.rotation.yaw -= 360.0f;
@@ -110,7 +124,7 @@ internal void camera_handle_input(Camera &camera, f32 dt) {
     }
 
     // Movement
-    {
+    if (!console_open) {
         camera.velocity *= CAMERA_DRAG;
 
         Vector3 forward = get_forward_vector(camera.transform);
@@ -134,13 +148,12 @@ internal void camera_handle_input(Camera &camera, f32 dt) {
 
         Vector3 offset = input * CAMERA_SPEED;
 
-        if (key_is_pressed(VK_SHIFT)) offset *= 10.0f;
-
         offset *= dt;
 
-        if (length(camera.velocity) < CAMERA_MAX_SPEED) {
-            camera.velocity += offset;
-        }
+        camera.velocity += offset;
+
+        if (key_is_pressed(VK_SHIFT)) limit(camera.velocity, CAMERA_MAX_SPEED * 10.0f);
+        else limit(camera.velocity, CAMERA_MAX_SPEED);
 
         camera.position += (side * camera.velocity.x);
         camera.position += (forward * camera.velocity.y);
