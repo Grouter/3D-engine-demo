@@ -3,12 +3,17 @@
 
 #define CAMERA_SENS 0.1f
 
+const f32 CAMERA_SPEED = 0.2f;
+const f32 CAMERA_DRAG = 0.9f;
+const f32 CAMERA_MAX_SPEED = 5.0f;
+
 struct Camera {
     f32 fov;
     f32 clip_near;
     f32 clip_far;
 
     Vector3 position;
+    Vector3 velocity;
     Vector3 rotation;
     Vector3 direction;
 
