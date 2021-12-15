@@ -67,6 +67,18 @@ bar.obj
 ! cups
 cups.obj
 
+! bed1
+bed1.obj
+
+! bed2
+bed2.obj
+
+! candlestick1
+candlestick1.obj
+
+! chandler
+chandelier.obj
+
 ! rock1
 rock1.obj
 grey
