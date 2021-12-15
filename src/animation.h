@@ -3,13 +3,17 @@
 
 struct CameraAnimation {
     u32 key_count = 0;
-    Array<Vector3> positions;
-    Array<Vector3> rotations;
-    Array<f32> times;
+    Array<Vector3> positions = {};
+    Array<Vector3> rotations = {};
+    Array<f32> times = {};
 };
 
-internal CameraAnimation load_camera_animation(const char *path) {
-    CameraAnimation result = {};
+internal void load_camera_animation(const char *path, CameraAnimation &animation) {
+    if (animation.positions.data) free_array(animation.positions);
+    if (animation.rotations.data) free_array(animation.rotations);
+    if (animation.times.data) free_array(animation.times);
+
+    animation = {};
 
     Array<char> file;
     {
@@ -17,8 +21,8 @@ internal CameraAnimation load_camera_animation(const char *path) {
 
         if (!read_result) {
             log_print("No such keyframe file %s\n", path);
-            result.key_count = 0;
-            return result;
+            animation.key_count = 0;
+            return;
         }
     }
 
@@ -28,7 +32,7 @@ internal CameraAnimation load_camera_animation(const char *path) {
     // Count key count so we can allocate the memory upfront
     while (*walker) {
         if (*walker == '!') {
-            result.key_count += 1;
+            animation.key_count += 1;
 
             walker = eat(walker, '\n', true);
         }
@@ -39,14 +43,14 @@ internal CameraAnimation load_camera_animation(const char *path) {
         walker += 1;
     }
 
-    if (result.key_count == 0) {
+    if (animation.key_count == 0) {
         log_print("0 keys were found in %s\n", path);
-        return result;
+        return;
     }
 
-    allocate_array(result.positions, result.key_count);
-    allocate_array(result.rotations, result.key_count);
-    allocate_array(result.times, result.key_count);
+    allocate_array(animation.positions, animation.key_count);
+    allocate_array(animation.rotations, animation.key_count);
+    allocate_array(animation.times, animation.key_count);
 
     Vector3 position = {};
     Vector3 rotation = {};
@@ -60,27 +64,27 @@ internal CameraAnimation load_camera_animation(const char *path) {
         if (*walker == '!') {
             key_index += 1;
 
-            result.positions.add(position);
-            result.rotations.add(rotation);
-            result.times.add(1.0f);
+            animation.positions.add(position);
+            animation.rotations.add(rotation);
+            animation.times.add(1.0f);
 
             walker += 1;
             continue;
         }
 
         if (strncmp(walker, "position", 8) == 0) {
-            sscanf(walker, "position: %f %f %f", &position.x, &position.y, &position.z);
-            result.positions[key_index] = position;
+            sscanf(walker, "position: %f, %f, %f", &position.x, &position.y, &position.z);
+            animation.positions[key_index] = position;
         }
         else if (strncmp(walker, "rotation", 8) == 0) {
-            sscanf(walker, "rotation: %f %f %f", &rotation.x, &rotation.y, &rotation.z);
-            result.rotations[key_index] = rotation;
+            sscanf(walker, "rotation: %f, %f, %f", &rotation.x, &rotation.y, &rotation.z);
+            animation.rotations[key_index] = rotation;
         }
         else if (strncmp(walker, "time", 4) == 0) {
             f32 time;
             sscanf(walker, "time: %f", &time);
 
-            result.times[key_index] = time;
+            animation.times[key_index] = time;
         }
 
         walker = eat(walker, '\n', true);
@@ -88,8 +92,6 @@ internal CameraAnimation load_camera_animation(const char *path) {
     }
 
     free_array(file);
-
-    return result;
 }
 
 #endif

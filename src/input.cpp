@@ -21,6 +21,10 @@ internal void handle_key_down(u8 scan_code, u16 virtual_code, bool alt_down) {
     else if (virtual_code == VK_ESCAPE) {
         exit(0);
     }
+    else if (virtual_code == VK_F9) {
+        load_camera_animation("test.keyframes", game_state.resources.camera_animation);
+        camera_start_animation(game_state.camera);
+    }
 }
 
 internal void handle_key_up(u8 scan_code, u16 virtual_code, bool alt_down) {

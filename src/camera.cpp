@@ -106,8 +106,8 @@ internal void camera_handle_mouse(Camera &camera, i32 dx, i32 dy) {
 }
 
 // @Speed: creating new vectors everytime
-internal void camera_handle_input(Camera &camera) {
-    const f32 CAMERA_SPEED = .5f;
+internal void camera_handle_input(Camera &camera, f32 dt) {
+    const f32 CAMERA_SPEED = 5.0f;
 
     Vector3 forward = get_forward_vector(camera.transform);
     Vector3 side    = get_side_vector(camera.transform);
@@ -129,6 +129,10 @@ internal void camera_handle_input(Camera &camera) {
     normalize(input);
 
     Vector3 offset = input * CAMERA_SPEED;
+
+    if (key_is_pressed(VK_SHIFT)) offset *= 3.0f;
+
+    offset *= dt;
 
     camera.position += (side * offset.x);
     camera.position += (forward * offset.y);

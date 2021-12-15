@@ -588,7 +588,7 @@ internal void init_resources(Resources &resources) {
     resources.fonts.add(load_font("karmina_regular.otf", FONT_SIZE_BIG,    FontResource_Big));
 
     // Animation
-    resources.camera_animation = load_camera_animation("test.keyframes");
+    load_camera_animation("test.keyframes", resources.camera_animation);
 
     // Skybox Cubemap
     {

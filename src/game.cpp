@@ -105,7 +105,7 @@ internal void init_game() {
 }
 
 internal void tick(f32 dt) {
-    camera_handle_input(game_state.camera);
+    camera_handle_input(game_state.camera, dt);
 
     camera_animate(game_state.camera, game_state.resources.camera_animation, dt);
     camera_update(game_state.camera);
