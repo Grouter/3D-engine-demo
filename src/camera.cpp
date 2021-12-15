@@ -86,58 +86,63 @@ internal void camera_update(Camera &camera) {
     };
 }
 
-internal void camera_handle_mouse(Camera &camera, i32 dx, i32 dy) {
-    camera.rotation.yaw   += (f32)dx * CAMERA_SENS;
-    camera.rotation.pitch += (f32)dy * CAMERA_SENS;
-
-    if (camera.rotation.yaw >= 360.0f) {
-        camera.rotation.yaw -= 360.0f;
-    }
-    else if (camera.rotation.yaw <= -360.0f) {
-        camera.rotation.yaw += 360.0f;
-    }
-
-    if (camera.rotation.pitch >= 360.0f) {
-        camera.rotation.pitch -= 360.0f;
-    }
-    else if (camera.rotation.pitch <= -360.0f) {
-        camera.rotation.pitch += 360.0f;
-    }
-}
-
 // @Speed: creating new vectors everytime
 internal void camera_handle_input(Camera &camera, f32 dt) {
-    camera.velocity *= CAMERA_DRAG;
+    // Rotation
+    if (input_state.mouse_locked) {
+        // @Broken: this is not windows size independent!!!!!!!!!!!!!
+        camera.rotation.yaw   += (f32)input_state.mouse_dx * CAMERA_SENS * dt;
+        camera.rotation.pitch += (f32)input_state.mouse_dy * CAMERA_SENS * dt;
 
-    Vector3 forward = get_forward_vector(camera.transform);
-    Vector3 side    = get_side_vector(camera.transform);
-    Vector3 input   = {};
+        if (camera.rotation.yaw >= 360.0f) {
+            camera.rotation.yaw -= 360.0f;
+        }
+        else if (camera.rotation.yaw <= -360.0f) {
+            camera.rotation.yaw += 360.0f;
+        }
 
-    if (key_is_pressed(VK_LEFT) || key_is_pressed('A')) {
-        input.x = -1;
-    }
-    if (key_is_pressed(VK_RIGHT) || key_is_pressed('D')) {
-        input.x = 1;
-    }
-    if (key_is_pressed(VK_UP) || key_is_pressed('W')) {
-        input.y = -1;
-    }
-    if (key_is_pressed(VK_DOWN) || key_is_pressed('S')) {
-        input.y = 1;
-    }
-
-    normalize(input);
-
-    Vector3 offset = input * CAMERA_SPEED;
-
-    if (key_is_pressed(VK_SHIFT)) offset *= 8.0f;
-
-    offset *= dt;
-
-    if (length(camera.velocity) < CAMERA_MAX_SPEED) {
-        camera.velocity += offset;
+        if (camera.rotation.pitch >= 360.0f) {
+            camera.rotation.pitch -= 360.0f;
+        }
+        else if (camera.rotation.pitch <= -360.0f) {
+            camera.rotation.pitch += 360.0f;
+        }
     }
 
-    camera.position += (side * camera.velocity.x);
-    camera.position += (forward * camera.velocity.y);
+    // Movement
+    {
+        camera.velocity *= CAMERA_DRAG;
+
+        Vector3 forward = get_forward_vector(camera.transform);
+        Vector3 side    = get_side_vector(camera.transform);
+        Vector3 input   = {};
+
+        if (key_is_pressed(VK_LEFT) || key_is_pressed('A')) {
+            input.x = -1;
+        }
+        if (key_is_pressed(VK_RIGHT) || key_is_pressed('D')) {
+            input.x = 1;
+        }
+        if (key_is_pressed(VK_UP) || key_is_pressed('W')) {
+            input.y = -1;
+        }
+        if (key_is_pressed(VK_DOWN) || key_is_pressed('S')) {
+            input.y = 1;
+        }
+
+        normalize(input);
+
+        Vector3 offset = input * CAMERA_SPEED;
+
+        if (key_is_pressed(VK_SHIFT)) offset *= 10.0f;
+
+        offset *= dt;
+
+        if (length(camera.velocity) < CAMERA_MAX_SPEED) {
+            camera.velocity += offset;
+        }
+
+        camera.position += (side * camera.velocity.x);
+        camera.position += (forward * camera.velocity.y);
+    }
 }

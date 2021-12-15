@@ -2,37 +2,105 @@
 # This just circles around the center...
 #
 
-!
-time: 5.0
-position: 0 0 10
-rotation: 0 90 0
+#!
+#time: 5.0
+#position: 0 0 10
+#rotation: 0 90 0
+#
+#!
+#time: 3.0
+#position: 10 0 10
+#
+#!
+#position: 10 0 0
+#rotation:  0 0 0
+#
+#!
+#position: 10 0 -10
+#rotation:  0 0 0
+#
+#!
+#position: 0 0 -10
+#rotation: 0 -90 0
+#
+#!
+#position: -10 0 -10
+#
+#!
+#position: -10 0 0
+#rotation:  0 -180 0
+#
+#!
+#position: -10 0 10
+#
+#!
+#position: 0 0 10
+#rotation:  0 -270 0
 
 !
-time: 3.0
-position: 10 0 10
+position: 0, 50, -80
+rotation: 30, -90, 0
 
 !
-position: 10 0 0
-rotation:  0 0 0
+position: 30, 50, -70
+rotation: 30, -67.5, 0
 
 !
-position: 10 0 -10
-rotation:  0 0 0
+position: 50, 50, -50
+rotation: 30, -45, 0
 
 !
-position: 0 0 -10
-rotation: 0 -90 0
+position: 70, 50, -30
+rotation: 30, -22.5, 0
 
 !
-position: -10 0 -10
+position: 80, 50, 0
+rotation: 30, 0, 0
 
 !
-position: -10 0 0
-rotation:  0 -180 0
+position: 70, 50, 30
+rotation: 30, 22.5, 0
 
 !
-position: -10 0 10
+position: 50, 50, 50
+rotation: 30, 45, 0
 
 !
-position: 0 0 10
-rotation:  0 -270 0
+position: 30, 50, 70
+rotation: 30, 67.5, 0
+
+!
+position: 0, 50, 80
+rotation: 30, 90, 0
+
+!
+position: -30, 50, 70
+rotation: 30, 112.5, 0
+
+!
+position: -50, 50, 50
+rotation: 30, 135, 0
+
+!
+position: -70, 50, 30
+rotation: 30, 157.5, 0
+
+!
+position: -80, 50, 0
+rotation: 30, 180, 0
+
+!
+position: -70, 50, -30
+rotation: 30, 202.5, 0
+
+!
+position: -50, 50, -50
+rotation: 30, 225, 0
+
+!
+position: -30, 50, -70
+rotation: 30, 247.5, 0
+
+!
+position: 0, 50, -80
+rotation: 30, 270, 0

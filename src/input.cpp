@@ -53,8 +53,4 @@ internal void handle_mouse_input() {
 
     input_state.mouse_old_x = input_state.mouse_x;
     input_state.mouse_old_y = input_state.mouse_y;
-
-    if (input_state.mouse_locked) {
-        camera_handle_mouse(game_state.camera, input_state.mouse_dx, input_state.mouse_dy);
-    }
 }

@@ -33,14 +33,9 @@ internal void load_camera_animation(const char *path, CameraAnimation &animation
     while (*walker) {
         if (*walker == '!') {
             animation.key_count += 1;
-
-            walker = eat(walker, '\n', true);
-        }
-        else if (*walker == '#') {
-            walker = eat(walker, '\n', true);
         }
 
-        walker += 1;
+        walker = eat(walker, '\n', true);
     }
 
     if (animation.key_count == 0) {
